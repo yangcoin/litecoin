@@ -93,7 +93,7 @@ static CBlock CreateGenesisBlock(const char* pszTimestamp, const CScript& genesi
  */
 static CBlock CreateGenesisBlock(uint32_t nTime, uint32_t nNonce, uint32_t nBits, int32_t nVersion, const CAmount& genesisReward)
 {
-    const char* pszTimestamp = "YANGCOIN START NEW FUTURE  11/1/2017";
+    const char* pszTimestamp = "yangchigi.com regist at 7/10/2000 ... WOW!!!";
     const CScript genesisOutputScript = CScript() << 
         ParseHex("04f287634e609ef2c8c912b3d6d4064a4f8fb27d077d168ac206e4dca365d278d45f647cedb0c2a28856def63895d1946d99250526b523358219dc5714aae8d81a") << OP_CHECKSIG;
     return CreateGenesisBlock(pszTimestamp, genesisOutputScript, nTime, nNonce, nBits, nVersion, genesisReward);
@@ -114,7 +114,7 @@ class CMainParams : public CChainParams {
 public:
     CMainParams() {
         strNetworkID = "main";
-        uint32_t GEN_TIME = 1509494400;
+        uint32_t GEN_TIME = 1497484800;
         unsigned int NOUNCE = 404568;
         consensus.BIP34Height = 0;
         consensus.BIP65Height = 0; // bab3041e8977e0dc3eeff63fe707b92bde1dd449d8efafb248c27c8264cc311a
@@ -216,7 +216,7 @@ class CTestNetParams : public CChainParams {
 public:
     CTestNetParams() {
         strNetworkID = "test";
-        uint32_t GEN_TIME = 1509495401;
+        uint32_t GEN_TIME = 1497484801;
         unsigned int NOUNCE = 130445;
         consensus.BIP34Height = 0;
         // consensus.BIP34Hash = uint256S("8075c771ed8b495ffd943980a95f702ab34fce3c8c54e379548bda33cc8c0573");
@@ -310,7 +310,7 @@ class CRegTestParams : public CChainParams {
 public:
     CRegTestParams() {
         strNetworkID = "regtest";
-        uint32_t GEN_TIME = 1509494402;
+        uint32_t GEN_TIME = 1497484802;
         unsigned int NOUNCE = 1185451;
         consensus.BIP34Height = 100000000; // BIP34 has not activated on regtest (far in the future so block v1 are not rejected in tests)
         // consensus.BIP34Hash = uint256();

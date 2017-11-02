@@ -8,6 +8,8 @@
 #include "tinyformat.h"
 #include "utilstrencodings.h"
 
+using namespace std;
+
 const char* GetOpName(opcodetype opcode)
 {
     switch (opcode)
@@ -184,21 +186,31 @@ unsigned int CScript::GetSigOpCount(const CScript& scriptSig) const
     // get the last item that the scriptSig
     // pushes onto the stack:
     const_iterator pc = scriptSig.begin();
-    std::vector<unsigned char> vData;
+    vector<unsigned char> data;
     while (pc < scriptSig.end())
     {
         opcodetype opcode;
-        if (!scriptSig.GetOp(pc, opcode, vData))
+        if (!scriptSig.GetOp(pc, opcode, data))
             return 0;
         if (opcode > OP_16)
             return 0;
     }
 
     /// ... and return its opcount:
-    CScript subscript(vData.begin(), vData.end());
+    CScript subscript(data.begin(), data.end());
     return subscript.GetSigOpCount(true);
 }
 
+bool CScript::IsPayToPublicKeyHash() const
+{
+    // Extra-fast test for pay-to-pubkey-hash CScripts:
+    return (this->size() == 25 &&
+	    (*this)[0] == OP_DUP &&
+	    (*this)[1] == OP_HASH160 &&
+	    (*this)[2] == 0x14 &&
+	    (*this)[23] == OP_EQUALVERIFY &&
+	    (*this)[24] == OP_CHECKSIG);
+}
 bool CScript::IsPayToScriptHash() const
 {
     // Extra-fast test for pay-to-script-hash CScripts:
@@ -214,6 +226,14 @@ bool CScript::IsPayToWitnessScriptHash() const
     return (this->size() == 34 &&
             (*this)[0] == OP_0 &&
             (*this)[1] == 0x20);
+}
+
+bool CScript::IsPayToPublicKey() const
+{
+    // Extra-fast test for pay-to-pubkey CScripts:
+    return (this->size() == 35 &&
+			(*this)[0] == 0x21 &&
+            (*this)[34] == OP_CHECKSIG);
 }
 
 // A witness program is any valid CScript that consists of a 1-byte push opcode
@@ -266,17 +286,4 @@ std::string CScriptWitness::ToString() const
         ret += HexStr(stack[i]);
     }
     return ret + ")";
-}
-
-bool CScript::HasValidOps() const
-{
-    CScript::const_iterator it = begin();
-    while (it < end()) {
-        opcodetype opcode;
-        std::vector<unsigned char> item;
-        if (!GetOp(it, opcode, item) || opcode > MAX_OPCODE || item.size() > MAX_SCRIPT_ELEMENT_SIZE) {
-            return false;
-        }
-    }
-    return true;
 }

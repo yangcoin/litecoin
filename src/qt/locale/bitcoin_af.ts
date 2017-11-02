@@ -62,12 +62,12 @@
         <translation>Ontvanger adresse</translation>
     </message>
     <message>
-        <source>These are your Litecoin addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
-        <translation>Hierdie is die adresse vanwaar u Litecoin betalings stuur. U moet altyd die bedrag en die adres van die ontvanger nagaan voordat u enige munte stuur.</translation>
+        <source>These are your Yangcoin addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
+        <translation>Hierdie is die adresse vanwaar u Yangcoin betalings stuur. U moet altyd die bedrag en die adres van die ontvanger nagaan voordat u enige munte stuur.</translation>
     </message>
     <message>
-        <source>These are your Litecoin addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
-        <translation>Hierdie is die adresse waar u Litecoins sal ontvang. Ons beveel aan dat u 'n nuwe adres kies vir elke transaksie</translation>
+        <source>These are your Yangcoin addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
+        <translation>Hierdie is die adresse waar u Yangcoin sal ontvang. Ons beveel aan dat u 'n nuwe adres kies vir elke transaksie</translation>
     </message>
     <message>
         <source>&amp;Copy Address</source>
@@ -168,8 +168,8 @@
         <translation>Bevestig dat die beursie gekodifiseer is</translation>
     </message>
     <message>
-        <source>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR LITECOINS&lt;/b&gt;!</source>
-        <translation>Waarskuwing: Indien u die beursie kodifiseer en u vergeet u wagwoord &lt;b&gt;VERLOOR U AL U LITECOINS&lt;/b&gt;!</translation>
+        <source>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR YANGCOIN&lt;/b&gt;!</source>
+        <translation>Waarskuwing: Indien u die beursie kodifiseer en u vergeet u wagwoord &lt;b&gt;VERLOOR U AL U YANGCOIN&lt;/b&gt;!</translation>
     </message>
     <message>
         <source>Are you sure you wish to encrypt your wallet?</source>
@@ -330,8 +330,8 @@
         <translation>Besig met herindeksering van blokke op hardeskyf...</translation>
     </message>
     <message>
-        <source>Send coins to a Litecoin address</source>
-        <translation>Stuur munte na 'n Litecoin adres</translation>
+        <source>Send coins to a Yangcoin address</source>
+        <translation>Stuur munte na 'n Yangcoin adres</translation>
     </message>
     <message>
         <source>Backup wallet to another location</source>
@@ -350,8 +350,8 @@
         <translation>Maak ontfouting en diagnostiese konsole oop</translation>
     </message>
     <message>
-        <source>Litecoin</source>
-        <translation>Litecoin</translation>
+        <source>Yangcoin</source>
+        <translation>Yangcoin</translation>
     </message>
     <message>
         <source>Wallet</source>
@@ -378,12 +378,12 @@
         <translation>Kodifiseer die private sleutes wat aan jou beursie gekoppel is.</translation>
     </message>
     <message>
-        <source>Sign messages with your Litecoin addresses to prove you own them</source>
-        <translation>Onderteken boodskappe met u Litecoin adresse om u eienaarskap te bewys</translation>
+        <source>Sign messages with your Yangcoin addresses to prove you own them</source>
+        <translation>Onderteken boodskappe met u Yangcoin adresse om u eienaarskap te bewys</translation>
     </message>
     <message>
-        <source>Verify messages to ensure they were signed with specified Litecoin addresses</source>
-        <translation>Verifieër boodskappe om seker te maak dat dit met die gespesifiseerde Litecoin adresse</translation>
+        <source>Verify messages to ensure they were signed with specified Yangcoin addresses</source>
+        <translation>Verifieër boodskappe om seker te maak dat dit met die gespesifiseerde Yangcoin adresse</translation>
     </message>
     <message>
         <source>&amp;File</source>
@@ -398,8 +398,8 @@
         <translation>Orebalk</translation>
     </message>
     <message>
-        <source>Request payments (generates QR codes and litecoin: URIs)</source>
-        <translation>Versoek betalings (genereer QR-kodes en litecoin: URI's)</translation>
+        <source>Request payments (generates QR codes and yangcoin: URIs)</source>
+        <translation>Versoek betalings (genereer QR-kodes en yangcoin: URI's)</translation>
     </message>
     <message>
         <source>Show the list of used sending addresses and labels</source>
@@ -410,8 +410,8 @@
         <translation>Vertoon die lys van gebruikte ontvangers-adresse en etikette</translation>
     </message>
     <message>
-        <source>Open a litecoin: URI or payment request</source>
-        <translation>Skep 'n litecoin: URI of betalingsversoek</translation>
+        <source>Open a yangcoin: URI or payment request</source>
+        <translation>Skep 'n yangcoin: URI of betalingsversoek</translation>
     </message>
     <message>
         <source>Indexing blocks on disk...</source>
@@ -513,47 +513,15 @@
         <translation>Bevestig</translation>
     </message>
     <message>
-        <source>yes</source>
-        <translation>ja</translation>
-    </message>
-    <message>
-        <source>no</source>
-        <translation>nee</translation>
-    </message>
-    <message>
-        <source>Can vary +/- %1 satoshi(s) per input.</source>
-        <translation>Kan verskil met +/- %1 satoshi(s) per invoer.</translation>
-    </message>
-    <message>
         <source>(no label)</source>
         <translation>(geen etiket)</translation>
     </message>
-    <message>
-        <source>change from %1 (%2)</source>
-        <translation>verander van %1 (%2)</translation>
-    </message>
-    <message>
-        <source>(change)</source>
-        <translation>(verander)</translation>
-    </message>
-</context>
+    </context>
 <context>
     <name>EditAddressDialog</name>
     <message>
         <source>Edit Address</source>
         <translation>Wysig Adres</translation>
-    </message>
-    <message>
-        <source>&amp;Label</source>
-        <translation>&amp;Etiket</translation>
-    </message>
-    <message>
-        <source>&amp;Address</source>
-        <translation>&amp;Adres</translation>
-    </message>
-    <message>
-        <source>Could not unlock wallet.</source>
-        <translation>Kon beursie nie oopsluit nie.</translation>
     </message>
     </context>
 <context>
@@ -597,10 +565,6 @@
         <translation>Welkom by %1.</translation>
     </message>
     <message>
-        <source>Error: Specified data directory "%1" cannot be created.</source>
-        <translation>Fout: Gespesifiseerde dataleêr "%1" kon nie geskep word nie.</translation>
-    </message>
-    <message>
         <source>Error</source>
         <translation>Fout</translation>
     </message>
@@ -638,28 +602,8 @@
         <translation>Alle kliëntopsies na verstek terugstel.</translation>
     </message>
     <message>
-        <source>&amp;Network</source>
-        <translation>&amp;Netwerk</translation>
-    </message>
-    <message>
-        <source>W&amp;allet</source>
-        <translation>B&amp;eursie</translation>
-    </message>
-    <message>
         <source>Expert</source>
         <translation>Kenner</translation>
-    </message>
-    <message>
-        <source>Enable coin &amp;control features</source>
-        <translation>Bemagtig munt &amp;beheer funksies.</translation>
-    </message>
-    <message>
-        <source>&amp;Port:</source>
-        <translation>&amp;Poort:</translation>
-    </message>
-    <message>
-        <source>IPv4</source>
-        <translation>IPv4</translation>
     </message>
     <message>
         <source>IPv6</source>
@@ -668,14 +612,6 @@
     <message>
         <source>Tor</source>
         <translation>Tor</translation>
-    </message>
-    <message>
-        <source>&amp;OK</source>
-        <translation>&amp;OK</translation>
-    </message>
-    <message>
-        <source>&amp;Cancel</source>
-        <translation>&amp;Kanselleer</translation>
     </message>
     <message>
         <source>default</source>
@@ -1012,8 +948,8 @@
 <context>
     <name>bitcoin-core</name>
     <message>
-        <source>Litecoin Core</source>
-        <translation>Litecoin Kern</translation>
+        <source>Yangcoin Core</source>
+        <translation>Yangcoin Kern</translation>
     </message>
     <message>
         <source>Information</source>

@@ -62,12 +62,12 @@
         <translation>Alamat-alamat penerima</translation>
     </message>
     <message>
-        <source>These are your Litecoin addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
-        <translation>Ini adalah alamat- alamat Litecoin Anda untuk mengirimkan pembayaran. Selalu periksa jumlah dan alamat penerima sebelum mengirimkan koin.</translation>
+        <source>These are your Yangcoin addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
+        <translation>Ini adalah alamat- alamat Yangcoin Anda untuk mengirimkan pembayaran. Selalu periksa jumlah dan alamat penerima sebelum mengirimkan koin.</translation>
     </message>
     <message>
-        <source>These are your Litecoin addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
-        <translation>Ini adalah alamat- alamat Litecoin Anda untuk menerima pembayaran. Dianjurkan untuk menggunakan alamat penerima yang baru setiap melakukan transaksi.</translation>
+        <source>These are your Yangcoin addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
+        <translation>Ini adalah alamat- alamat Yangcoin Anda untuk menerima pembayaran. Dianjurkan untuk menggunakan alamat penerima yang baru setiap melakukan transaksi.</translation>
     </message>
     <message>
         <source>&amp;Copy Address</source>
@@ -164,8 +164,8 @@
         <translation>Konfirmasi pengenkripsian dompet</translation>
     </message>
     <message>
-        <source>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR LITECOINS&lt;/b&gt;!</source>
-        <translation>Peringatan: Jika Anda enkripsi dompet Anda dan lupa kata sandi anda, Anda akan &lt;b&gt;KEHILANGAN SEMUA LITECOIN ANDA&lt;/b&gt;!</translation>
+        <source>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR YANGCOIN&lt;/b&gt;!</source>
+        <translation>Peringatan: Jika Anda enkripsi dompet Anda dan lupa kata sandi anda, Anda akan &lt;b&gt;KEHILANGAN SEMUA YANGCOIN ANDA&lt;/b&gt;!</translation>
     </message>
     <message>
         <source>Are you sure you wish to encrypt your wallet?</source>
@@ -176,7 +176,7 @@
         <translation>Dompet terenkripsi</translation>
     </message>
     <message>
-        <source>%1 will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your litecoins from being stolen by malware infecting your computer.</source>
+        <source>%1 will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your yangcoin from being stolen by malware infecting your computer.</source>
         <translation>%1 sekarang akan ditutup untuk menyelesaikan proses enkripsi. Ingatlah bahwa mengenkripsi dompet Anda tidak dapat sepenuhnya melindungi komputer Anda dari pencurian malware yang menginfeksi komputer Anda.</translation>
     </message>
     <message>
@@ -334,8 +334,8 @@
         <translation>Mengindex ulang blok di dalam disk...</translation>
     </message>
     <message>
-        <source>Send coins to a Litecoin address</source>
-        <translation>Kirim koin ke alamat Litecoin</translation>
+        <source>Send coins to a Yangcoin address</source>
+        <translation>Kirim koin ke alamat Yangcoin</translation>
     </message>
     <message>
         <source>Backup wallet to another location</source>
@@ -358,8 +358,8 @@
         <translation>&amp;Verifikasi pesan...</translation>
     </message>
     <message>
-        <source>Litecoin</source>
-        <translation>Litecoin</translation>
+        <source>Yangcoin</source>
+        <translation>Yangcoin</translation>
     </message>
     <message>
         <source>Wallet</source>
@@ -386,12 +386,12 @@
         <translation>Enkripsi private key yang dimiliki dompet Anda</translation>
     </message>
     <message>
-        <source>Sign messages with your Litecoin addresses to prove you own them</source>
-        <translation>Tanda tangani sebuah pesan menggunakan alamat Litecoin Anda untuk membuktikan bahwa Anda adalah pemilik alamat tersebut</translation>
+        <source>Sign messages with your Yangcoin addresses to prove you own them</source>
+        <translation>Tanda tangani sebuah pesan menggunakan alamat Yangcoin Anda untuk membuktikan bahwa Anda adalah pemilik alamat tersebut</translation>
     </message>
     <message>
-        <source>Verify messages to ensure they were signed with specified Litecoin addresses</source>
-        <translation>Verifikasi pesan untuk memastikan bahwa pesan tersebut ditanda tangani oleh suatu alamat Litecoin tertentu</translation>
+        <source>Verify messages to ensure they were signed with specified Yangcoin addresses</source>
+        <translation>Verifikasi pesan untuk memastikan bahwa pesan tersebut ditanda tangani oleh suatu alamat Yangcoin tertentu</translation>
     </message>
     <message>
         <source>&amp;File</source>
@@ -410,8 +410,8 @@
         <translation>Baris tab</translation>
     </message>
     <message>
-        <source>Request payments (generates QR codes and litecoin: URIs)</source>
-        <translation>Permintaan pembayaran (membuat kode QR dan litecoin: URIs)</translation>
+        <source>Request payments (generates QR codes and yangcoin: URIs)</source>
+        <translation>Permintaan pembayaran (membuat kode QR dan yangcoin: URIs)</translation>
     </message>
     <message>
         <source>Show the list of used sending addresses and labels</source>
@@ -422,16 +422,16 @@
         <translation>Tampilkan daftar alamat dan label yang diterima</translation>
     </message>
     <message>
-        <source>Open a litecoin: URI or payment request</source>
-        <translation>Buka URI litecoin: atau permintaan pembayaran</translation>
+        <source>Open a yangcoin: URI or payment request</source>
+        <translation>Buka URI yangcoin: atau permintaan pembayaran</translation>
     </message>
     <message>
         <source>&amp;Command-line options</source>
         <translation>&amp;pilihan Command-line</translation>
     </message>
     <message numerus="yes">
-        <source>%n active connection(s) to Litecoin network</source>
-        <translation><numerusform>%n koneksi aktif ke jaringan Litecoin</numerusform></translation>
+        <source>%n active connection(s) to Yangcoin network</source>
+        <translation><numerusform>%n koneksi aktif ke jaringan Yangcoin</numerusform></translation>
     </message>
     <message>
         <source>Indexing blocks on disk...</source>
@@ -474,8 +474,8 @@
         <translation>Terbaru</translation>
     </message>
     <message>
-        <source>Show the %1 help message to get a list with possible Litecoin command-line options</source>
-        <translation>Tampilkan %1 pesan bantuan untuk mendapatkan daftar opsi baris perintah Litecoin yang memungkinkan</translation>
+        <source>Show the %1 help message to get a list with possible Yangcoin command-line options</source>
+        <translation>Tampilkan %1 pesan bantuan untuk mendapatkan daftar opsi baris perintah Yangcoin yang memungkinkan</translation>
     </message>
     <message>
         <source>%1 client</source>
@@ -528,14 +528,6 @@
         <translation>Transaksi diterima</translation>
     </message>
     <message>
-        <source>HD key generation is &lt;b&gt;enabled&lt;/b&gt;</source>
-        <translation>Pembuatan kunci HD &lt;b&gt;diaktifkan&lt;/b&gt;</translation>
-    </message>
-    <message>
-        <source>HD key generation is &lt;b&gt;disabled&lt;/b&gt;</source>
-        <translation>Pembuatan kunci HD &lt;b&gt;dinonaktifkan&lt;/b&gt;</translation>
-    </message>
-    <message>
         <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt;</source>
         <translation>Dompet saat ini &lt;b&gt;terenkripsi&lt;/b&gt; dan &lt;b&gt;terbuka&lt;/b&gt;</translation>
     </message>
@@ -543,11 +535,7 @@
         <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;locked&lt;/b&gt;</source>
         <translation>Dompet saat ini &lt;b&gt;terenkripsi&lt;/b&gt; dan &lt;b&gt;terkunci&lt;/b&gt;</translation>
     </message>
-    <message>
-        <source>A fatal error occurred. Litecoin can no longer continue safely and will quit.</source>
-        <translation>Terjadi Kesalahan Fatal. Litecoin Tidak Dapat Melanjutkan Dengan Aman Dan Akan Keluar</translation>
-    </message>
-</context>
+    </context>
 <context>
     <name>CoinControlDialog</name>
     <message>
@@ -627,56 +615,8 @@
         <translation>Salin label</translation>
     </message>
     <message>
-        <source>Copy amount</source>
-        <translation>Salin Jumlah</translation>
-    </message>
-    <message>
-        <source>Copy transaction ID</source>
-        <translation>Salain ID Transaksi</translation>
-    </message>
-    <message>
-        <source>Lock unspent</source>
-        <translation>Kunci Yang Tidak Digunakan</translation>
-    </message>
-    <message>
-        <source>Unlock unspent</source>
-        <translation>Buka Kunci Yang Tidak Digunakan</translation>
-    </message>
-    <message>
-        <source>Copy quantity</source>
-        <translation>Salin Kuantitas</translation>
-    </message>
-    <message>
         <source>Copy fee</source>
         <translation>Salin biaya</translation>
-    </message>
-    <message>
-        <source>Copy after fee</source>
-        <translation>Salin Setelah Upah</translation>
-    </message>
-    <message>
-        <source>Copy bytes</source>
-        <translation>Salin bytes</translation>
-    </message>
-    <message>
-        <source>Copy dust</source>
-        <translation>Salin jumlah yang lebih kecil</translation>
-    </message>
-    <message>
-        <source>Copy change</source>
-        <translation>Salin Perubahan</translation>
-    </message>
-    <message>
-        <source>(%1 locked)</source>
-        <translation>(%1 terkunci)</translation>
-    </message>
-    <message>
-        <source>yes</source>
-        <translation>Ya</translation>
-    </message>
-    <message>
-        <source>no</source>
-        <translation>Tidak</translation>
     </message>
     <message>
         <source>(no label)</source>
@@ -705,39 +645,7 @@
         <source>&amp;Address</source>
         <translation>&amp;Alamat</translation>
     </message>
-    <message>
-        <source>New receiving address</source>
-        <translation>Alamat penerima baru</translation>
-    </message>
-    <message>
-        <source>New sending address</source>
-        <translation>Alamat pengirim baru</translation>
-    </message>
-    <message>
-        <source>Edit receiving address</source>
-        <translation>Ubah alamat penerima</translation>
-    </message>
-    <message>
-        <source>Edit sending address</source>
-        <translation>Ubah alamat pengirim</translation>
-    </message>
-    <message>
-        <source>The entered address "%1" is not a valid Litecoin address.</source>
-        <translation>Alamat yang dimasukkan "%1" bukanlah alamat Litecoin yang valid.</translation>
-    </message>
-    <message>
-        <source>The entered address "%1" is already in the address book.</source>
-        <translation>Alamat yang dimasukkan "%1" sudah ada di dalam buku alamat.</translation>
-    </message>
-    <message>
-        <source>Could not unlock wallet.</source>
-        <translation>Tidak dapat membuka dompet.</translation>
-    </message>
-    <message>
-        <source>New key generation failed.</source>
-        <translation>Pembuatan kunci baru gagal.</translation>
-    </message>
-</context>
+    </context>
 <context>
     <name>FreespaceChecker</name>
     <message>
@@ -770,10 +678,6 @@
     <message>
         <source>(%1-bit)</source>
         <translation>(%1-bit)</translation>
-    </message>
-    <message>
-        <source>About %1</source>
-        <translation>Tentang %1</translation>
     </message>
     <message>
         <source>Command-line options</source>
@@ -811,24 +715,12 @@
         <source>Show splash screen on startup (default: %u)</source>
         <translation>Tampilkan layar kilat saat memulai (default: %u)</translation>
     </message>
-    <message>
-        <source>Reset all settings changed in the GUI</source>
-        <translation>Hapus semua pengaturan pada GUI.</translation>
-    </message>
-</context>
+    </context>
 <context>
     <name>Intro</name>
     <message>
         <source>Welcome</source>
         <translation>Selamat Datang</translation>
-    </message>
-    <message>
-        <source>Welcome to %1.</source>
-        <translation>Selamat Datang ke %1.</translation>
-    </message>
-    <message>
-        <source>As this is the first time the program is launched, you can choose where %1 will store its data.</source>
-        <translation>Karena ini adalah pertama kalinya program dijalankan, Anda dapat memilih lokasi %1 akan menyimpan data.</translation>
     </message>
     <message>
         <source>Use the default data directory</source>
@@ -972,16 +864,16 @@
         <translation>&amp;Perubahan saldo untuk transaksi yang belum dikonfirmasi</translation>
     </message>
     <message>
-        <source>Automatically open the Litecoin client port on the router. This only works when your router supports UPnP and it is enabled.</source>
-        <translation>Otomatis membuka port client Litecoin di router. Hanya berjalan apabila router anda mendukung UPnP dan di-enable.</translation>
+        <source>Automatically open the Yangcoin client port on the router. This only works when your router supports UPnP and it is enabled.</source>
+        <translation>Otomatis membuka port client Yangcoin di router. Hanya berjalan apabila router anda mendukung UPnP dan di-enable.</translation>
     </message>
     <message>
         <source>Map port using &amp;UPnP</source>
         <translation>Petakan port dengan &amp;UPnP</translation>
     </message>
     <message>
-        <source>Connect to the Litecoin network through a SOCKS5 proxy.</source>
-        <translation>Hubungkan ke jaringan Litecoin melalui SOCKS5 proxy.</translation>
+        <source>Connect to the Yangcoin network through a SOCKS5 proxy.</source>
+        <translation>Hubungkan ke jaringan Yangcoin melalui SOCKS5 proxy.</translation>
     </message>
     <message>
         <source>Proxy &amp;IP:</source>
@@ -1087,8 +979,8 @@
         <translation>Formulir</translation>
     </message>
     <message>
-        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Litecoin network after a connection is established, but this process has not completed yet.</source>
-        <translation>Informasi terlampir mungkin sudah kedaluwarsa. Dompet Anda secara otomatis mensinkronisasi dengan jaringan Litecoin ketika sebuah hubungan terbentuk, namun proses ini belum selesai.</translation>
+        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Yangcoin network after a connection is established, but this process has not completed yet.</source>
+        <translation>Informasi terlampir mungkin sudah kedaluwarsa. Dompet Anda secara otomatis mensinkronisasi dengan jaringan Yangcoin ketika sebuah hubungan terbentuk, namun proses ini belum selesai.</translation>
     </message>
     <message>
         <source>Available:</source>
@@ -1144,8 +1036,8 @@
         <translation>Nilai</translation>
     </message>
     <message>
-        <source>Enter a Litecoin address (e.g. %1)</source>
-        <translation>Masukkan alamat Litecoin (contoh %1)</translation>
+        <source>Enter a Yangcoin address (e.g. %1)</source>
+        <translation>Masukkan alamat Yangcoin (contoh %1)</translation>
     </message>
     <message>
         <source>%1 h</source>
@@ -1393,11 +1285,7 @@
         <source>Copy label</source>
         <translation>Salin label</translation>
     </message>
-    <message>
-        <source>Copy amount</source>
-        <translation>Salin Jumlah</translation>
-    </message>
-</context>
+    </context>
 <context>
     <name>ReceiveRequestDialog</name>
     <message>
@@ -1543,32 +1431,8 @@
         <translation>K&amp;irim</translation>
     </message>
     <message>
-        <source>Copy quantity</source>
-        <translation>Salin Kuantitas</translation>
-    </message>
-    <message>
-        <source>Copy amount</source>
-        <translation>Salin Jumlah</translation>
-    </message>
-    <message>
         <source>Copy fee</source>
         <translation>Salin biaya</translation>
-    </message>
-    <message>
-        <source>Copy after fee</source>
-        <translation>Salin Setelah Upah</translation>
-    </message>
-    <message>
-        <source>Copy bytes</source>
-        <translation>Salin bytes</translation>
-    </message>
-    <message>
-        <source>Copy dust</source>
-        <translation>Salin dust</translation>
-    </message>
-    <message>
-        <source>Copy change</source>
-        <translation>Salin Perubahan</translation>
     </message>
     <message>
         <source>(no label)</source>
@@ -1679,8 +1543,8 @@
         <translation>Salin tanda tangan terpilih ke sistem klipboard</translation>
     </message>
     <message>
-        <source>Sign the message to prove you own this Litecoin address</source>
-        <translation>Tandai pesan untuk menyetujui kamu pemiliki alamat Litecoin ini</translation>
+        <source>Sign the message to prove you own this Yangcoin address</source>
+        <translation>Tandai pesan untuk menyetujui kamu pemiliki alamat Yangcoin ini</translation>
     </message>
     <message>
         <source>Sign &amp;Message</source>
@@ -1757,14 +1621,6 @@
         <translation>Salin label</translation>
     </message>
     <message>
-        <source>Copy amount</source>
-        <translation>Salin Jumlah</translation>
-    </message>
-    <message>
-        <source>Copy transaction ID</source>
-        <translation>Salain ID Transaksi</translation>
-    </message>
-    <message>
         <source>Comma separated file (*.csv)</source>
         <translation>Berkas yang berformat(*.csv)</translation>
     </message>
@@ -1820,8 +1676,8 @@
         <translation>Berjalan dibelakang sebagai daemin dan menerima perintah</translation>
     </message>
     <message>
-        <source>Litecoin Core</source>
-        <translation>Litecoin Core</translation>
+        <source>Yangcoin Core</source>
+        <translation>Yangcoin Core</translation>
     </message>
     <message>
         <source>Execute command when a wallet transaction changes (%s in cmd is replaced by TxID)</source>

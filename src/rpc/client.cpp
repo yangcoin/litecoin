@@ -10,7 +10,10 @@
 #include <set>
 #include <stdint.h>
 
+#include <boost/algorithm/string/case_conv.hpp> // for to_lower()
 #include <univalue.h>
+
+using namespace std;
 
 class CRPCConvertParam
 {
@@ -21,7 +24,7 @@ public:
 };
 
 /**
- * Specify a (method, idx, name) here if the argument is a non-string RPC
+ * Specifiy a (method, idx, name) here if the argument is a non-string RPC
  * argument and needs to be converted from JSON.
  *
  * @note Parameter indexes start from 0.
@@ -37,8 +40,6 @@ static const CRPCConvertParam vRPCConvertParams[] =
     { "getnetworkhashps", 1, "height" },
     { "sendtoaddress", 1, "amount" },
     { "sendtoaddress", 4, "subtractfeefromamount" },
-    { "sendtoaddress", 5 , "replaceable" },
-    { "sendtoaddress", 6 , "conf_target" },
     { "settxfee", 0, "amount" },
     { "getreceivedbyaddress", 1, "minconf" },
     { "getreceivedbyaccount", 1, "minconf" },
@@ -68,12 +69,9 @@ static const CRPCConvertParam vRPCConvertParams[] =
     { "getblocktemplate", 0, "template_request" },
     { "listsinceblock", 1, "target_confirmations" },
     { "listsinceblock", 2, "include_watchonly" },
-    { "listsinceblock", 3, "include_removed" },
     { "sendmany", 1, "amounts" },
     { "sendmany", 2, "minconf" },
     { "sendmany", 4, "subtractfeefrom" },
-    { "sendmany", 5 , "replaceable" },
-    { "sendmany", 6 , "conf_target" },
     { "addmultisigaddress", 0, "nrequired" },
     { "addmultisigaddress", 1, "keys" },
     { "createmultisig", 0, "nrequired" },
@@ -81,22 +79,16 @@ static const CRPCConvertParam vRPCConvertParams[] =
     { "listunspent", 0, "minconf" },
     { "listunspent", 1, "maxconf" },
     { "listunspent", 2, "addresses" },
-    { "listunspent", 3, "include_unsafe" },
-    { "listunspent", 4, "query_options" },
-    { "getblock", 1, "verbosity" },
     { "getblock", 1, "verbose" },
     { "getblockheader", 1, "verbose" },
-    { "getchaintxstats", 0, "nblocks" },
     { "gettransaction", 1, "include_watchonly" },
     { "getrawtransaction", 1, "verbose" },
     { "createrawtransaction", 0, "inputs" },
     { "createrawtransaction", 1, "outputs" },
     { "createrawtransaction", 2, "locktime" },
-    { "createrawtransaction", 3, "replaceable" },
     { "signrawtransaction", 1, "prevtxs" },
     { "signrawtransaction", 2, "privkeys" },
     { "sendrawtransaction", 1, "allowhighfees" },
-    { "combinerawtransaction", 0, "txs" },
     { "fundrawtransaction", 1, "options" },
     { "gettxout", 1, "n" },
     { "gettxout", 2, "include_mempool" },
@@ -115,20 +107,26 @@ static const CRPCConvertParam vRPCConvertParams[] =
     { "keypoolrefill", 0, "newsize" },
     { "getrawmempool", 0, "verbose" },
     { "estimatefee", 0, "nblocks" },
+    { "estimatepriority", 0, "nblocks" },
     { "estimatesmartfee", 0, "nblocks" },
-    { "estimaterawfee", 0, "nblocks" },
-    { "estimaterawfee", 1, "threshold" },
-    { "prioritisetransaction", 1, "dummy" },
+    { "estimatesmartpriority", 0, "nblocks" },
+    { "prioritisetransaction", 1, "priority_delta" },
     { "prioritisetransaction", 2, "fee_delta" },
     { "setban", 2, "bantime" },
     { "setban", 3, "absolute" },
+    { "getblockhashes", 0 ,"arg0"},
+    { "getblockhashes", 1 ,"arg0"},
+    { "getblockhashes", 2 ,"arg0"},
+    { "getspentinfo", 0,"arg0"},
+    { "getaddresstxids", 0,"arg0"},
+    { "getaddressbalance", 0,"arg0"},
+    { "getaddressdeltas", 0,"arg0"},
+    { "getaddressutxos", 0,"arg0"},
+    { "getaddressmempool", 0,"arg0"},
     { "setnetworkactive", 0, "state" },
     { "getmempoolancestors", 1, "verbose" },
     { "getmempooldescendants", 1, "verbose" },
     { "bumpfee", 1, "options" },
-    { "logging", 0, "include" },
-    { "logging", 1, "exclude" },
-    { "disconnectnode", 1, "nodeid" },
     // Echo with conversion (For testing only)
     { "echojson", 0, "arg0" },
     { "echojson", 1, "arg1" },
@@ -182,7 +180,7 @@ UniValue ParseNonRFCJSONValue(const std::string& strVal)
     UniValue jVal;
     if (!jVal.read(std::string("[")+strVal+std::string("]")) ||
         !jVal.isArray() || jVal.size()!=1)
-        throw std::runtime_error(std::string("Error parsing JSON:")+strVal);
+        throw runtime_error(string("Error parsing JSON:")+strVal);
     return jVal[0];
 }
 

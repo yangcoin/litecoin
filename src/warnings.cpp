@@ -37,6 +37,12 @@ void SetfLargeWorkInvalidChainFound(bool flag)
     fLargeWorkInvalidChainFound = flag;
 }
 
+bool GetfLargeWorkInvalidChainFound()
+{
+    LOCK(cs_warnings);
+    return fLargeWorkInvalidChainFound;
+}
+
 std::string GetWarnings(const std::string& strFor)
 {
     std::string strStatusBar;
@@ -51,7 +57,7 @@ std::string GetWarnings(const std::string& strFor)
         strGUI = _("This is a pre-release test build - use at your own risk - do not use for mining or merchant applications");
     }
 
-    if (gArgs.GetBoolArg("-testsafemode", DEFAULT_TESTSAFEMODE))
+    if (GetBoolArg("-testsafemode", DEFAULT_TESTSAFEMODE))
         strStatusBar = strRPC = strGUI = "testsafemode enabled";
 
     // Misc warnings like out of disk space and clock is wrong

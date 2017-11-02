@@ -1,13 +1,26 @@
 *.tar.gz
-
+settings.json
+launch.json
+tasks.json
 *.exe
-src/litecoin
-src/litecoind
-src/litecoin-cli
-src/litecoin-tx
-src/test/test_litecoin
-src/test/test_litecoin_fuzzy
-src/qt/test/test_litecoin-qt
+data_copy
+data/*
+tmp/*
+src/yangcoin
+src/yangcoind
+src/yangcoin-cli
+src/yangcoin-tx
+src/test/test_yangcoin
+src/test/test_yangcoin_fuzzy
+src/qt/test/test_yangcoin-qt
+data/*
+src/yangcoin
+src/yangcoind
+src/yangcoin-cli
+src/yangcoin-tx
+src/test/test_yangcoin
+src/test/test_yangcoin_fuzzy
+src/qt/test/test_yangcoin-qt
 
 # autoreconf
 Makefile.in
@@ -74,12 +87,17 @@ src/qt/test/moc*.cpp
 # Compilation and Qt preprocessor part
 *.qm
 Makefile
-litecoin-qt
-Litecoin-Qt.app
+yangcoin-qt
+Yangcoin-Qt.app
+yangcoin-qt
+Yangcoin-Qt.app
+yangcoind
+yangcoin-cli
 
 # Unit-tests
 Makefile.test
-litecoin-qt_test
+yangcoin-qt_test
+src/test/buildenv.py
 
 # Resources cpp
 qrc_*.cpp
@@ -92,7 +110,7 @@ build
 *.gcno
 *.gcda
 /*.info
-test_litecoin.coverage/
+test_yangcoin.coverage/
 total.coverage/
 coverage_percent.txt
 
@@ -100,8 +118,8 @@ coverage_percent.txt
 linux-coverage-build
 linux-build
 win32-build
-test/config.ini
-test/cache/*
+qa/pull-tester/tests_config.py
+qa/cache/*
 
 !src/leveldb*/Makefile
 
@@ -109,3 +127,10 @@ test/cache/*
 
 libbitcoinconsensus.pc
 contrib/devtools/split-debug.sh
+tmp/bitcoin-1.0.0/bin/bitcoin-cli
+.vscode/settings.json
+.vscode/tasks.json
+.vscode/launch.json
+.vscode/settings.json
+wallet.dat
+wallet.dat.*

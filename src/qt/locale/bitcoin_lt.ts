@@ -44,10 +44,6 @@
     </context>
 <context>
     <name>AddressTableModel</name>
-    <message>
-        <source>Address</source>
-        <translation>Adresas</translation>
-    </message>
     </context>
 <context>
     <name>AskPassphraseDialog</name>
@@ -118,10 +114,6 @@
         <translation>&amp;Apie %1</translation>
     </message>
     <message>
-        <source>Show information about %1</source>
-        <translation>Rodyti informaciją apie %1</translation>
-    </message>
-    <message>
         <source>About &amp;Qt</source>
         <translation>Apie &amp;Qt</translation>
     </message>
@@ -162,8 +154,8 @@
         <translation>Blokai iš naujo indeksuojami...</translation>
     </message>
     <message>
-        <source>Send coins to a Litecoin address</source>
-        <translation>Siųsti monetas Litecoin adresui</translation>
+        <source>Send coins to a Yangcoin address</source>
+        <translation>Siųsti monetas Yangcoin adresui</translation>
     </message>
     <message>
         <source>Backup wallet to another location</source>
@@ -186,8 +178,8 @@
         <translation>&amp;Tikrinti žinutę...</translation>
     </message>
     <message>
-        <source>Litecoin</source>
-        <translation>Litecoin</translation>
+        <source>Yangcoin</source>
+        <translation>Yangcoin</translation>
     </message>
     <message>
         <source>Wallet</source>
@@ -252,12 +244,6 @@
     <message>
         <source>Catching up...</source>
         <translation>Vejamasi...</translation>
-    </message>
-    <message>
-        <source>Date: %1
-</source>
-        <translation>Data: %1
-</translation>
     </message>
     <message>
         <source>Sent transaction</source>
@@ -432,8 +418,8 @@
         <translation>Piniginė</translation>
     </message>
     <message>
-        <source>Automatically open the Litecoin client port on the router. This only works when your router supports UPnP and it is enabled.</source>
-        <translation>Automatiškai atidaryti Litecoin kliento prievadą maršrutizatoriuje. Tai veikia tik tada, kai jūsų maršrutizatorius palaiko UPnP ir ji įjungta.</translation>
+        <source>Automatically open the Yangcoin client port on the router. This only works when your router supports UPnP and it is enabled.</source>
+        <translation>Automatiškai atidaryti Yangcoin kliento prievadą maršrutizatoriuje. Tai veikia tik tada, kai jūsų maršrutizatorius palaiko UPnP ir ji įjungta.</translation>
     </message>
     <message>
         <source>Map port using &amp;UPnP</source>
@@ -730,10 +716,6 @@
         <source>Copy &amp;Address</source>
         <translation>&amp;Kopijuoti adresą</translation>
     </message>
-    <message>
-        <source>Address</source>
-        <translation>Adresas</translation>
-    </message>
     </context>
 <context>
     <name>RecentRequestsTableModel</name>
@@ -865,7 +847,7 @@
         <translation>Įveskite pranešimą, kurį norite pasirašyti čia</translation>
     </message>
     <message>
-        <source>Sign the message to prove you own this Litecoin address</source>
+        <source>Sign the message to prove you own this Yangcoin address</source>
         <translation>Registruotis žinute įrodymuii, kad turite šį adresą</translation>
     </message>
     <message>
@@ -881,8 +863,8 @@
         <translation>&amp;Patikrinti žinutę</translation>
     </message>
     <message>
-        <source>Verify the message to ensure it was signed with the specified Litecoin address</source>
-        <translation>Patikrinkite žinutę, jog įsitikintumėte, kad ją pasirašė nurodytas Litecoin adresas</translation>
+        <source>Verify the message to ensure it was signed with the specified Yangcoin address</source>
+        <translation>Patikrinkite žinutę, jog įsitikintumėte, kad ją pasirašė nurodytas Yangcoin adresas</translation>
     </message>
     <message>
         <source>Verify &amp;Message</source>
@@ -918,10 +900,6 @@
     </context>
 <context>
     <name>TransactionView</name>
-    <message>
-        <source>Address</source>
-        <translation>Adresas</translation>
-    </message>
     </context>
 <context>
     <name>UnitDisplayStatusBarControl</name>
@@ -958,8 +936,8 @@
         <translation>Dirbti fone kaip šešėlyje ir priimti komandas</translation>
     </message>
     <message>
-        <source>Litecoin Core</source>
-        <translation>Litecoin branduolys</translation>
+        <source>Yangcoin Core</source>
+        <translation>Yangcoin branduolys</translation>
     </message>
     <message>
         <source>Error opening block database</source>

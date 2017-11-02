@@ -6,11 +6,11 @@
 set -e
 
 ROOTDIR=dist
-BUNDLE="${ROOTDIR}/Litecoin-Qt.app"
+BUNDLE="${ROOTDIR}/Yangcoin-Qt.app"
 CODESIGN=codesign
 TEMPDIR=sign.temp
 TEMPLIST=${TEMPDIR}/signatures.txt
-OUT=signature-osx.tar.gz
+OUT=signature.tar.gz
 OUTROOT=osx
 
 if [ ! -n "$1" ]; then

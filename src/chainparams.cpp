@@ -115,7 +115,7 @@ public:
     CMainParams() {
         strNetworkID = "main";
         uint32_t GEN_TIME = 1497484800;
-        unsigned int NOUNCE = 404568;
+        unsigned int NOUNCE = 1078766;
         consensus.BIP34Height = 0;
         consensus.BIP65Height = 0; // bab3041e8977e0dc3eeff63fe707b92bde1dd449d8efafb248c27c8264cc311a
         consensus.BIP66Height = 0; // 7aceee012833fa8952f8835d8b1b3ae233cd6ab08fdb27a771d2bd7bdc491894
@@ -159,8 +159,8 @@ public:
 
         genesis = CreateGenesisBlock(GEN_TIME,NOUNCE, 0x1e0fffff, 1, 50 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
-        uint256 hashGenesis = uint256S("0x8b3aa1f1d87b9533d9d36b63875c0c97d833cd5cd8585c05030783a515a3345b");
-        uint256 hashMerkelRoot = uint256S("0xab3a00e260205f753521e80d1efa70d4f9a7aadc88070e10f5145e1aecccde80");
+        uint256 hashGenesis = uint256S("0x8a4b34fee986a5be6235841ea96a456f266fd78d32b6b28bf01927ccf7a7932d");
+        uint256 hashMerkelRoot = uint256S("0xcfd1ba05fd58e5a599c68ec1baa3249cb13075a5583a7fdd94256c512cf71c31");
         if(hashGenesis !=genesis.GetHash()){
             genesis.nNonce = 0;
             searchGenesis(genesis);
@@ -195,7 +195,7 @@ public:
 
         checkpointData = (CCheckpointData) {
             boost::assign::map_list_of
-            (  0, uint256S("0x8b3aa1f1d87b9533d9d36b63875c0c97d833cd5cd8585c05030783a515a3345b"))
+            (  0, uint256S("0x8a4b34fee986a5be6235841ea96a456f266fd78d32b6b28bf01927ccf7a7932d"))
         };
 
         chainTxData = ChainTxData{
@@ -217,7 +217,7 @@ public:
     CTestNetParams() {
         strNetworkID = "test";
         uint32_t GEN_TIME = 1497484801;
-        unsigned int NOUNCE = 130445;
+        unsigned int NOUNCE = 1577707;
         consensus.BIP34Height = 0;
         // consensus.BIP34Hash = uint256S("8075c771ed8b495ffd943980a95f702ab34fce3c8c54e379548bda33cc8c0573");
         consensus.BIP65Height = 76; // 8075c771ed8b495ffd943980a95f702ab34fce3c8c54e379548bda33cc8c0573
@@ -247,7 +247,7 @@ public:
         consensus.nMinimumChainWork = uint256S("0x000000000000000000000000000000000000000000000000000000054cb9e7a0");
 
         // By default assume that the signatures in ancestors of this block are valid.
-        consensus.defaultAssumeValid = uint256S("0x43a16a626ef2ffdbe928f2bc26dcd5475c6a1a04f9542dfc6a0a88e5fcf9bd4c"); //8711
+        consensus.defaultAssumeValid = uint256S("0x00"); //8711
 
         pchMessageStart[0] = 0x76;
         pchMessageStart[1] = 0x65;
@@ -258,8 +258,8 @@ public:
 
         genesis = CreateGenesisBlock(GEN_TIME,NOUNCE, 0x1e0fffff, 1, 50 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
-        uint256 hashGenesis = uint256S("0xf47f333675ef7872069b81c29eb84003174ea12a42db657dd133c4ca8d9d6b80");
-        uint256 hashMerkelRoot = uint256S("0xa5c3358ed9bfe4c7397875af02a9cca111bc4bf3d5ce742ca22a8617bcd379cc");
+        uint256 hashGenesis = uint256S("0xaf20fb906d175a5e6034d14962424e85283e607825d59eb3388f9d1087a1b894");
+        uint256 hashMerkelRoot = uint256S("0x72e498ca51c12f81d00e66e96b845165866fc44839c711b82f011aafc63d6332");
         if(hashGenesis !=genesis.GetHash()){
             genesis.nNonce = 0;
             searchGenesis(genesis);
@@ -311,7 +311,7 @@ public:
     CRegTestParams() {
         strNetworkID = "regtest";
         uint32_t GEN_TIME = 1497484802;
-        unsigned int NOUNCE = 1185451;
+        unsigned int NOUNCE = 89541;
         consensus.BIP34Height = 100000000; // BIP34 has not activated on regtest (far in the future so block v1 are not rejected in tests)
         // consensus.BIP34Hash = uint256();
         consensus.BIP65Height = 1351; // BIP65 activated on regtest (Used in rpc activation tests)
@@ -348,8 +348,8 @@ public:
 
         genesis = CreateGenesisBlock(GEN_TIME,NOUNCE, 0x1e0fffff, 1, 50 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
-        uint256 hashGenesis = uint256S("0x059fe092401d4bde9b38de8ee3b92c3352bec2ab055d66f0b9fb418a101d2efd");
-        uint256 hashMerkelRoot = uint256S("0xf3a2dc7f5ac46d618c3ddce4ba5d2bb5bbfef05eb95fc962fd95f5a4c2f068a1");
+        uint256 hashGenesis = uint256S("0x459ad710c2fc22f0fdc8f2b3a6d56ffe946a0160bea99501a5082210dd18a8cb");
+        uint256 hashMerkelRoot = uint256S("0x6fb866ca7c038c613219b077ea1f3cdf01053f43f9bf6e1521dd3b09fbc7ba9c");
         if(hashGenesis !=genesis.GetHash()){
             genesis.nNonce = 0;
             searchGenesis(genesis);
@@ -367,7 +367,7 @@ public:
 
         checkpointData = (CCheckpointData){
             boost::assign::map_list_of
-            ( 0, uint256S("0x059fe092401d4bde9b38de8ee3b92c3352bec2ab055d66f0b9fb418a101d2efd"))
+            ( 0, uint256S("0x459ad710c2fc22f0fdc8f2b3a6d56ffe946a0160bea99501a5082210dd18a8cb"))
         };
 
         chainTxData = ChainTxData{

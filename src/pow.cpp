@@ -79,6 +79,8 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
     const CBlockIndex* pindexFirst = pindexLast;
     
     for (int i = 0; pindexFirst && i < blockstogoback; i++){ 
+        if(pindexFirst->nHeight<=1)//root
+            break;
         pindexFirst = pindexFirst->pprev;
     }
     

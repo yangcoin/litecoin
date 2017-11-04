@@ -180,8 +180,8 @@ public:
         vSeeds.push_back(CDNSSeedData("seed7", "yang007.bitchk.com",true));
         vSeeds.push_back(CDNSSeedData("seed8", "yang008.bitchk.com",true));
 
-        base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,28);//C
-        base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,87);//c
+        base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,78);//Y
+        base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,140);//y
         
         base58Prefixes[SECRET_KEY] =     std::vector<unsigned char>(1,204);
         base58Prefixes[EXT_PUBLIC_KEY] = boost::assign::list_of(0x04)(0x88)(0xB2)(0x1E).convert_to_container<std::vector<unsigned char> >();
@@ -272,8 +272,9 @@ public:
         vSeeds.clear();
         // nodes with support for servicebits filtering should be at the top
         vSeeds.push_back(CDNSSeedData("dns001", "yang001.bitchk.com",true));
-        base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,28);//C
-        base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,87);//c
+        base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,80);//Y
+        base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,142);//y
+        
 
         
         base58Prefixes[SECRET_KEY] =     std::vector<unsigned char>(1,239);
@@ -377,8 +378,8 @@ public:
             0
         };
 
-        base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,28);//C
-        base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,87);//c
+        base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,80);//C
+        base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,142);//c
         
         base58Prefixes[SECRET_KEY] =     std::vector<unsigned char>(1,239);
         base58Prefixes[EXT_PUBLIC_KEY] = boost::assign::list_of(0x04)(0x35)(0x87)(0xCF).convert_to_container<std::vector<unsigned char> >();

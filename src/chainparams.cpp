@@ -95,7 +95,7 @@ static CBlock CreateGenesisBlock(uint32_t nTime, uint32_t nNonce, uint32_t nBits
 {
     const char* pszTimestamp = "yangchigi.com regist at 7/10/2000 ... WOW!!!";
     const CScript genesisOutputScript = CScript() << 
-        ParseHex("04f287634e609ef2c8c912b3d6d4064a4f8fb27d077d168ac206e4dca365d278d45f647cedb0c2a28856def63895d1946d99250526b523358219dc5714aae8d81a") << OP_CHECKSIG;
+        ParseHex("041f989cea5bb6e240acc9d417c7fcfa11ff771fd8e16481d5c164ffa4fc0968c4732834682d605f05c451d93f61508734b7632530db36e688963921daea7db924") << OP_CHECKSIG;
     return CreateGenesisBlock(pszTimestamp, genesisOutputScript, nTime, nNonce, nBits, nVersion, genesisReward);
 }
 
@@ -115,7 +115,7 @@ public:
     CMainParams() {
         strNetworkID = "main";
         uint32_t GEN_TIME = 1497484800;
-        unsigned int NOUNCE = 1078766;
+        unsigned int NOUNCE = 39035;
         consensus.BIP34Height = 0;
         consensus.BIP65Height = 0; // bab3041e8977e0dc3eeff63fe707b92bde1dd449d8efafb248c27c8264cc311a
         consensus.BIP66Height = 0; // 7aceee012833fa8952f8835d8b1b3ae233cd6ab08fdb27a771d2bd7bdc491894
@@ -150,17 +150,17 @@ public:
          * The characters are rarely used upper ASCII, not valid as UTF-8, and produce
          * a large 32-bit integer with any alignment.
          */
-        pchMessageStart[0] = 0x71;//q
-        pchMessageStart[1] = 0x74;//c
-        pchMessageStart[2] = 0x63;//t
-        pchMessageStart[3] = 0x79;//y
+        pchMessageStart[0] = 0x59;//
+        pchMessageStart[1] = 0x41;//
+        pchMessageStart[2] = 0x4e;//
+        pchMessageStart[3] = 0x47;//
         nDefaultPort = 23001;
         nPruneAfterHeight = 100000;
 
         genesis = CreateGenesisBlock(GEN_TIME,NOUNCE, 0x1e0fffff, 1, 50 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
-        uint256 hashGenesis = uint256S("0x8a4b34fee986a5be6235841ea96a456f266fd78d32b6b28bf01927ccf7a7932d");
-        uint256 hashMerkelRoot = uint256S("0xcfd1ba05fd58e5a599c68ec1baa3249cb13075a5583a7fdd94256c512cf71c31");
+        uint256 hashGenesis = uint256S("0xbf36a3266be55cff28ff429bc066ac80fc2d05cb395ecef14dbb72d221395bbe");
+        uint256 hashMerkelRoot = uint256S("0xb27efd689036a672667617d484edcd6be1a5778b7623dd42680d6eade89c2ad7");
         if(hashGenesis !=genesis.GetHash()){
             genesis.nNonce = 0;
             searchGenesis(genesis);
@@ -170,14 +170,15 @@ public:
 
         vSeeds.clear();
         // Note that of those with the service bits flag, most only support a subset of possible options
+        vSeeds.push_back(CDNSSeedData("c1", "chain001.bitchk.com",true));
         vSeeds.push_back(CDNSSeedData("seed1", "yang001.bitchk.com",true));
         vSeeds.push_back(CDNSSeedData("seed2", "yang002.bitchk.com",true));
         vSeeds.push_back(CDNSSeedData("seed3", "yang003.bitchk.com",true));
         vSeeds.push_back(CDNSSeedData("seed4", "yang004.bitchk.com",true));
-        vSeeds.push_back(CDNSSeedData("seed4", "yang005.bitchk.com",true));
-        vSeeds.push_back(CDNSSeedData("seed4", "yang006.bitchk.com",true));
-        vSeeds.push_back(CDNSSeedData("seed4", "yang007.bitchk.com",true));
-        vSeeds.push_back(CDNSSeedData("seed4", "yang008.bitchk.com",true));
+        vSeeds.push_back(CDNSSeedData("seed5", "yang005.bitchk.com",true));
+        vSeeds.push_back(CDNSSeedData("seed6", "yang006.bitchk.com",true));
+        vSeeds.push_back(CDNSSeedData("seed7", "yang007.bitchk.com",true));
+        vSeeds.push_back(CDNSSeedData("seed8", "yang008.bitchk.com",true));
 
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,28);//C
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,87);//c
@@ -195,7 +196,7 @@ public:
 
         checkpointData = (CCheckpointData) {
             boost::assign::map_list_of
-            (  0, uint256S("0x8a4b34fee986a5be6235841ea96a456f266fd78d32b6b28bf01927ccf7a7932d"))
+            (  0, uint256S("0xbf36a3266be55cff28ff429bc066ac80fc2d05cb395ecef14dbb72d221395bbe"))
         };
 
         chainTxData = ChainTxData{
@@ -217,7 +218,7 @@ public:
     CTestNetParams() {
         strNetworkID = "test";
         uint32_t GEN_TIME = 1497484801;
-        unsigned int NOUNCE = 1577707;
+        unsigned int NOUNCE = 2061590;
         consensus.BIP34Height = 0;
         // consensus.BIP34Hash = uint256S("8075c771ed8b495ffd943980a95f702ab34fce3c8c54e379548bda33cc8c0573");
         consensus.BIP65Height = 76; // 8075c771ed8b495ffd943980a95f702ab34fce3c8c54e379548bda33cc8c0573
@@ -249,17 +250,17 @@ public:
         // By default assume that the signatures in ancestors of this block are valid.
         consensus.defaultAssumeValid = uint256S("0x00"); //8711
 
-        pchMessageStart[0] = 0x76;
-        pchMessageStart[1] = 0x65;
+        pchMessageStart[0] = 0x79;
+        pchMessageStart[1] = 0x61;
         pchMessageStart[2] = 0x6e;
-        pchMessageStart[3] = 0x74;
+        pchMessageStart[3] = 0x67;
         nDefaultPort = 23011;
         nPruneAfterHeight = 1000;
 
         genesis = CreateGenesisBlock(GEN_TIME,NOUNCE, 0x1e0fffff, 1, 50 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
-        uint256 hashGenesis = uint256S("0xaf20fb906d175a5e6034d14962424e85283e607825d59eb3388f9d1087a1b894");
-        uint256 hashMerkelRoot = uint256S("0x72e498ca51c12f81d00e66e96b845165866fc44839c711b82f011aafc63d6332");
+        uint256 hashGenesis = uint256S("0x096ce3bbe32a7d43e1242feb97f517cd4506ec3eb03126dc6e8c34e6d3b18e20");
+        uint256 hashMerkelRoot = uint256S("0x6b9ff8837771c47b088ac9304d01667a2f976a7e94531b5a77b4ddeb9a6a19fe");
         if(hashGenesis !=genesis.GetHash()){
             genesis.nNonce = 0;
             searchGenesis(genesis);
@@ -288,7 +289,7 @@ public:
 
         checkpointData = (CCheckpointData) {
             boost::assign::map_list_of
-            (  0, uint256S("0xf47f333675ef7872069b81c29eb84003174ea12a42db657dd133c4ca8d9d6b80"))
+            (  0, uint256S("0x096ce3bbe32a7d43e1242feb97f517cd4506ec3eb03126dc6e8c34e6d3b18e20"))
         };
 
         chainTxData = ChainTxData{
@@ -311,7 +312,7 @@ public:
     CRegTestParams() {
         strNetworkID = "regtest";
         uint32_t GEN_TIME = 1497484802;
-        unsigned int NOUNCE = 89541;
+        unsigned int NOUNCE = 164116;
         consensus.BIP34Height = 100000000; // BIP34 has not activated on regtest (far in the future so block v1 are not rejected in tests)
         // consensus.BIP34Hash = uint256();
         consensus.BIP65Height = 1351; // BIP65 activated on regtest (Used in rpc activation tests)
@@ -339,17 +340,17 @@ public:
         // By default assume that the signatures in ancestors of this block are valid.
         consensus.defaultAssumeValid = uint256S("0x00");
 
-        pchMessageStart[0] = 0x76;
-        pchMessageStart[1] = 0x65;
+        pchMessageStart[0] = 0x79;
+        pchMessageStart[1] = 0x61;
         pchMessageStart[2] = 0x6e;
-        pchMessageStart[3] = 0x74;
+        pchMessageStart[3] = 0x67;
         nDefaultPort = 23021;
         nPruneAfterHeight = 1000;
 
         genesis = CreateGenesisBlock(GEN_TIME,NOUNCE, 0x1e0fffff, 1, 50 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
-        uint256 hashGenesis = uint256S("0x459ad710c2fc22f0fdc8f2b3a6d56ffe946a0160bea99501a5082210dd18a8cb");
-        uint256 hashMerkelRoot = uint256S("0x6fb866ca7c038c613219b077ea1f3cdf01053f43f9bf6e1521dd3b09fbc7ba9c");
+        uint256 hashGenesis = uint256S("0xa31f431eceadaa4be8056c888a5e53ff9f88aadb51f337f323a9b6fd3ceb4505");
+        uint256 hashMerkelRoot = uint256S("0x9a95652dd2cbbe103550e625d35cb5bf955c0754596a12afc4b479869d47ac8d");
         if(hashGenesis !=genesis.GetHash()){
             genesis.nNonce = 0;
             searchGenesis(genesis);
@@ -367,7 +368,7 @@ public:
 
         checkpointData = (CCheckpointData){
             boost::assign::map_list_of
-            ( 0, uint256S("0x459ad710c2fc22f0fdc8f2b3a6d56ffe946a0160bea99501a5082210dd18a8cb"))
+            ( 0, uint256S("0xa31f431eceadaa4be8056c888a5e53ff9f88aadb51f337f323a9b6fd3ceb4505"))
         };
 
         chainTxData = ChainTxData{

@@ -170,16 +170,9 @@ public:
 
         vSeeds.clear();
         // Note that of those with the service bits flag, most only support a subset of possible options
-        vSeeds.push_back(CDNSSeedData("c1", "chain001.bitchk.com",true));
-        vSeeds.push_back(CDNSSeedData("seed1", "yang001.bitchk.com",true));
-        vSeeds.push_back(CDNSSeedData("seed2", "yang002.bitchk.com",true));
-        vSeeds.push_back(CDNSSeedData("seed3", "yang003.bitchk.com",true));
-        vSeeds.push_back(CDNSSeedData("seed4", "yang004.bitchk.com",true));
-        vSeeds.push_back(CDNSSeedData("seed5", "yang005.bitchk.com",true));
-        vSeeds.push_back(CDNSSeedData("seed6", "yang006.bitchk.com",true));
-        vSeeds.push_back(CDNSSeedData("seed7", "yang007.bitchk.com",true));
-        vSeeds.push_back(CDNSSeedData("seed8", "yang008.bitchk.com",true));
-
+        vSeeds.push_back(CDNSSeedData("c1", "seed.bitchk.com",true));
+        vSeeds.push_back(CDNSSeedData("seed1", "yng001.bitchk.com",true));
+        
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,78);//Y
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,140);//y
         

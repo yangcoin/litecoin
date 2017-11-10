@@ -12,7 +12,7 @@
 #include "pubkey.h"
 #include "script/script.h"
 #include "uint256.h"
-
+#include "version.h"
 
 using namespace std;
 
@@ -1129,7 +1129,11 @@ public:
         // Serialize nVersion
         ::Serialize(s, txTo.nVersion);
         // Serialize nTime
+#if TX_TIMESTAMP == 1     
         ::Serialize(s, txTo.nTime);
+#else   
+    #error  1      
+#endif        
         // Serialize vin
         unsigned int nInputs = fAnyoneCanPay ? 1 : txTo.vin.size();
         ::WriteCompactSize(s, nInputs);
@@ -1206,7 +1210,9 @@ uint256 SignatureHash(const CScript& scriptCode, const CTransaction& txTo, unsig
         // Version
         ss << txTo.nVersion;
         // nTime for POS
+#if TX_TIMESTAMP == 1
         ss << txTo.nTime;//
+#endif        
         // Input prevouts/nSequence (none/all, depending on flags)
         ss << hashPrevouts;
         ss << hashSequence;

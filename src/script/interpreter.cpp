@@ -1131,9 +1131,8 @@ public:
         // Serialize nTime
 #if TX_TIMESTAMP == 1     
         ::Serialize(s, txTo.nTime);
-#else   
-    #error  1      
-#endif        
+#endif
+
         // Serialize vin
         unsigned int nInputs = fAnyoneCanPay ? 1 : txTo.vin.size();
         ::WriteCompactSize(s, nInputs);

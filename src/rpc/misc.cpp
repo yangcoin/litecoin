@@ -630,6 +630,7 @@ UniValue getaddressmempool(const JSONRPCRequest& request)
         delta.push_back(Pair("index", (int)it->first.index));
         delta.push_back(Pair("satoshis", it->second.amount));
         delta.push_back(Pair("timestamp", it->second.time));
+        
         if (it->second.amount < 0) {
             delta.push_back(Pair("prevtxid", it->second.prevhash.GetHex()));
             delta.push_back(Pair("prevout", (int)it->second.prevout));
@@ -710,7 +711,7 @@ UniValue getaddressutxos(const JSONRPCRequest& request)
         output.push_back(Pair("script", HexStr(it->second.script.begin(), it->second.script.end())));
         output.push_back(Pair("satoshis", it->second.satoshis));
         output.push_back(Pair("height", it->second.blockHeight));
-        output.push_back(Pair("txtime", it->second.nTime));
+        output.push_back(Pair("nTime", it->second.nTime));
         utxos.push_back(output);
     }
 

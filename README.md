@@ -5,7 +5,7 @@ Yangcoin Core integration/staging tree
 
 http://www.yangcoin.org
 
-What is Yangcoin?
+What is Yangcoin? 
 ----------------
 
 Yangcoin is an experimental digital currency that enables instant payments to

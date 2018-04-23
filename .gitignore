@@ -14,6 +14,7 @@ src/test/test_yangcoin
 src/test/test_yangcoin_fuzzy
 src/qt/test/test_yangcoin-qt
 data/*
+data2/*
 src/yangcoin
 src/yangcoind
 src/yangcoin-cli

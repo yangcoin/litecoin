@@ -276,4 +276,4 @@ wallet.dat.*
 background.tiff
 background.tiff.png
 background.tiff@2x.png
-
+data*/**

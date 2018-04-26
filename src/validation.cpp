@@ -1228,9 +1228,9 @@ bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex, const Consensus
 CAmount GetBlockSubsidy(const CBlockIndex * pindexPrev , const Consensus::Params& consensusParams)
 {
     CAmount nSubsidy  = 0;
-    DbgMsg("nTime :%ld" , pindexPrev->nTime);
+    //DbgMsg("nTime :%ld" , pindexPrev->nTime);
     if(pindexPrev==NULL ) {
-        nSubsidy = BLOCK_REWARD_COIN_40;
+        nSubsidy = BLOCK_REWARD_COIN;
     } else if(pindexPrev->nHeight <BLOCK_HEIGHT_INIT){
         nSubsidy = PREMINE_MONEY_COIN / BLOCK_HEIGHT_INIT; // 
     }else if(pindexPrev->nHeight <BLOCK_HEIGHT_45){

@@ -20,7 +20,7 @@ bitcoin_dir=${coin}-${version}
 rm -Rf tmp/*
 rm -Rf ${tarball_name}
 
-mkdir -p tmp/${bitcoin_dir}/bin
+mkdir -p tmp/${coin}
 
 cp src/${coin}-cli          tmp/${coin}/${coin}-cli
 cp src/${coin}-tx           tmp/${coin}/${coin}-tx

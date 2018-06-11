@@ -1,6 +1,6 @@
 #!/bin/sh
 coin=yangcoin
-version=0.14.3
+version=0.14.2
 platform=`uname -a | awk '{print tolower($1)}'`
 arch=`uname -m`
 

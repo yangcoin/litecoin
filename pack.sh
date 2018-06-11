@@ -22,13 +22,13 @@ rm -Rf ${tarball_name}
 
 mkdir -p tmp/${bitcoin_dir}/bin
 
-cp src/${coin}-cli          tmp/${bitcoin_dir}/bin/${coin}-cli
-cp src/${coin}-tx           tmp/${bitcoin_dir}/bin/${coin}-tx
-cp src/${coin}d             tmp/${bitcoin_dir}/bin/${coin}d
-cp src/test/test_bitcoin    tmp/${bitcoin_dir}/bin/test_${coin}
-cp src/wallet-utility       tmp/${bitcoin_dir}/bin/
-cp src/qt/${coin}-qt        tmp/${bitcoin_dir}/bin/${coin}-qt
-cp ${coin}.conf             tmp/${bitcoin_dir}/bin/${coin}.conf
+cp src/${coin}-cli          tmp/${coin}/${coin}-cli
+cp src/${coin}-tx           tmp/${coin}/${coin}-tx
+cp src/${coin}d             tmp/${coin}/${coin}d
+cp src/test/test_bitcoin    tmp/${coin}/test_${coin}
+cp src/wallet-utility       tmp/${coin}/
+cp src/qt/${coin}-qt        tmp/${coin}/${coin}-qt
+cp ${coin}.conf             tmp/${coin}/${coin}.conf
 cd tmp
 tar -zcvf ../${tarball_name} ./
 cd ../

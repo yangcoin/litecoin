@@ -187,7 +187,7 @@ public:
 
     //! Byte offset within blk?????.dat where this block's data is stored
     unsigned int nDataPos;
-
+    int64_t nMoneySupply;
     //! Byte offset within rev?????.dat where this block's undo data is stored
     unsigned int nUndoPos;
 
@@ -240,6 +240,7 @@ public:
         nTime          = 0;
         nBits          = 0;
         nNonce         = 0;
+        nMoneySupply = 0;
     }
 
     CBlockIndex()
@@ -410,6 +411,7 @@ public:
         READWRITE(nTime);
         READWRITE(nBits);
         READWRITE(nNonce);
+        READWRITE(nMoneySupply);
     }
 
     uint256 GetBlockHash() const

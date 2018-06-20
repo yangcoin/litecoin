@@ -154,6 +154,11 @@ public:
         nValue = -1;
         scriptPubKey.clear();
     }
+    void SetEmpty()
+    {
+        nValue = 0;
+        scriptPubKey.clear();
+    }
 
     bool IsNull() const
     {
@@ -198,6 +203,9 @@ inline void UnserializeTransaction(TxType& tx, Stream& s) {
     const bool fAllowWitness = !(s.GetVersion() & SERIALIZE_TRANSACTION_NO_WITNESS);
 
     s >> tx.nVersion;
+
+    s >> tx.nTime;
+
     unsigned char flags = 0;
     tx.vin.clear();
     tx.vout.clear();
@@ -233,6 +241,8 @@ inline void SerializeTransaction(const TxType& tx, Stream& s) {
     const bool fAllowWitness = !(s.GetVersion() & SERIALIZE_TRANSACTION_NO_WITNESS);
 
     s << tx.nVersion;
+  
+    s << tx.nTime;
     unsigned char flags = 0;
     // Consistency check
     if (fAllowWitness) {
@@ -279,6 +289,7 @@ public:
     // and bypass the constness. This is safe, as they update the entire
     // structure, including the hash.
     const int32_t nVersion;
+    uint32_t nTime =0;
     const std::vector<CTxIn> vin;
     const std::vector<CTxOut> vout;
     const uint32_t nLockTime;
@@ -362,6 +373,7 @@ public:
 struct CMutableTransaction
 {
     int32_t nVersion;
+    uint32_t nTime;//For
     std::vector<CTxIn> vin;
     std::vector<CTxOut> vout;
     uint32_t nLockTime;

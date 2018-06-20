@@ -1,41 +1,41 @@
-Litecoin Core
+Yangcoin Core
 =============
 
 Setup
 ---------------------
-Litecoin Core is the original Litecoin client and it builds the backbone of the network. It downloads and, by default, stores the entire history of Litecoin transactions (which is currently more than 7 GBs); depending on the speed of your computer and network connection, the synchronization process can take anywhere from a few hours to a day or more.
+Yangcoin Core is the original Yangcoin client and it builds the backbone of the network. It downloads and, by default, stores the entire history of Yangcoin transactions (which is currently more than 7 GBs); depending on the speed of your computer and network connection, the synchronization process can take anywhere from a few hours to a day or more.
 
-To download Litecoin Core, visit [litecoin.org](https://litecoin.org).
+To download Yangcoin Core, visit [yangcoin.org](https://yangcoin.org).
 
 Running
 ---------------------
-The following are some helpful notes on how to run Litecoin on your native platform.
+The following are some helpful notes on how to run Yangcoin on your native platform.
 
 ### Unix
 
 Unpack the files into a directory and run:
 
-- `bin/litecoin-qt` (GUI) or
-- `bin/litecoind` (headless)
+- `bin/yangcoin-qt` (GUI) or
+- `bin/yangcoind` (headless)
 
 ### Windows
 
-Unpack the files into a directory, and then run litecoin-qt.exe.
+Unpack the files into a directory, and then run yangcoin-qt.exe.
 
 ### OS X
 
-Drag Litecoin-Core to your applications folder, and then run Litecoin-Core.
+Drag Yangcoin-Core to your applications folder, and then run Yangcoin-Core.
 
 ### Need Help?
 
-* See the documentation at the [Litecoin Wiki](https://litecoin.info/)
+* See the documentation at the [Yangcoin Wiki](https://yangcoin.info/)
 for help and more information.
-* Ask for help on [#litecoin](http://webchat.freenode.net?channels=litecoin) on Freenode. If you don't have an IRC client use [webchat here](http://webchat.freenode.net?channels=litecoin).
-* Ask for help on the [LitecoinTalk](https://litecointalk.io/) forums.
+* Ask for help on [#yangcoin](http://webchat.freenode.net?channels=yangcoin) on Freenode. If you don't have an IRC client use [webchat here](http://webchat.freenode.net?channels=yangcoin).
+* Ask for help on the [YangcoinTalk](https://yangcointalk.io/) forums.
 
 Building
 ---------------------
-The following are developer notes on how to build Litecoin on your native platform. They are not complete guides, but include notes on the necessary libraries, compile flags, etc.
+The following are developer notes on how to build Yangcoin on your native platform. They are not complete guides, but include notes on the necessary libraries, compile flags, etc.
 
 - [OS X Build Notes](build-osx.md)
 - [Unix Build Notes](build-unix.md)
@@ -45,12 +45,12 @@ The following are developer notes on how to build Litecoin on your native platfo
 
 Development
 ---------------------
-The Litecoin repo's [root README](/README.md) contains relevant information on the development process and automated testing.
+The Yangcoin repo's [root README](/README.md) contains relevant information on the development process and automated testing.
 
 - [Developer Notes](developer-notes.md)
 - [Release Notes](release-notes.md)
 - [Release Process](release-process.md)
-- [Source Code Documentation (External Link)](https://dev.visucore.com/litecoin/doxygen/)
+- [Source Code Documentation (External Link)](https://dev.visucore.com/yangcoin/doxygen/)
 - [Translation Process](translation_process.md)
 - [Translation Strings Policy](translation_strings_policy.md)
 - [Travis CI](travis-ci.md)
@@ -61,8 +61,8 @@ The Litecoin repo's [root README](/README.md) contains relevant information on t
 - [Benchmarking](benchmarking.md)
 
 ### Resources
-* Discuss on the [LitecoinTalk](https://litecointalk.io/) forums.
-* Discuss general Litecoin development on #litecoin-dev on Freenode. If you don't have an IRC client use [webchat here](http://webchat.freenode.net/?channels=litecoin-dev).
+* Discuss on the [YangcoinTalk](https://yangcointalk.io/) forums.
+* Discuss general Yangcoin development on #yangcoin-dev on Freenode. If you don't have an IRC client use [webchat here](http://webchat.freenode.net/?channels=yangcoin-dev).
 
 ### Miscellaneous
 - [Assets Attribution](assets-attribution.md)

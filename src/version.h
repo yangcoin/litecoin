@@ -5,6 +5,7 @@
 #ifndef BITCOIN_VERSION_H
 #define BITCOIN_VERSION_H
 
+
 /**
  * network protocol versioning
  */

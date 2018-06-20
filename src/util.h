@@ -136,16 +136,19 @@ template<typename T, typename... Args> static inline void MarkUsed(const T& t, c
 #define LogPrintf(...) do { MarkUsed(__VA_ARGS__); } while(0)
 #define LogPrint(category, ...) do { MarkUsed(__VA_ARGS__); } while(0)
 #else
-#define LogPrintf(...) do { \
-    std::string _log_msg_; /* Unlikely name to avoid shadowing variables */ \
-    try { \
-        _log_msg_ = tfm::format(__VA_ARGS__); \
-    } catch (tinyformat::format_error &fmterr) { \
-        /* Original format string will have newline so don't add one here */ \
-        _log_msg_ = "Error \"" + std::string(fmterr.what()) + "\" while formatting log message: " + FormatStringFromLogArgs(__VA_ARGS__); \
+
+#define DEBUG_LOG
+#ifdef DEBUG_LOG 
+#define LogPrintf(msg , args...) LogPrintStr(tfm::format( "[%s:%d]  %s() :: " msg ,  __FILE__,__LINE__,__func__ , ##args))
+#define DbgMsg(msg , args...) LogPrintStr(tfm::format( "[%s:%d]  %s() :: " msg "\n" ,  __FILE__,__LINE__,__func__ , ##args))
+#define LogPrint(category,msg, args...) do { \
+    if (LogAcceptCategory((category))) { \
+        LogPrintStr(tfm::format("[%s:%d]  %s() :: " msg ,  __FILE__,__LINE__,__func__ , ##args)); \
     } \
-    LogPrintStr(_log_msg_); \
 } while(0)
+
+#else
+#define DbgMsg(msg , args...) 
 
 #define LogPrint(category, ...) do { \
     if (LogAcceptCategory((category))) { \
@@ -153,7 +156,7 @@ template<typename T, typename... Args> static inline void MarkUsed(const T& t, c
     } \
 } while(0)
 #endif
-
+#endif
 template<typename... Args>
 bool error(const char* fmt, const Args&... args)
 {

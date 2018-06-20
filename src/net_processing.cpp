@@ -33,7 +33,7 @@
 #include "validationinterface.h"
 
 #if defined(NDEBUG)
-# error "Litecoin cannot be compiled without assertions."
+# error "Yangcoin cannot be compiled without assertions."
 #endif
 
 std::atomic<int64_t> nTimeBestReceived(0); // Used only to inform the wallet of when we last received a block
@@ -1428,10 +1428,14 @@ bool static ProcessHeadersMessage(CNode *pfrom, CConnman *connman, const std::ve
                 // nMinimumChainWork, even if a peer has a chain past our tip,
                 // as an anti-DoS measure.
                 if (IsOutboundDisconnectionCandidate(pfrom)) {
-                    LogPrintf("Disconnecting outbound peer %d -- headers chain has insufficient work\n", pfrom->GetId());
+                    LogPrintf("Disconnecting outbound peer %d -- headers chain has insufficient work\n %s,%s\n", pfrom->GetId(),
+                        nodestate->pindexBestKnownBlock->nChainWork.ToString() , nMinimumChainWork.ToString());
+                    
                     pfrom->fDisconnect = true;
                 }
             }
+            LogPrintf("peer %s : %d \n %s,%s\n", pfrom->GetAddrName() ,pfrom->GetId(),
+                        nodestate->pindexBestKnownBlock->nChainWork.ToString() , nMinimumChainWork.ToString());
         }
 
         if (!pfrom->fDisconnect && IsOutboundDisconnectionCandidate(pfrom) && nodestate->pindexBestKnownBlock != nullptr) {
@@ -1649,11 +1653,11 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
         std::string remoteAddr;
         if (fLogIPs)
             remoteAddr = ", peeraddr=" + pfrom->addr.ToString();
-
-        LogPrintf("receive version message: %s: version %d, blocks=%d, us=%s, peer=%d%s\n",
+        CNodeState *nodestate = State(pfrom->GetId());
+        LogPrintf("receive version message: %s: version %d, blocks=%d, us=%s, peer=%d%s nChainWork=%s\n",
                   cleanSubVer, pfrom->nVersion,
                   pfrom->nStartingHeight, addrMe.ToString(), pfrom->GetId(),
-                  remoteAddr);
+                  remoteAddr ,(nodestate->pindexBestKnownBlock)?nodestate->pindexBestKnownBlock->nChainWork.ToString():"none");
 
         int64_t nTimeOffset = nTime - GetTime();
         pfrom->nTimeOffset = nTimeOffset;

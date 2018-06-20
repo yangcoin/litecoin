@@ -50,7 +50,7 @@
 #include <boost/thread.hpp>
 
 #if defined(NDEBUG)
-# error "Litecoin cannot be compiled without assertions."
+# error "Yangcoin cannot be compiled without assertions."
 #endif
 
 /**
@@ -93,7 +93,7 @@ static void CheckBlockIndex(const Consensus::Params& consensusParams);
 /** Constant stuff for coinbase transactions we create: */
 CScript COINBASE_FLAGS;
 
-const std::string strMessageMagic = "Litecoin Signed Message:\n";
+const std::string strMessageMagic = "Yangcoin Signed Message:\n";
 
 // Internal stuff
 namespace {
@@ -860,7 +860,7 @@ static bool AcceptToMemoryPoolWorker(const CChainParams& chainparams, CTxMemPool
         // Remove conflicting transactions from the mempool
         for (const CTxMemPool::txiter it : allConflicting)
         {
-            LogPrint(BCLog::MEMPOOL, "replacing tx %s with %s for %s LTC additional fees, %d delta bytes\n",
+            LogPrint(BCLog::MEMPOOL, "replacing tx %s with %s for %s YNG additional fees, %d delta bytes\n",
                     it->GetTx().GetHash().ToString(),
                     hash.ToString(),
                     FormatMoney(nModifiedFees - nConflictingFees),
@@ -1038,16 +1038,29 @@ bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex, const Consensus
     return true;
 }
 
-CAmount GetBlockSubsidy(int nHeight, const Consensus::Params& consensusParams)
-{
-    int halvings = nHeight / consensusParams.nSubsidyHalvingInterval;
-    // Force block reward to zero when right shift is undefined.
-    if (halvings >= 64)
-        return 0;
 
-    CAmount nSubsidy = 50 * COIN;
-    // Subsidy is cut in half every 210,000 blocks which will occur approximately every 4 years.
-    nSubsidy >>= halvings;
+CAmount GetBlockSubsidy(const CBlockIndex * pindexPrev , const Consensus::Params& consensusParams)
+{
+    CAmount nSubsidy  = 0;
+    //DbgMsg("nTime :%ld" , pindexPrev->nTime);
+    if(pindexPrev==NULL ) {
+        nSubsidy = BLOCK_REWARD_COIN;
+    } else if(pindexPrev->nHeight <BLOCK_HEIGHT_INIT){
+        nSubsidy = PREMINE_MONEY_COIN / BLOCK_HEIGHT_INIT; // 
+    }else if(pindexPrev->nHeight <BLOCK_HEIGHT_45){
+        nSubsidy = BLOCK_REWARD_COIN; // 
+    }else if(pindexPrev->nTime <1524544200 ){
+        nSubsidy = BLOCK_REWARD_COIN_45; //
+    } else {
+        nSubsidy = BLOCK_REWARD_COIN_40; //
+    }
+    //limit of reward
+    if (pindexPrev != NULL && (pindexPrev->nMoneySupply + nSubsidy) >= MAX_MONEY) {
+		LogPrintf("Max Money.... no more reward[pow]\n");
+		nSubsidy = 0;
+	}
+    
+    //TODO check MaxMoney...
     return nSubsidy;
 }
 
@@ -1826,7 +1839,7 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
     int64_t nTime3 = GetTimeMicros(); nTimeConnect += nTime3 - nTime2;
     LogPrint(BCLog::BENCH, "      - Connect %u transactions: %.2fms (%.3fms/tx, %.3fms/txin) [%.2fs]\n", (unsigned)block.vtx.size(), 0.001 * (nTime3 - nTime2), 0.001 * (nTime3 - nTime2) / block.vtx.size(), nInputs <= 1 ? 0 : 0.001 * (nTime3 - nTime2) / (nInputs-1), nTimeConnect * 0.000001);
 
-    CAmount blockReward = nFees + GetBlockSubsidy(pindex->nHeight, chainparams.GetConsensus());
+    CAmount blockReward = nFees + GetBlockSubsidy(pindex->pprev, chainparams.GetConsensus());
     if (block.vtx[0]->GetValueOut() > blockReward)
         return state.DoS(100,
                          error("ConnectBlock(): coinbase pays too much (actual=%d vs limit=%d)",

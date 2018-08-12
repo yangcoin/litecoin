@@ -2187,11 +2187,7 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
     LogPrint("bench", "    - Verify %u txins: %.2fms (%.3fms/txin) [%.2fs]\n", nInputs - 1, 0.001 * (nTime4 - nTime2), nInputs <= 1 ? 0 : 0.001 * (nTime4 - nTime2) / (nInputs-1), nTimeVerify * 0.000001);
     pindex->nMoneySupply = (pindex->pprev? pindex->pprev->nMoneySupply : 0) + ( blockReward<0?0:blockReward -nFees)  ;
     
-    //pindex->nMoneySupply = ( ( BLOCK_HEIGHT_INIT * 14000000 ) + (50 * pindex->nHeight) ) * COIN; 
-    // DbgMsg("moneySupply prev:%u :%u  ,%d " , pindex->pprev->nMoneySupply, (pindex->pprev? pindex->pprev->nMoneySupply : 0) + nValueOut , nValueOut );
-    // DbgMsg("%u %u %d " ,pindex->nMoneySupply,
-    // ( BLOCK_HEIGHT_INIT * 14000000 ) + (50 * pindex->nHeight), pindex->nHeight );
-    // exit(0);
+    
     if (fJustCheck)
         return true;
 

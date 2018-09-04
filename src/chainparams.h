@@ -10,8 +10,11 @@
 #include "consensus/params.h"
 #include "primitives/block.h"
 #include "protocol.h"
+#include "pubkey.h"
+
 
 #include <vector>
+
 
 struct CDNSSeedData {
     std::string name, host;
@@ -93,6 +96,8 @@ protected:
     bool fDefaultConsistencyChecks;
     bool fRequireStandard;
     bool fMineBlocksOnDemand;
+    
+    std::vector<CPubKey> vPoOPubKeys;
     CCheckpointData checkpointData;
     ChainTxData chainTxData;
 };

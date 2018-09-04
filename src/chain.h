@@ -296,7 +296,11 @@ public:
     {
         return (int64_t)nTimeMax;
     }
-
+    int64_t GetPastTimeLimit() const
+    {
+            return GetBlockTime();
+        
+    }
     enum { nMedianTimeSpan=11 };
 
     int64_t GetMedianTimePast() const

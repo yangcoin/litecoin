@@ -1663,6 +1663,12 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
     if (!connman.Start(scheduler, strNodeError, connOptions))
         return InitError(strNodeError);
 
+    if (!GetBoolArg("-staking", !GetBoolArg("-server", false)))
+        LogPrintf("Staking disabled\n");
+    else if (pwalletMain) { 
+        LogPrintf("Staking enabled.\n");
+    	threadGroup.create_thread(boost::bind(&ThreadStakeMiner, pwalletMain, chainparams));
+    }
     // ********************************************************* Step 12: finished
 
     SetRPCWarmupFinished();

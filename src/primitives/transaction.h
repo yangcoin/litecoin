@@ -396,7 +396,11 @@ public:
     {
         return (vin.size() == 1 && vin[0].prevout.IsNull());
     }
-
+    bool IsCoinOnline() const
+    {
+        // qctcoin: vin zero vout 
+        return (vin.size() > 0 && (!vin[0].prevout.IsNull()) && vout.size() >= 2 && vout[0].IsEmpty()&& vout[1].nValue==vin[0].prevout.n);
+    }
     friend bool operator==(const CTransaction& a, const CTransaction& b)
     {
         return a.hash == b.hash;

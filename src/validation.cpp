@@ -3117,23 +3117,25 @@ bool FindUndoPos(CValidationState &state, int nFile, CDiskBlockPos &pos, unsigne
 bool CheckBlockHeader(const CBlockHeader& block, CValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW)
 {
     // Check proof of work matches claimed amount
+    
     if (fCheckPOW && !CheckProofOfWork(block.GetPoWHash(), block.nBits, consensusParams))
         return state.DoS(50, false, REJECT_INVALID, "high-hash", false, "proof of work failed");
 
     return true;
 }
 
-bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW, bool fCheckMerkleRoot)
+bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW, bool fCheckMerkleRoot, bool fCheckSig)
 {
     // These are checks that are independent of context.
 
     if (block.fChecked)
         return true;
-
     // Check that the header is valid (particularly PoW).  This is mostly
     // redundant with the call in AcceptBlockHeader.
-    if (!CheckBlockHeader(block, state, consensusParams, fCheckPOW))
+    DbgMsg("checkPow %d , isPoO:%d " , fCheckPOW,block.IsProofOfOnline() );
+    if (!CheckBlockHeader(block, state, consensusParams, fCheckPOW&&block.IsProofOfWork())) { 
         return false;
+    }
 
     // Check the merkle root.
     if (fCheckMerkleRoot) {
@@ -3185,6 +3187,7 @@ bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::P
 
     return true;
 }
+
 
 static bool CheckIndexAgainstCheckpoint(const CBlockIndex* pindexPrev, CValidationState& state, const CChainParams& chainparams, const uint256& hash)
 {
@@ -3536,6 +3539,7 @@ bool ProcessNewBlock(const CChainParams& chainparams, const std::shared_ptr<cons
         if (ret) {
             // Store to disk
             ret = AcceptBlock(pblock, state, chainparams, &pindex, fForceProcessing, NULL, fNewBlock);
+            DbgMsg("AcceptBlock result:%d" , ret);
         }
         CheckBlockIndex(chainparams.GetConsensus());
         if (!ret) {

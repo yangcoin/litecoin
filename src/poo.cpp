@@ -17,10 +17,13 @@
 #include "consensus/consensus.h"
 #include "wallet/wallet.h"
 using namespace std;
-// TODO
+/**
+ *  블럭의 서명을 확인한다.
+ * 
+ */
 static bool CheckBlockSignature(const CBlock& block)//, const uint256& hash)
 {
-    if (block.IsProofOfOnline()){
+    if (!block.IsProofOfOnline()){//online block 이 아니면
         
         return block.vchBlockSig.empty();
     }
@@ -36,12 +39,13 @@ static bool CheckBlockSignature(const CBlock& block)//, const uint256& hash)
 
     const CTxOut& txout = block.vtx[1]->vout[1];
 
+    // 출력필드의 공개키값을 확인한다.
     if (!Solver(txout.scriptPubKey, whichType, vSolutions)){ 
         LogPrintf("CheckBlockSignature: Bad Block (Pos) - wrong signature\n");
         return false;
     }
 
-    if (whichType == TX_PUBKEY)
+    if (whichType == TX_PUBKEY) //공개키이면 블럭의 서명자와 
     {
         vector<unsigned char>& vchPubKey = vSolutions[0];
         return CPubKey(vchPubKey).Verify(block.GetHash(), block.vchBlockSig);
@@ -73,36 +77,26 @@ static bool CheckBlockSignature(const CBlock& block)//, const uint256& hash)
     return false;
 }
 
-// Check kernel hash target and coinstake signature
-bool CheckProofOfStake(CBlockIndex* pindexPrev, const CTransaction& tx, unsigned int nBits, CValidationState& state)
+// Check kernel hash target and coinonline signature
+bool CheckProofOfOnline(CBlockIndex* pindexPrev, const CTransaction& tx, unsigned int nBits, CValidationState& state)
 {
+    // vin size()==0 and vin prevout == null and vout.size()==1 
     if (!tx.IsCoinOnline())
-        return error("CheckProofOfStake() : called on non-coinstake %s", tx.GetHash().ToString());
+        return error("CheckProofOfOnline() : called on non-coinstake %s", tx.GetHash().ToString());
 
     // Kernel (input 0) must match the stake hash target per coin age (nBits)
     const CTxIn& txin = tx.vin[0];
     
     
     CTransactionRef txPrev;
-    uint256 hashBlock = uint256();
-    if (!GetTransaction(txin.prevout.hash, txPrev, Params().GetConsensus(), hashBlock, true))
-        return error("CheckProofOfStake() : INFO: read txPrev failed %s",txin.prevout.hash.GetHex());
     
-
     CDiskTxPos txindex;
 
-    // Verify signature
-    if (!VerifySignature(*txPrev, tx, 0, SCRIPT_VERIFY_NONE, 0))
-        return state.DoS(100, error("CheckProofOfStake() : VerifySignature failed on coinstake %s", tx.GetHash().ToString()));
- 
-
-    if (mapBlockIndex.count(hashBlock) == 0)
-        return fDebug? error("CheckProofOfStake() : read block failed") : false; // unable to read block of previous transaction
-
     
-    CBlockIndex* pblockindex = mapBlockIndex[hashBlock];
-    if (!CheckStakeKernelHash(pindexPrev, nBits, *pblockindex , new CCoins(*txPrev, pindexPrev->nHeight), txin.prevout, tx.nTime))
-        return state.DoS(1, error("CheckProofOfStake() : INFO: check kernel failed on coinstake %s", tx.GetHash().ToString())); // may occur during initial download or if behind on block chain sync
+    
+    // CBlockIndex* pblockindex = mapBlockIndex[hashBlock];
+    // if (!CheckStakeKernelHash(pindexPrev, nBits, *pblockindex , new CCoins(*txPrev, pindexPrev->nHeight), txin.prevout, tx.nTime))
+    //     return state.DoS(1, error("CheckProofOfOnline() : INFO: check kernel failed on coinstake %s", tx.GetHash().ToString())); // may occur during initial download or if behind on block chain sync
 
     return true;
 }
@@ -140,13 +134,13 @@ bool VerifySignature(const CTransaction& txFrom, const CTransaction& txTo, unsig
 //   quantities so as to generate blocks faster, degrading the system back into
 //   a proof-of-work situation.
 //
-bool CheckStakeKernelHash(const CBlockIndex* pindexPrev, 
-                            unsigned int nBits,  
-                            CBlockIndex& blockFrom, 
-                            const CCoins* txPrev, 
-                            const COutPoint& prevout, 
-                            unsigned int nTimeTx)
-{
+// bool CheckStakeKernelHash(const CBlockIndex* pindexPrev, 
+//                             unsigned int nBits,  
+//                             CBlockIndex& blockFrom, 
+//                             const CCoins* txPrev, 
+//                             const COutPoint& prevout, 
+//                             unsigned int nTimeTx)
+// {
     // // Weight
     // int64_t nValueIn = txPrev->vout[prevout.n].nValue;
     // if (nValueIn == 0)
@@ -169,5 +163,26 @@ bool CheckStakeKernelHash(const CBlockIndex* pindexPrev,
     // if (UintToArith256(hashProofOfStake) / nValueIn > bnTarget)
     //     return false;
 
+//     return true;
+// }
+
+/**
+ * 최소 비트를 확인한다.
+ * 이전 블럭.
+ * bit.
+ * 이전에 사용한 코인.
+ * 블럭시간
+ */
+bool CheckKernel(const CBlockIndex *pindexPrev, unsigned int nBits, uint32_t nTime,  uint32_t *pBlockTime)
+{
+    // TODO 
+    // 경쟁 관계를 만들어야 한다.
+    // n개의 online miner 들간의 경쟁관계... 
+    // 최소 시간...
     return true;
+    // uint256 hashProofOfStake, targetProofOfStake;
+
+    // CAmount amount = 0;
+    // return CheckStakeKernelHash(pindexPrev, nBits, *pBlockTime,
+    //     amount, prevout, nTime, hashProofOfStake, targetProofOfStake);
 }

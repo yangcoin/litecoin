@@ -16,8 +16,8 @@
 
 #include "chainparamsseeds.h"
 #include "arith_uint256.h"
-
-
+#include "util.h"
+#include "base58.h"
 bool fSearchGenesis = true;
 
 void searchGenesis(CBlock genesis){
@@ -139,6 +139,10 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nStartTime = 0; // January 28, 2017
         consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nTimeout = 0; // January 31st, 2018
 
+        // Deployment of SegWit (BIP141, BIP143, and BIP147)
+        consensus.vDeployments[Consensus::DEPLOYMENT_POO].bit = 2;
+        consensus.vDeployments[Consensus::DEPLOYMENT_POO].nStartTime = 1536391627; // January 28, 2017
+        consensus.vDeployments[Consensus::DEPLOYMENT_POO].nTimeout = 0; // January 31st, 2018
         // The best chain should have at least this much work.
         // consensus.nMinimumChainWork = uint256S("0x000000000000000000000000000000000000000000000006805c7318ce2736c0");
         consensus.nMinimumChainWork = uint256S("0x00");
@@ -147,7 +151,7 @@ public:
         consensus.defaultAssumeValid = uint256S("0x00");
 
         consensus.nOnlineTimestampMask = 0xf; // 10
-        consensus.nProofOfOnlineInterval = 10;// 
+        consensus.nProofOfOnlineInterval = 2;// 
         /**
          * The message start string is designed to be unlikely to occur in normal data.
          * The characters are rarely used upper ASCII, not valid as UTF-8, and produce
@@ -183,6 +187,11 @@ public:
         base58Prefixes[EXT_SECRET_KEY] = boost::assign::list_of(0x04)(0x88)(0xAD)(0xE4).convert_to_container<std::vector<unsigned char> >();
 
         vFixedSeeds = std::vector<SeedSpec6>(pnSeed6_main, pnSeed6_main + ARRAYLEN(pnSeed6_main));
+
+        vOnlinePubKeys = std::vector<char *>();
+        for(int i =0;i<ARRAYLEN(pnSeedOnline_main);i++){
+            vOnlinePubKeys.push_back(  pnSeedOnline_main[i]);
+        }
 
         fMiningRequiresPeers = true;
         fDefaultConsistencyChecks = false;

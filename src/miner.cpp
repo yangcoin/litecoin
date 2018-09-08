@@ -193,9 +193,18 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     CMutableTransaction coinbaseTx;
     coinbaseTx.vin.resize(1);
     coinbaseTx.vin[0].prevout.SetNull();
+    
+    // vout[0]
+    // coinbase or coinproof
     coinbaseTx.vout.resize(1);
-    coinbaseTx.vout[0].scriptPubKey = scriptPubKeyIn;
-    coinbaseTx.vout[0].nValue = nFees + GetBlockSubsidy(pindexPrev, chainparams.GetConsensus());
+    DbgMsg("nFees %d " , nFees);
+    if(fProofOfOnline){
+        coinbaseTx.vout[0].SetEmpty();
+    }else{
+        coinbaseTx.vout[0].scriptPubKey = scriptPubKeyIn;
+        coinbaseTx.vout[0].nValue = nFees + GetBlockSubsidy(pindexPrev, chainparams.GetConsensus());
+    
+    }
     coinbaseTx.vin[0].scriptSig = CScript() << nHeight << OP_0;
     pblock->vtx[0] = MakeTransactionRef(std::move(coinbaseTx));
     pblocktemplate->vchCoinbaseCommitment = GenerateCoinbaseCommitment(*pblock, pindexPrev, chainparams.GetConsensus());
@@ -213,6 +222,7 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     pblocktemplate->vTxSigOpsCost[0] = WITNESS_SCALE_FACTOR * GetLegacySigOpCount(*pblock->vtx[0]);
 
     CValidationState state;
+    DbgMsg("TestBlockvalidity");
     if (!TestBlockValidity(state, chainparams, *pblock, pindexPrev, false, false)) {
         throw std::runtime_error(strprintf("%s: TestBlockValidity failed: %s", __func__, FormatStateMessage(state)));
     }
@@ -655,115 +665,55 @@ void IncrementExtraNonce(CBlock* pblock, const CBlockIndex* pindexPrev, unsigned
     pblock->hashMerkleRoot = BlockMerkleRoot(*pblock);
 }
 
-// original novacoin: attempt to generate suitable proof-of-stake
-// poo modify first input
-bool SignPoOBlock(CBlock& block, CWallet& wallet, int64_t& nFees)
-{
-    // if we are trying to sign
-    //    something except proof-of-stake block template
-    if (!block.vtx[0]->vout[0].IsEmpty()){
-    	LogPrintf("something except proof-of-stake block\n");
-    	return false;
-    }
-
-
-    // if we are trying to sign
-    //    a complete proof-of-stake block
-    if (block.IsProofOfOnline()){
-    	LogPrintf("trying to sign a complete proof-of-stake block\n");
-    	return true;
-    }
-
-    /**
-     * 서명 순서.
-     * 빈 코인베이스를 생성한다.
-     * 블럭시간의 15 초 간격으로 조절한다.
-     * 
-     */
-    static int64_t nLastCoinStakeSearchTime = GetAdjustedTime(); // startup timestamp
-
-    CKey key;
-    
-    CMutableTransaction txCoinBase(*block.vtx[0]);
-    CMutableTransaction txCoinStake;
-    txCoinStake.nTime = GetAdjustedTime();
-    int64_t time = txCoinStake.nTime;
-    txCoinStake.nTime &= ~Params().GetConsensus().nOnlineTimestampMask;
-    int64_t nSearchTime = txCoinStake.nTime; // search to current time
-
-    if (nSearchTime > nLastCoinStakeSearchTime)
-    {
-        // 목표 비트로 n( 1에서 60?으로 수정) 번 코인을 찾는다.
-        // int64_t nSearchInterval = nBestHeight+1 > 0 ? 1 : nSearchTime - nLastCoinStakeSearchTime;
-        if (wallet.CreateCoinStake(wallet, block.nBits, 1, nFees, txCoinStake, key))
-        {
-            // if have other tx allow time limit zero else allow time is pow block limit 
-            if (( block.vtx.size()>1&&txCoinStake.nTime >= pindexBestHeader->GetPastTimeLimit()+1)||txCoinStake.nTime >= pindexBestHeader->GetPastTimeLimit() + 60)
-            {
-                DbgMsg("tx:%d, limit:%d gap:%d",txCoinStake.nTime , pindexBestHeader->GetPastTimeLimit(), ( txCoinStake.nTime - pindexBestHeader->GetPastTimeLimit()));
-                // make sure coinstake would meet timestamp protocol
-                //    as it would be the same as the block timestamp
-            	txCoinBase.nTime = block.nTime = txCoinStake.nTime;
-            	block.vtx[0] = MakeTransactionRef(txCoinBase);
-
-                // we have to make sure that we have no future timestamps in
-                //    our transactions set
-                for (std::vector<CTransactionRef>::iterator it = block.vtx.begin(); it != block.vtx.end();)
-                    if ((*it)->nTime > block.nTime) { it = block.vtx.erase(it); } else { ++it; }
-
-                block.vtx.insert(block.vtx.begin() + 1, MakeTransactionRef(txCoinStake));
-
-                block.hashMerkleRoot = BlockMerkleRoot(block);
-                // append a signature to our block
-                return key.Sign(block.GetHash(), block.vchBlockSig);
-            }
-        }
-        
-    }
-
-    return false;
-}
-void ThreadStakeMiner(CWallet *pwallet, const CChainParams& chainparams)
+/**
+ * Proof Of Online miner
+ * 
+ */
+void ThreadOnlineMiner(CWallet *pwallet, const CChainParams& chainparams)
 {
     LogPrintf("staking start....");
 
     SetThreadPriority(THREAD_PRIORITY_LOWEST);
 
     // Make this thread recognisable as the mining thread
-    RenameThread("blackcoin-miner");
+    RenameThread("yangcoin-miner");
 
     CReserveKey reservekey(pwallet);
 
     bool fTryToSync = true;
-    
+    bool fIsTest = true;
     int nCount =0;
     while (true){
         while (pwallet->IsLocked()){
             MilliSleep(1000);
         }
 
-        
-        while (g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL) < 1 || IsInitialBlockDownload()){
-            fTryToSync = true;
-            MilliSleep(1000);
-        }
+        if(!fIsTest) { 
+            while (g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL) < 1 || IsInitialBlockDownload()){
+                fTryToSync = true;
+                MilliSleep(1000);
+            }
 
-        if (fTryToSync){
-            fTryToSync = false;
-            //연결수가 3보가 작거나, 동기화 시간이 10 분을 넘었으면 1분간 쉰다.
-            if (g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL)  < 3 || pindexBestHeader->GetBlockTime() < GetTime() - 10 * 60){
-                MilliSleep(60000);
-                continue;
+            if (!fIsTest&&fTryToSync){
+                fTryToSync = false;
+                //연결수가 3보가 작거나, 동기화 시간이 10 분을 넘었으면 1분간 쉰다.
+                if (g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL)  < 3 || pindexBestHeader->GetBlockTime() < GetTime() - 10 * 60){
+                    MilliSleep(60000);
+                    continue;
+                }
             }
         }
-        if(!pwallet->HaveAvailableCoinsForStaking()) {
+        if(!pwallet->HaveAvailableCoinsForOnline()) {
+            DbgMsg("haveavv.... ");
             MilliSleep(nMinerSleep);
+
             continue;
         }
 
         CBlockIndex* pindexPrev = chainActive.Tip();
         if(pindexPrev->nHeight % chainparams.GetConsensus().nProofOfOnlineInterval !=0){
             MilliSleep(nMinerSleep);
+            DbgMsg("skip not online block. %d %d " , pindexPrev->nHeight ,chainparams.GetConsensus().nProofOfOnlineInterval);
             continue;
         }
         LogPrint("poo" , "start poo miner");
@@ -778,12 +728,12 @@ void ThreadStakeMiner(CWallet *pwallet, const CChainParams& chainparams)
 
         CBlock *pblock = &pblocktemplate->block;
         // Trying to sign a block
-        if (SignPoOBlock(*pblock, *pwallet, nFees))
+        if (pwallet->SignPoOBlock(*pblock, *pwallet, nFees))
         {
             SetThreadPriority(THREAD_PRIORITY_NORMAL);
             if (chainActive.Tip()->GetBlockHash() != pblock->hashPrevBlock) {
                 //another block was received while building ours, scrap progress
-                LogPrintf("ThreadStakeMiner(): Valid future PoS block was orphaned before becoming valid");
+                LogPrintf("ThreadOnlineMiner(): Valid future PoS block was orphaned before becoming valid");
                 continue;
             }
             CheckStake(pblock, *pwallet, chainparams);
@@ -795,17 +745,62 @@ void ThreadStakeMiner(CWallet *pwallet, const CChainParams& chainparams)
         }
     }
 }
+/**
+ * block 서명이 pool 의 한명인가?
+ * 블럭의 보상이 넘었는가?
+ * 블럭의 
+ */
+bool CheckOnline(CBlock* pblock, CWallet& wallet, const CChainParams& chainparams){
+    uint256 hashBlock = pblock->GetHash();
+
+    if(!pblock->IsProofOfOnline()){ 
+        DbgMsg("%s ", pblock->ToString());
+        return error("CheckStake() : %s is not a proof-of-stake block", hashBlock.GetHex());
+    }
+
+    CValidationState state;
+    // verify hash target and signature of coinstake tx
+    if (!CheckProofOfOnline(mapBlockIndex[pblock->hashPrevBlock], *pblock->vtx[1], pblock->nBits, state))
+        return error("CheckStake() : proof-of-stake checking failed");
+
+    //// debug print
+    LogPrintf("%s\n", pblock->ToString());
+    LogPrintf("out %s\n", FormatMoney(pblock->vtx[1]->GetValueOut()));
+
+    // Found a solution
+    {
+        LOCK(cs_main);
+        if (pblock->hashPrevBlock != chainActive.Tip()->GetBlockHash())
+            return error("CheckStake() : generated block is stale");
+
+        // Track how many getdata requests this block gets
+        {
+            LOCK(wallet.cs_wallet);
+            wallet.mapRequestCount[hashBlock] = 0;
+        }
+
+        // Process this block the same as if we had received it from another node
+        if (!ProcessBlockFound(pblock, chainparams, pblock->GetHash()))
+            return error("CheckStake() : ProcessBlock, block not accepted");
+    }
+
+    return true;
+}
 
 bool CheckStake(CBlock* pblock, CWallet& wallet, const CChainParams& chainparams)
 {
     uint256 hashBlock = pblock->GetHash();
 
-    if(!pblock->IsProofOfOnline())
+    if(!pblock->IsProofOfOnline()){ 
+        DbgMsg("%s ", pblock->ToString());
         return error("CheckStake() : %s is not a proof-of-stake block", hashBlock.GetHex());
+    }
 
     CValidationState state;
     // verify hash target and signature of coinstake tx
-    if (!CheckProofOfStake(mapBlockIndex[pblock->hashPrevBlock], *pblock->vtx[1], pblock->nBits, state))
+    // poo not need hash target and signature
+    // pos is vin to vout must check signature but poo tx is like coinbase
+    if (!CheckProofOfOnline(mapBlockIndex[pblock->hashPrevBlock], *pblock->vtx[1], pblock->nBits, state))
         return error("CheckStake() : proof-of-stake checking failed");
 
     //// debug print

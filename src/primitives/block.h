@@ -121,9 +121,13 @@ public:
     }
     bool IsProofOfOnline() const
     {
+        // DbgMsg("len:%d  online:%d" ,vtx.size(),vtx[1]->IsCoinOnline() );
         return (vtx.size() > 1 && vtx[1]->IsCoinOnline());
     }
-
+    bool IsProofOfWork() const
+    {
+        return !IsProofOfOnline();
+    }
     
     std::string ToString() const;
 };

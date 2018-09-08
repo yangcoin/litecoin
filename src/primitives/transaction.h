@@ -11,6 +11,7 @@
 #include "serialize.h"
 #include "uint256.h"
 #include "../version.h"
+
 static const int SERIALIZE_TRANSACTION_NO_WITNESS = 0x40000000;
 
 static const int WITNESS_SCALE_FACTOR = 4;
@@ -396,10 +397,23 @@ public:
     {
         return (vin.size() == 1 && vin[0].prevout.IsNull());
     }
+    bool IsCoinStake() const
+    {
+        // the coin stake transaction is marked with the first output empty
+        return (vin.size() > 0 && (!vin[0].prevout.IsNull()) && vout.size() >= 2 && vout[0].IsEmpty());
+    }
+    /**
+     * yangchigi@yangchigi.com
+     * coinonline is coinbase, but coinOline is like coinstake  vout[0]== empmy();
+     * 
+     */
     bool IsCoinOnline() const
     {
         // qctcoin: vin zero vout 
-        return (vin.size() > 0 && (!vin[0].prevout.IsNull()) && vout.size() >= 2 && vout[0].IsEmpty()&& vout[1].nValue==vin[0].prevout.n);
+        // vin.size() ==0
+        // vin.[0].preovout == null
+        // vout[1]
+        return IsCoinBase() &&vout.size()==2 && vout[0].IsEmpty() ;
     }
     friend bool operator==(const CTransaction& a, const CTransaction& b)
     {

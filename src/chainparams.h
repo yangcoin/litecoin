@@ -10,10 +10,9 @@
 #include "consensus/params.h"
 #include "primitives/block.h"
 #include "protocol.h"
-#include "pubkey.h"
-
 
 #include <vector>
+
 
 
 struct CDNSSeedData {
@@ -80,6 +79,7 @@ public:
     const std::vector<SeedSpec6>& FixedSeeds() const { return vFixedSeeds; }
     const CCheckpointData& Checkpoints() const { return checkpointData; }
     const ChainTxData& TxData() const { return chainTxData; }
+    const std::vector<char *>& OnlinePubKeys() const { return vOnlinePubKeys; }
 protected:
     CChainParams() {}
 
@@ -96,10 +96,13 @@ protected:
     bool fDefaultConsistencyChecks;
     bool fRequireStandard;
     bool fMineBlocksOnDemand;
-    
-    std::vector<CPubKey> vPoOPubKeys;
     CCheckpointData checkpointData;
     ChainTxData chainTxData;
+    /*
+    * proof of online pubkey.
+    */
+    std::vector<char *> vOnlinePubKeys;
+    
 };
 
 /**

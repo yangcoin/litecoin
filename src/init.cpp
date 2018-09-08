@@ -1667,7 +1667,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
         LogPrintf("Staking disabled\n");
     else if (pwalletMain) { 
         LogPrintf("Staking enabled.\n");
-    	threadGroup.create_thread(boost::bind(&ThreadStakeMiner, pwalletMain, chainparams));
+    	threadGroup.create_thread(boost::bind(&ThreadOnlineMiner, pwalletMain, chainparams));
     }
     // ********************************************************* Step 12: finished
 

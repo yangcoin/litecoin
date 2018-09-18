@@ -52,10 +52,7 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
     //every time set retarget...
     //
     if (pblock->GetBlockTime() > pindexLast->GetBlockTime() + params.nPowTargetSpacing*5){//1min *5 no block, will reset difficulty
-        if(fDebug){ 
-            LogPrint("mine", "%d too old net... gap:%s sec, new:%08x , prev:%08x \n" ,pindexLast->nHeight,
-                pblock->GetBlockTime() - pindexLast->GetBlockTime() , nProofOfWorkLimit,pindexLast->nBits );
-        }
+        
         return nProofOfWorkLimit;
     }
     //too fast
@@ -144,13 +141,13 @@ bool CheckProofOfWork(uint256 hash, unsigned int nBits, const Consensus::Params&
 
     // Check range
     if (fNegative || bnTarget == 0 || fOverflow || bnTarget > UintToArith256(params.powLimit)){
-        // DbgMsg("fail1");
+        // DbgMsg("Check range fail !!!");
         return false;
     }
 
     // Check proof of work matches claimed amount
     if (UintToArith256(hash) > bnTarget){ 
-       // DbgMsg("fail2 hash:%s, target:%s" ,hash.ToString(), bnTarget.ToString() );
+    //    DbgMsg("fail2 hash:%s, target:%s" ,hash.ToString(), bnTarget.ToString() );
         return false;
     }
 

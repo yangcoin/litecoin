@@ -9,6 +9,7 @@
 #include "primitives/transaction.h"
 #include "serialize.h"
 #include "uint256.h"
+#include "consensus/params.h"
 
 /** Nodes collect new transactions into a block, hash them into a hash tree,
  * and scan through nonce values to make the block's hash satisfy proof-of-work
@@ -27,7 +28,8 @@ public:
     uint32_t nTime;
     uint32_t nBits;
     uint32_t nNonce;
-
+    COutPoint prevoutStake;
+    std::vector<unsigned char> vchBlockSig;
     CBlockHeader()
     {
         SetNull();
@@ -43,6 +45,10 @@ public:
         READWRITE(nTime);
         READWRITE(nBits);
         READWRITE(nNonce);
+        if(nTime> POO_START_TIME) { 
+            READWRITE(vchBlockSig);
+            READWRITE(prevoutStake);
+        }
     }
 
     void SetNull()
@@ -53,6 +59,8 @@ public:
         nTime = 0;
         nBits = 0;
         nNonce = 0;
+        vchBlockSig.clear();
+        prevoutStake.SetNull();
     }
 
     bool IsNull() const
@@ -68,6 +76,27 @@ public:
     {
         return (int64_t)nTime;
     }
+    virtual bool IsProofOfStake() const
+    {
+        return !prevoutStake.IsNull();
+    }
+    virtual bool IsProofOfOnline() const
+    {
+        return prevoutStake.IsNull()&&vchBlockSig.size()>0;
+    }
+    virtual bool IsProofOfWork() const
+    {
+        return !IsProofOfStake()&&!IsProofOfStake();
+    }
+    virtual uint32_t StakeTime() const
+    {
+        uint32_t ret = 0;
+        if(IsProofOfStake())
+        {
+            ret = nTime;
+        }
+        return ret;
+    }
 };
 
 
@@ -76,7 +105,6 @@ class CBlock : public CBlockHeader
 public:
     // network and disk
     std::vector<CTransactionRef> vtx;
-    std::vector<unsigned char> vchBlockSig;
     // memory only
     mutable bool fChecked;
 
@@ -97,14 +125,13 @@ public:
     inline void SerializationOp(Stream& s, Operation ser_action) {
         READWRITE(*(CBlockHeader*)this);
         READWRITE(vtx);
-        // READWRITE(vchBlockSig);
+        
     }
-
+    
     void SetNull()
     {
         CBlockHeader::SetNull();
         vtx.clear();
-        vchBlockSig.clear();
         fChecked = false;
     }
 
@@ -119,15 +146,7 @@ public:
         block.nNonce         = nNonce;
         return block;
     }
-    bool IsProofOfOnline() const
-    {
-        // DbgMsg("len:%d  online:%d" ,vtx.size(),vtx[1]->IsCoinOnline() );
-        return (vtx.size() > 1 && vtx[1]->IsCoinOnline());
-    }
-    bool IsProofOfWork() const
-    {
-        return !IsProofOfOnline();
-    }
+     
     
     std::string ToString() const;
 };

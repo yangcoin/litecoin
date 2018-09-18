@@ -493,7 +493,9 @@ int64_t GetTransactionSigOpCost(const CTransaction& tx, const CCoinsViewCache& i
 
 
 
-
+/**
+ * Tx 검증.
+ */
 bool CheckTransaction(const CTransaction& tx, CValidationState &state, bool fCheckDuplicateInputs)
 {
     // Basic checks that don't depend on any context
@@ -1852,14 +1854,12 @@ int32_t ComputeBlockVersion(const CBlockIndex* pindexPrev, const Consensus::Para
 {
     LOCK(cs_main);
     int32_t nVersion = VERSIONBITS_TOP_BITS;
-
     for (int i = 0; i < (int)Consensus::MAX_VERSION_BITS_DEPLOYMENTS; i++) {
         ThresholdState state = VersionBitsState(pindexPrev, params, (Consensus::DeploymentPos)i, versionbitscache);
         if (state == THRESHOLD_LOCKED_IN || state == THRESHOLD_STARTED) {
-            nVersion |= VersionBitsMask(params, (Consensus::DeploymentPos)i);
+             nVersion |= VersionBitsMask(params, (Consensus::DeploymentPos)i);
         }
     }
-
     return nVersion;
 }
 
@@ -1904,7 +1904,13 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
     AssertLockHeld(cs_main);
 
     int64_t nTimeStart = GetTimeMicros();
-
+    if (block.IsProofOfOnline())
+    {
+        pindex->SetProofOfOnline();
+    }else{
+        pindex->prevoutStake.SetNull();
+    }
+    
     // Check it again in case a previous version let a bad block in
     if (!CheckBlock(block, state, chainparams.GetConsensus(), !fJustCheck, !fJustCheck))
         return error("%s: Consensus::CheckBlock: %s", __func__, FormatStateMessage(state));
@@ -2173,7 +2179,7 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
     }
     int64_t nTime3 = GetTimeMicros(); nTimeConnect += nTime3 - nTime2;
     LogPrint("bench", "      - Connect %u transactions: %.2fms (%.3fms/tx, %.3fms/txin) [%.2fs]\n", (unsigned)block.vtx.size(), 0.001 * (nTime3 - nTime2), 0.001 * (nTime3 - nTime2) / block.vtx.size(), nInputs <= 1 ? 0 : 0.001 * (nTime3 - nTime2) / (nInputs-1), nTimeConnect * 0.000001);
-
+    // TODO check poo reward...
     CAmount blockReward = nFees + GetBlockSubsidy(pindex->pprev, chainparams.GetConsensus());
     if (block.vtx[0]->GetValueOut() > blockReward)
         return state.DoS(100,
@@ -2446,7 +2452,7 @@ void static UpdateTip(CBlockIndex *pindexNew, const CChainParams& chainParams) {
             }
         }
     }
-    LogPrintf("%s: new best=%s height=%d version=0x%08x log2_work=%.8g tx=%lu date='%s' progress=%f cache=%.1fMiB(%utx)", __func__,
+    LogPrintf("%s: new best=%s height=%d version=0x%08x log2_work=%.8g tx=%lu date='%s' progress=%f cache=%.1fMiB(%utx)\n", __func__,
       chainActive.Tip()->GetBlockHash().ToString(), chainActive.Height(), chainActive.Tip()->nVersion,
       log(chainActive.Tip()->nChainWork.getdouble())/log(2.0), (unsigned long)chainActive.Tip()->nChainTx,
       DateTimeStrFormat("%Y-%m-%d %H:%M:%S", chainActive.Tip()->GetBlockTime()),
@@ -3117,7 +3123,15 @@ bool FindUndoPos(CValidationState &state, int nFile, CDiskBlockPos &pos, unsigne
 bool CheckBlockHeader(const CBlockHeader& block, CValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW)
 {
     // Check proof of work matches claimed amount
-    
+    DbgMsg("isOnline # 1 %d  %d %d" , block.IsProofOfOnline() , block.prevoutStake.IsNull() , block.vchBlockSig.size());
+    CBlockIndex pblockIdx = CBlockIndex(block);
+    DbgMsg("isOnline # 2 %d  %d %d" , pblockIdx.IsProofOfOnline() , pblockIdx.prevoutStake.IsNull() , pblockIdx.vchBlockSig.size());
+    if(pblockIdx.IsProofOfOnline()){
+        return true;
+    }
+    DbgMsg("poo ? %d" , block.IsProofOfOnline());
+    // Check proof of work matches claimed amount
+
     if (fCheckPOW && !CheckProofOfWork(block.GetPoWHash(), block.nBits, consensusParams))
         return state.DoS(50, false, REJECT_INVALID, "high-hash", false, "proof of work failed");
 
@@ -3132,8 +3146,9 @@ bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::P
         return true;
     // Check that the header is valid (particularly PoW).  This is mostly
     // redundant with the call in AcceptBlockHeader.
-    DbgMsg("checkPow %d , isPoO:%d " , fCheckPOW,block.IsProofOfOnline() );
+    // DbgMsg("checkPow %d , isPoO:%d " , fCheckPOW,block.IsProofOfOnline() );
     if (!CheckBlockHeader(block, state, consensusParams, fCheckPOW&&block.IsProofOfWork())) { 
+        DbgMsg("Check BlockHeader fail");
         return false;
     }
 
@@ -3164,10 +3179,13 @@ bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::P
     // First transaction must be coinbase, the rest must not be
     if (block.vtx.empty() || !block.vtx[0]->IsCoinBase())
         return state.DoS(100, false, REJECT_INVALID, "bad-cb-missing", false, "first tx is not coinbase");
-    for (unsigned int i = 1; i < block.vtx.size(); i++)
-        if (block.vtx[i]->IsCoinBase())
+    
+    
+    for (unsigned int i = 1; i < block.vtx.size(); i++) { 
+        if (block.vtx[i]->IsCoinBase()&&!block.vtx[i]->IsCoinOnline()) {
             return state.DoS(100, false, REJECT_INVALID, "bad-cb-multiple", false, "more than one coinbase");
-
+        }
+    }
     // Check transactions
     for (const auto& tx : block.vtx)
         if (!CheckTransaction(*tx, state, false))
@@ -3455,8 +3473,10 @@ static bool AcceptBlock(const std::shared_ptr<const CBlock>& pblock, CValidation
     CBlockIndex *pindexDummy = NULL;
     CBlockIndex *&pindex = ppindex ? *ppindex : pindexDummy;
 
-    if (!AcceptBlockHeader(block, state, chainparams, &pindex))
+    if (!AcceptBlockHeader(block, state, chainparams, &pindex)){
+        DbgMsg("reject block ");
         return false;
+    }
 
     // Try to process all requested blocks that we don't have, but only
     // process an unrequested block if it's new and has enough work to
@@ -3540,6 +3560,8 @@ bool ProcessNewBlock(const CChainParams& chainparams, const std::shared_ptr<cons
             // Store to disk
             ret = AcceptBlock(pblock, state, chainparams, &pindex, fForceProcessing, NULL, fNewBlock);
             DbgMsg("AcceptBlock result:%d" , ret);
+        }else{
+            DbgMsg("Check Block Fail ,%s" , state.GetDebugMessage());
         }
         CheckBlockIndex(chainparams.GetConsensus());
         if (!ret) {

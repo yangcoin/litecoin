@@ -4121,18 +4121,14 @@ bool CWallet::HaveAvailableCoinsForOnline() const
         CBitcoinAddress addr(onlineKey);
         CKeyID keyID;
         if (!addr.GetKeyID(keyID)){
-            DbgMsg("return 1");
             continue ;
         }
             
         CKey vchSecret;
         if (!GetKey(keyID, vchSecret)){ 
-            DbgMsg("return false;");
             continue ;
         }
-        
         CPubKey pubKey = vchSecret.GetPubKey();
-        DbgMsg("stop... %s "  ,pubKey.GetHash().ToString());
         return true;       
     }
     return false;
@@ -4174,29 +4170,36 @@ uint64_t CWallet::GetStakeWeight() const
     return nWeight;
 }
 
-
-bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int64_t nSearchInterval, CAmount& nFees, CMutableTransaction& tx, CKey& key)
+/**
+ * 입력된 CoinStake 는 CoinBase 이어야 한다.
+ * PoS의 블럭은 입력과 출력이 필요하지만 PoO는 입력이 필요없다.
+ * 
+ * vout[0]은 비어 있어야 하며, (like PoS)
+ * vout[1]은 제공되어진 키값이어야 한다.
+ * vout[2]는 새롭게 제공되어지는 키값이다. (미래에 발생할 키값.) -> pruned mode에서의 동작을 확인할수 있어야 한다.
+ * vout[3]은 앞으로 제거되어질 키값이다. 
+ * 2번과 3번은 다중서명이 되어 있어야 한다.
+ * - 가능한 공개키들중 51% 의 키값으로 서명되어야 한다.
+ * - op 코드등의 이용방안...
+ */
+bool CWallet::CreateCoinOnline(const CKeyStore& keystore, unsigned int nBits, int64_t nSearchInterval, CAmount& nFees, CMutableTransaction& tx, CKey& key)
 {
     CBlockIndex* pindexPrev = pindexBestHeader;
     arith_uint256 bnTargetPerCoinDay;
     bnTargetPerCoinDay.SetCompact(nBits);
 
     struct CMutableTransaction txNew(tx);
-    txNew.vin.clear();
-    txNew.vout.clear();
-    txNew.vin.resize(1);
     txNew.vin[0].prevout.SetNull(); // make coinbase
     // Mark coin stake transaction
     CScript scriptEmpty;
     scriptEmpty.clear();
-    txNew.vout.push_back(CTxOut(0, scriptEmpty));
+
     CKeyID onLineid;
     
     if(!GetOnlineKey(onLineid,key)){
         return false;
     }
     
-    DbgMsg("pubKeyHash %s %d" , key.GetPubKey().GetHash().ToString() , nFees);
 
 
     // // Choose coins to use
@@ -4236,30 +4239,34 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
         for (unsigned int n=0; n<min(nSearchInterval,(int64_t)nMaxStakeSearchInterval) && !fKernelFound && pindexPrev == pindexBestHeader; n++)
         {
             boost::this_thread::interruption_point();
-    //         // Search backward in time from the given txNew timestamp
-    //         // Search nSearchInterval seconds back up to nMaxStakeSearchInterval
-    //         COutPoint prevoutStake = COutPoint(pcoin.first->GetHash(), pcoin.second);
+            // Search backward in time from the given txNew timestamp
+            // Search nSearchInterval seconds back up to nMaxStakeSearchInterval
+            // COutPoint prevoutStake = COutPoint(pcoin.first->GetHash(), pcoin.second);
             
             uint32_t nBlockTime;
             //LogPrintf("looking for coinstake \n");
             if (CheckKernel(pindexPrev, nBits, txNew.nTime - n,  &nBlockTime))
             {
     //             // Found a kernel
-    //             LogPrintf("CreateCoinStake : kernel found\n");
+    //             LogPrintf("CreateCoinOnline : kernel found\n");
                 vector<vector<unsigned char> > vSolutions;
                 txnouttype whichType;
                 CScript scriptPubKeyOut;
+                // 
+                boost::shared_ptr<CReserveScript> coinbaseScript(new CReserveScript());
+                coinbaseScript->reserveScript = GetScriptForDestination(onLineid);
+                // scriptPubKeyOut << coinbaseScript->reserveScript  << OP_CHECKSIG;
     //             scriptPubKeyKernel = pcoin.first->tx->vout[pcoin.second].scriptPubKey;
                 
     //             if (!Solver(scriptPubKeyKernel, whichType, vSolutions))
     //             {
-    //                 LogPrint("coinstake", "CreateCoinStake : failed to parse kernel\n");
+    //                 LogPrint("coinstake", "CreateCoinOnline : failed to parse kernel\n");
     //                 break;
     //             }
-    //             LogPrint("coinstake", "CreateCoinStake : parsed kernel type=%d\n", whichType);
+    //             LogPrint("coinstake", "CreateCoinOnline : parsed kernel type=%d\n", whichType);
     //             if (whichType != TX_PUBKEY && whichType != TX_PUBKEYHASH)
     //             {
-    //                 LogPrint("coinstake", "CreateCoinStake : no support for kernel type=%d\n", whichType);
+    //                 LogPrint("coinstake", "CreateCoinOnline : no support for kernel type=%d\n", whichType);
     //                 break;  // only support pay to public key and pay to address
     //             }
     //             if (whichType == TX_PUBKEYHASH) // pay to address type
@@ -4267,7 +4274,7 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
     //                 // convert to pay to public key type
     //                 if (!keystore.GetKey(uint160(vSolutions[0]), key))
     //                 {
-    //                     LogPrint("coinstake", "CreateCoinStake : failed to get key for kernel type=%d\n", whichType);
+    //                     LogPrint("coinstake", "CreateCoinOnline : failed to get key for kernel type=%d\n", whichType);
     //                     break;  // unable to find corresponding public key
     //                 }
 
@@ -4277,13 +4284,13 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
     //             {
     //                 if (!keystore.GetKey(Hash160(vSolutions[0]), key))
     //                 {
-    //                     LogPrint("coinstake", "CreateCoinStake : failed to get key for kernel type=%d\n", whichType);
+    //                     LogPrint("coinstake", "CreateCoinOnline : failed to get key for kernel type=%d\n", whichType);
     //                     break;  // unable to find corresponding public key
     //                 }
 
     //                 if (key.GetPubKey() != vSolutions[0])
     //                 {
-    //                     LogPrint("coinstake", "CreateCoinStake : invalid key for kernel type=%d\n", whichType);
+    //                     LogPrint("coinstake", "CreateCoinOnline : invalid key for kernel type=%d\n", whichType);
     //                     break; // keys mismatch
     //                 }
 
@@ -4292,8 +4299,8 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
                 txNew.nTime -= n;
                 // txNew.vin[0].prevout.SetNull();
                 nCredit = nFees;
-                txNew.vout.push_back(CTxOut(0, scriptPubKeyOut));
-                // LogPrint("coinstake", "CreateCoinStake : added kernel type=%d\n", whichType);
+                txNew.vout.push_back(CTxOut(0, coinbaseScript->reserveScript ));
+                // LogPrint("coinstake", "CreateCoinOnline : added kernel type=%d\n", whichType);
                 fKernelFound = true;
                 break;
             } 
@@ -4333,7 +4340,7 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
     // {
     //     uint64_t nCoinAge;
     //     if (!GetCoinAge(txNew,   nCoinAge))
-    //         return error("CreateCoinStake : failed to calculate coin age");       
+    //         return error("CreateCoinOnline : failed to calculate coin age");       
     //     int64_t nReward = GetProofOfStakeReward(pindexPrev, nCoinAge, nFees);
     //     if (nReward <= 0){
     //         return false;
@@ -4360,13 +4367,13 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
     // BOOST_FOREACH(const CWalletTx* pcoin, vwtxPrev)
     // {
     //     if (!SignSignature(*this, *pcoin, txNew, nIn++, SIGHASH_ALL))
-    //         return error("CreateCoinStake : failed to sign coinstake");
+    //         return error("CreateCoinOnline : failed to sign coinstake");
     // }
 
         
     unsigned int nBytes = ::GetSerializeSize(txNew, SER_NETWORK, PROTOCOL_VERSION);
     if (nBytes >= MAX_STANDARD_TX_WEIGHT)
-        return error("CreateCoinStake : exceeded coinstake size limit");
+        return error("CreateCoinOnline : exceeded coinstake size limit");
 
     // // Successfully generated coinstake
     tx = CTransaction(txNew);
@@ -4395,12 +4402,12 @@ bool CWallet::SignPoOBlock(CBlock& block, CWallet& wallet, int64_t& nFees)
 
     CKey key;
     
-    CMutableTransaction txCoinBase(*block.vtx[0]);
-    CMutableTransaction txCoinStake;
-    txCoinStake.nTime = GetAdjustedTime();
-    int64_t time = txCoinStake.nTime;
-    txCoinStake.nTime &= ~Params().GetConsensus().nOnlineTimestampMask;
-    int64_t nSearchTime = txCoinStake.nTime; // search to current time
+    CMutableTransaction txCoinOnline(*block.vtx[0]);
+    // CMutableTransaction txCoinOnline;
+    txCoinOnline.nTime = GetAdjustedTime();
+    int64_t time = txCoinOnline.nTime;
+    txCoinOnline.nTime &= ~Params().GetConsensus().nOnlineTimestampMask;
+    int64_t nSearchTime = txCoinOnline.nTime; // search to current time
 
     // int64_t nFees = -block.vTxFees[0];
     // DbgMsg("nFee %d " , nFees);
@@ -4410,23 +4417,32 @@ bool CWallet::SignPoOBlock(CBlock& block, CWallet& wallet, int64_t& nFees)
         // 목표 비트로 n( 1에서 60?으로 수정) 번 코인을 찾는다.
         // int64_t nSearchInterval = nBestHeight+1 > 0 ? 1 : nSearchTime - nLastCoinStakeSearchTime;
         // 
-        if (wallet.CreateCoinStake(wallet, block.nBits, 1, nFees, txCoinStake, key))
+        /**
+         * 코인온라인 생성.
+         * 새로운 Tx 를 만들지 않는다.
+         * 생성된 CoinBase에 vout 을 추가한다.
+         * 
+         * 
+         * 
+         */
+        if (wallet.CreateCoinOnline(wallet, block.nBits, 1, nFees, txCoinOnline, key))
         {
             // if have other tx allow time limit zero else allow time is pow block limit 
-            if (( block.vtx.size()>1&&txCoinStake.nTime >= pindexBestHeader->GetPastTimeLimit()+1)||txCoinStake.nTime >= pindexBestHeader->GetPastTimeLimit() + 60)
+            if (( block.vtx.size()>1&&txCoinOnline.nTime >= pindexBestHeader->GetPastTimeLimit()+1)||txCoinOnline.nTime >= pindexBestHeader->GetPastTimeLimit() + 60)
             {
-                DbgMsg("tx:%d, limit:%d gap:%d",txCoinStake.nTime , pindexBestHeader->GetPastTimeLimit(), ( txCoinStake.nTime - pindexBestHeader->GetPastTimeLimit()));
+                DbgMsg("tx:%d, limit:%d gap:%d",txCoinOnline.nTime , pindexBestHeader->GetPastTimeLimit(), ( txCoinOnline.nTime - pindexBestHeader->GetPastTimeLimit()));
                 // make sure coinstake would meet timestamp protocol
                 //    as it would be the same as the block timestamp
-            	txCoinBase.nTime = block.nTime = txCoinStake.nTime;
-            	block.vtx[0] = MakeTransactionRef(txCoinBase);
+            	//txCoinBase.nTime = block.nTime = txCoinOnline.nTime;
+                block.nTime = txCoinOnline.nTime;
+            	block.vtx[0] = MakeTransactionRef(txCoinOnline);
 
                 // we have to make sure that we have no future timestamps in
                 //    our transactions set
                 for (std::vector<CTransactionRef>::iterator it = block.vtx.begin(); it != block.vtx.end();)
                     if ((*it)->nTime > block.nTime) { it = block.vtx.erase(it); } else { ++it; }
 
-                block.vtx.insert(block.vtx.begin() + 1, MakeTransactionRef(txCoinStake));
+                // block.vtx.insert(block.vtx.begin() + 1, MakeTransactionRef(txCoinOnline));
 
                 block.hashMerkleRoot = BlockMerkleRoot(block);
                 // append a signature to our block

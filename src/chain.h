@@ -145,7 +145,9 @@ enum BlockStatus: uint32_t {
     BLOCK_FAILED_CHILD       =   64, //!< descends from failed block
     BLOCK_FAILED_MASK        =   BLOCK_FAILED_VALID | BLOCK_FAILED_CHILD,
 
-    BLOCK_OPT_WITNESS       =   128, //!< block data in blk*.data was received with a witness-enforcing client
+    BLOCK_OPT_WITNESS        =   128, //!< block data in blk*.data was received with a witness-enforcing client
+    BLOCK_PROOF_OF_ONLINE    =   256, //
+    BLOCK_PROOF_OF_STAKE     =   512, //
 };
 
 /** The block chain is a tree shaped structure starting with the
@@ -198,6 +200,11 @@ public:
     unsigned int nTime;
     unsigned int nBits;
     unsigned int nNonce;
+    
+    std::vector<unsigned char> vchBlockSig;
+    
+    COutPoint prevoutStake;
+    uint256 nStakeModifier;
 
     //! (memory only) Sequential id assigned to distinguish order in which blocks are received.
     int32_t nSequenceId;
@@ -228,6 +235,9 @@ public:
         nNonce         = 0;
 
         nMoneySupply = 0;
+        vchBlockSig.clear();
+        nStakeModifier = uint256();
+        prevoutStake.SetNull();
     }
 
     CBlockIndex()
@@ -244,6 +254,15 @@ public:
         nTime          = block.nTime;
         nBits          = block.nBits;
         nNonce         = block.nNonce;
+
+        nStakeModifier = uint256();
+        prevoutStake   = block.prevoutStake; 
+        vchBlockSig    = block.vchBlockSig; 
+        // if(block.IsProofOfOnline()){
+        //     nStatus |=BLOCK_PROOF_OF_ONLINE;
+        // }else if( block.IsProofOfStake()) {
+        //     nStatus |=BLOCK_PROOF_OF_STAKE;
+        // }
     }
 
     CDiskBlockPos GetBlockPos() const {
@@ -274,6 +293,9 @@ public:
         block.nTime          = nTime;
         block.nBits          = nBits;
         block.nNonce         = nNonce;
+        block.vchBlockSig    = vchBlockSig;
+        block.prevoutStake   = prevoutStake;
+        
         return block;
     }
 
@@ -316,7 +338,39 @@ public:
         std::sort(pbegin, pend);
         return pbegin[(pend - pbegin)/2];
     }
+    virtual bool IsProofOfStake() const
+    {
+        return !prevoutStake.IsNull();
+    }
+    virtual bool IsProofOfOnline() const
+    {
+        return prevoutStake.IsNull()&&vchBlockSig.size()>0;
+    }
+    virtual bool IsProofOfWork() const
+    {
+        return !IsProofOfStake()&&!IsProofOfStake();
+    }
+    // bool IsProofOfWork() const
+    // {
+    //     return !IsProofOfStake()&&!IsProofOfOnline();
+    // }
 
+    // bool IsProofOfStake() const
+    // {
+    //     return (nStatus & BLOCK_PROOF_OF_STAKE);
+    // }
+    // bool IsProofOfOnline() const
+    // {
+    //     return (nStatus & BLOCK_PROOF_OF_ONLINE);
+    // }
+    void SetProofOfOnline()
+    {
+        nStatus |= BLOCK_PROOF_OF_ONLINE;
+    }
+    void SetProofOfStake()
+    {
+        nStatus |= BLOCK_PROOF_OF_STAKE;
+    }
     std::string ToString() const
     {
         return strprintf("CBlockIndex(pprev=%p, nHeight=%d, merkle=%s, hashBlock=%s, nMoneySupply=%s)",
@@ -401,6 +455,12 @@ public:
         READWRITE(nBits);
         READWRITE(nNonce);
         READWRITE(nMoneySupply);
+        if(nTime > POO_START_TIME ){ 
+            READWRITE(vchBlockSig);
+            READWRITE(nStakeModifier);
+            READWRITE(prevoutStake);
+            
+        }
     }
 
     uint256 GetBlockHash() const
@@ -412,6 +472,8 @@ public:
         block.nTime           = nTime;
         block.nBits           = nBits;
         block.nNonce          = nNonce;
+        block.vchBlockSig     = vchBlockSig;
+        block.prevoutStake    = prevoutStake;
         return block.GetHash();
     }
 

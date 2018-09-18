@@ -22,8 +22,7 @@ static char * pnSeedOnline_main[] = {
     {"Yidn1vWNioXdcoB1LwxwQiXLWBWhW3Cmov"},
     {"YVuDDD2Xyd8T2xvPyH5Z6FMrR6JERFkyhe"}
 };
-static std::string pnSeedOnline_test[] = {
-    {"YQw9rPR1cpFLRYeyKgT99NggNFJUifv5T5"},
-    {"Yidn1vWNioXdcoB1LwxwQiXLWBWhW3Cmov"}
+static char * pnSeedOnline_test[] = {
+    {"ZMmtyCxii7CtHUWHikSi8rrJSzft4MsmVW"} // priv key, cRESQFi5HKtG1PHPXZsM3skA7cmdazESfjEEapMUAXHMNRMhDA5G
 };
 #endif // BITCOIN_CHAINPARAMSSEEDS_H

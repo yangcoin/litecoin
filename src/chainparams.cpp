@@ -139,7 +139,7 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nStartTime = 0; // January 28, 2017
         consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nTimeout = 0; // January 31st, 2018
 
-        // Deployment of SegWit (BIP141, BIP143, and BIP147)
+        // Deployment of PoO
         consensus.vDeployments[Consensus::DEPLOYMENT_POO].bit = 2;
         consensus.vDeployments[Consensus::DEPLOYMENT_POO].nStartTime = 1536391627; // January 28, 2017
         consensus.vDeployments[Consensus::DEPLOYMENT_POO].nTimeout = 0; // January 31st, 2018
@@ -228,7 +228,7 @@ public:
         // consensus.BIP34Hash = uint256S("8075c771ed8b495ffd943980a95f702ab34fce3c8c54e379548bda33cc8c0573");
         consensus.BIP65Height = 76; // 8075c771ed8b495ffd943980a95f702ab34fce3c8c54e379548bda33cc8c0573
         consensus.BIP66Height = 76; // 8075c771ed8b495ffd943980a95f702ab34fce3c8c54e379548bda33cc8c0573
-        consensus.powLimit = uint256S("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+        consensus.powLimit = uint256S("000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPowTargetTimespan = 1 * 1 * 60 * 60; // 1 hour  sec
         consensus.nPowTargetSpacing = 1 * 60;//1min
      //   consensus.fPowAllowMinDifficultyBlocks = true;
@@ -257,7 +257,7 @@ public:
         
         // poo interval and timestamp mask
         consensus.nOnlineTimestampMask = 0xf; // 10
-        consensus.nProofOfOnlineInterval = 10;// 
+        consensus.nProofOfOnlineInterval = 2;// 7
         
         pchMessageStart[0] = 0x79;
         pchMessageStart[1] = 0x61;
@@ -284,6 +284,11 @@ public:
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,80);//Y
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,142);//y
         
+        
+        vOnlinePubKeys = std::vector<char *>();
+        for(int i =0;i<ARRAYLEN( pnSeedOnline_test);i++){
+            vOnlinePubKeys.push_back( pnSeedOnline_test[i]);
+        }
 
         
         base58Prefixes[SECRET_KEY] =     std::vector<unsigned char>(1,239);

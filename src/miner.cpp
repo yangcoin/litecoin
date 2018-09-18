@@ -146,7 +146,7 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     if(!pblocktemplate.get())
         return nullptr;
     pblock = &pblocktemplate->block; // pointer for convenience
-
+    
     // Add dummy coinbase tx as first transaction
     pblock->vtx.emplace_back();
     pblocktemplate->vTxFees.push_back(-1); // updated at end
@@ -197,13 +197,12 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     // vout[0]
     // coinbase or coinproof
     coinbaseTx.vout.resize(1);
-    DbgMsg("nFees %d " , nFees);
+    
     if(fProofOfOnline){
         coinbaseTx.vout[0].SetEmpty();
     }else{
         coinbaseTx.vout[0].scriptPubKey = scriptPubKeyIn;
         coinbaseTx.vout[0].nValue = nFees + GetBlockSubsidy(pindexPrev, chainparams.GetConsensus());
-    
     }
     coinbaseTx.vin[0].scriptSig = CScript() << nHeight << OP_0;
     pblock->vtx[0] = MakeTransactionRef(std::move(coinbaseTx));
@@ -217,7 +216,6 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     pblock->hashPrevBlock  = pindexPrev->GetBlockHash();
     UpdateTime(pblock, chainparams.GetConsensus(), pindexPrev);
     pblock->nBits          = GetNextWorkRequired(pindexPrev, pblock, chainparams.GetConsensus());
-    DbgMsg("nBit %08x", pblock->nBits);
     pblock->nNonce         = 0;
     pblocktemplate->vTxSigOpsCost[0] = WITNESS_SCALE_FACTOR * GetLegacySigOpCount(*pblock->vtx[0]);
 
@@ -684,6 +682,12 @@ void ThreadOnlineMiner(CWallet *pwallet, const CChainParams& chainparams)
     bool fIsTest = true;
     int nCount =0;
     while (true){
+        if(GetTime() <= POO_START_TIME) {
+            DbgMsg("SLEPP POO NOT ACTIVE...");
+            MilliSleep(5000);
+            
+            continue;
+        }
         while (pwallet->IsLocked()){
             MilliSleep(1000);
         }
@@ -704,16 +708,14 @@ void ThreadOnlineMiner(CWallet *pwallet, const CChainParams& chainparams)
             }
         }
         if(!pwallet->HaveAvailableCoinsForOnline()) {
-            DbgMsg("haveavv.... ");
-            MilliSleep(nMinerSleep);
-
-            continue;
+            return;
         }
 
         CBlockIndex* pindexPrev = chainActive.Tip();
         if(pindexPrev->nHeight % chainparams.GetConsensus().nProofOfOnlineInterval !=0){
-            MilliSleep(nMinerSleep);
             DbgMsg("skip not online block. %d %d " , pindexPrev->nHeight ,chainparams.GetConsensus().nProofOfOnlineInterval);
+
+            MilliSleep(nMinerSleep * 10);
             continue;
         }
         LogPrint("poo" , "start poo miner");
@@ -727,6 +729,7 @@ void ThreadOnlineMiner(CWallet *pwallet, const CChainParams& chainparams)
              return;
 
         CBlock *pblock = &pblocktemplate->block;
+        
         // Trying to sign a block
         if (pwallet->SignPoOBlock(*pblock, *pwallet, nFees))
         {
@@ -736,7 +739,7 @@ void ThreadOnlineMiner(CWallet *pwallet, const CChainParams& chainparams)
                 LogPrintf("ThreadOnlineMiner(): Valid future PoS block was orphaned before becoming valid");
                 continue;
             }
-            CheckStake(pblock, *pwallet, chainparams);
+            CheckOnline(pblock, *pwallet, chainparams);
             SetThreadPriority(THREAD_PRIORITY_LOWEST);
             MilliSleep(nMinerSleep );
         }
@@ -755,13 +758,13 @@ bool CheckOnline(CBlock* pblock, CWallet& wallet, const CChainParams& chainparam
 
     if(!pblock->IsProofOfOnline()){ 
         DbgMsg("%s ", pblock->ToString());
-        return error("CheckStake() : %s is not a proof-of-stake block", hashBlock.GetHex());
+        return error("CheckOnline() : %s is not a proof-of-stake block", hashBlock.GetHex());
     }
 
     CValidationState state;
     // verify hash target and signature of coinstake tx
     if (!CheckProofOfOnline(mapBlockIndex[pblock->hashPrevBlock], *pblock->vtx[1], pblock->nBits, state))
-        return error("CheckStake() : proof-of-stake checking failed");
+        return error("CheckOnline() : proof-of-stake checking failed");
 
     //// debug print
     LogPrintf("%s\n", pblock->ToString());
@@ -771,7 +774,7 @@ bool CheckOnline(CBlock* pblock, CWallet& wallet, const CChainParams& chainparam
     {
         LOCK(cs_main);
         if (pblock->hashPrevBlock != chainActive.Tip()->GetBlockHash())
-            return error("CheckStake() : generated block is stale");
+            return error("CheckOnline() : generated block is stale");
 
         // Track how many getdata requests this block gets
         {
@@ -781,52 +784,12 @@ bool CheckOnline(CBlock* pblock, CWallet& wallet, const CChainParams& chainparam
 
         // Process this block the same as if we had received it from another node
         if (!ProcessBlockFound(pblock, chainparams, pblock->GetHash()))
-            return error("CheckStake() : ProcessBlock, block not accepted");
+            return error("CheckOnline() : ProcessBlock, block not accepted");
     }
 
     return true;
 }
-
-bool CheckStake(CBlock* pblock, CWallet& wallet, const CChainParams& chainparams)
-{
-    uint256 hashBlock = pblock->GetHash();
-
-    if(!pblock->IsProofOfOnline()){ 
-        DbgMsg("%s ", pblock->ToString());
-        return error("CheckStake() : %s is not a proof-of-stake block", hashBlock.GetHex());
-    }
-
-    CValidationState state;
-    // verify hash target and signature of coinstake tx
-    // poo not need hash target and signature
-    // pos is vin to vout must check signature but poo tx is like coinbase
-    if (!CheckProofOfOnline(mapBlockIndex[pblock->hashPrevBlock], *pblock->vtx[1], pblock->nBits, state))
-        return error("CheckStake() : proof-of-stake checking failed");
-
-    //// debug print
-    LogPrintf("%s\n", pblock->ToString());
-    LogPrintf("out %s\n", FormatMoney(pblock->vtx[1]->GetValueOut()));
-
-    // Found a solution
-    {
-        LOCK(cs_main);
-        if (pblock->hashPrevBlock != chainActive.Tip()->GetBlockHash())
-            return error("CheckStake() : generated block is stale");
-
-        // Track how many getdata requests this block gets
-        {
-            LOCK(wallet.cs_wallet);
-            wallet.mapRequestCount[hashBlock] = 0;
-        }
-
-        // Process this block the same as if we had received it from another node
-        if (!ProcessBlockFound(pblock, chainparams, pblock->GetHash()))
-            return error("CheckStake() : ProcessBlock, block not accepted");
-    }
-
-    return true;
-}
-
+ 
 
 static bool ProcessBlockFound(const CBlock* pblock, const CChainParams& chainparams, const uint256& hash)
 {

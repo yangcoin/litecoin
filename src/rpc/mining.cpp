@@ -124,6 +124,7 @@ UniValue generateBlocks(boost::shared_ptr<CReserveScript> coinbaseScript, int nG
         
         while (nMaxTries > 0 && pblock->nNonce < nInnerLoopCount && !CheckProofOfWork(pblock->GetPoWHash(), pblock->nBits, Params().GetConsensus())) {
             if(nMaxTries%10000==0){
+                DbgMsg("PoWHash: %s ,%x", pblock->GetPoWHash().ToString(),pblock->nBits);
                 DbgMsg("Search %u \n%s" ,nMaxTries,pblock->ToString() );
             }
             ++pblock->nNonce;

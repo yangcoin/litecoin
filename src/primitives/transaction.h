@@ -14,6 +14,8 @@
 
 static const int SERIALIZE_TRANSACTION_NO_WITNESS = 0x40000000;
 
+const  int64_t POO_START_TIME = 1537237800;//2018-09-18 2:30 UTC
+static const uint8_t ONLINE_BLOCK_VERSION = 0xA0;
 static const int WITNESS_SCALE_FACTOR = 4;
 
 /** An outpoint - a combination of a transaction hash and an index n into its vout */
@@ -395,7 +397,7 @@ public:
 
     bool IsCoinBase() const
     {
-        return (vin.size() == 1 && vin[0].prevout.IsNull());
+        return (vin.size() == 1 && vin[0].prevout.IsNull() &&vout.size()>=1);
     }
     bool IsCoinStake() const
     {

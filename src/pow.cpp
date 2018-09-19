@@ -11,13 +11,13 @@
 #include "uint256.h"
 #include "util.h"
 #include "validation.h"
-
+#include "consensus/consensus.h"
 unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params)
 {
     unsigned int nProofOfWorkLimit = UintToArith256(params.powLimit).GetCompact();
 
     // Genesis block
-    if (pindexLast == NULL||pindexLast->nHeight < ( BLOCK_HEIGHT_INIT +1 )) { 
+    if (pindexLast == NULL||pindexLast->nHeight <=  COINBASE_MATURITY ) { 
         LogPrint("mine", "init Limit %d ,%d\n" ,pindexLast->nHeight ,BLOCK_HEIGHT_INIT);
         return nProofOfWorkLimit;
     }

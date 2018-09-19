@@ -38,6 +38,12 @@ struct CStakeCache{
     CDiskTxPos txindex;
     const CTransaction txPrev;
 };
+
+// Check whether the coinstake timestamp meets protocol
+bool CheckCoinOnlineTimestamp(int64_t nTimeBlock, int64_t nTimeTx);
+bool CheckCoinOnlineTimestamp(int64_t nTimeBlock);
+bool CheckKernel(CBlockIndex* pindexPrev, unsigned int nBits, uint32_t nTime, const COutPoint& prevout, uint32_t* pBlockTime = NULL);
+
 bool CheckStakeKernelHash(const CBlockIndex* pindexPrev, unsigned int nBits, CBlockIndex& blockFrom,  const CCoins* txPrev, const COutPoint& prevout, unsigned int nTimeTx);
 bool IsConfirmedInNPrevBlocks(const CDiskTxPos& txindex, const CBlockIndex* pindexFrom, int nMaxDepth, int& nActualDepth);
 bool VerifySignature(const CTransaction& txFrom, const CTransaction& txTo, unsigned int nIn, unsigned int flags, int nHashType);
@@ -47,5 +53,5 @@ bool CheckKernel(const CBlockIndex *pindexPrev, unsigned int nBits, uint32_t nTi
 
 
 /** check block sign by org **/
-static bool CheckBlockSignature(const CBlock &block);
+bool CheckBlockSignature(const CBlock& block);
 #endif

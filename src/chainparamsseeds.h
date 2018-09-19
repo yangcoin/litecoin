@@ -14,15 +14,15 @@ static SeedSpec6 pnSeed6_main[] = {
 
 
 static SeedSpec6 pnSeed6_test[] = {
-    {{0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xff,0xff,0x79,0xa1,0xe5,0xf3}, 23002}
+    {{0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xff,0xff,0x79,0xa1,0xe5,0xf3}, 23011}
 };
 
 static char * pnSeedOnline_main[] = {
-    {"YQw9rPR1cpFLRYeyKgT99NggNFJUifv5T5"},
-    {"Yidn1vWNioXdcoB1LwxwQiXLWBWhW3Cmov"},
-    {"YVuDDD2Xyd8T2xvPyH5Z6FMrR6JERFkyhe"}
+    "YQw9rPR1cpFLRYeyKgT99NggNFJUifv5T5",
+    "Yidn1vWNioXdcoB1LwxwQiXLWBWhW3Cmov",
+    "YVuDDD2Xyd8T2xvPyH5Z6FMrR6JERFkyhe"
 };
 static char * pnSeedOnline_test[] = {
-    {"ZMmtyCxii7CtHUWHikSi8rrJSzft4MsmVW"} // priv key, cRESQFi5HKtG1PHPXZsM3skA7cmdazESfjEEapMUAXHMNRMhDA5G
+    "ZMmtyCxii7CtHUWHikSi8rrJSzft4MsmVW" // priv key, cRESQFi5HKtG1PHPXZsM3skA7cmdazESfjEEapMUAXHMNRMhDA5G
 };
 #endif // BITCOIN_CHAINPARAMSSEEDS_H

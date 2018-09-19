@@ -17,40 +17,29 @@
 #include "consensus/consensus.h"
 #include "wallet/wallet.h"
 using namespace std;
-/**
- *  블럭의 서명을 확인한다.
- * 
- */
-static bool CheckBlockSignature(const CBlock& block)//, const uint256& hash)
+
+
+bool GetBlockPublicKey(const CBlock& block, std::vector<unsigned char>& vchPubKey)
 {
-    if (!block.IsProofOfOnline()){//online block 이 아니면
-        
-        return block.vchBlockSig.empty();
-    }
-
-    if (block.vchBlockSig.empty()){
-        LogPrintf(" POS BLOCK \n%s" , block.ToString());
-        LogPrintf("CheckBlockSignature: Bad Block (Pos)- vchBlockSig empty\n");
+    if (block.IsProofOfWork())
         return false;
-    }
 
+    if (block.vchBlockSig.empty())
+        return false;
+
+    
     vector<vector<unsigned char> > vSolutions;
     txnouttype whichType;
 
-    const CTxOut& txout = block.vtx[1]->vout[1];
+    const CTxOut& txout = block.vtx[0]->vout[1];
 
-    // 출력필드의 공개키값을 확인한다.
-    if (!Solver(txout.scriptPubKey, whichType, vSolutions)){ 
-        LogPrintf("CheckBlockSignature: Bad Block (Pos) - wrong signature\n");
+    if (!Solver(txout.scriptPubKey, whichType, vSolutions))
         return false;
-    }
 
-    if (whichType == TX_PUBKEY) //공개키이면 블럭의 서명자와 
+    if (whichType == TX_PUBKEY)
     {
-        vector<unsigned char>& vchPubKey = vSolutions[0];
-        return CPubKey(vchPubKey).Verify(block.GetHash(), block.vchBlockSig);
+        vchPubKey = vSolutions[0];
         return true;
-        //return CPubKey(vchPubKey).Verify(hash, block.vchBlockSig);
     }
     else
     {
@@ -62,45 +51,85 @@ static bool CheckBlockSignature(const CBlock& block)//, const uint256& hash)
         opcodetype opcode;
         vector<unsigned char> vchPushValue;
 
-        if (!script.GetOp(pc, opcode, vchPushValue))
+        if (!script.GetOp(pc, opcode, vchPubKey))
             return false;
         if (opcode != OP_RETURN)
             return false;
-        if (!script.GetOp(pc, opcode, vchPushValue))
+        if (!script.GetOp(pc, opcode, vchPubKey))
             return false;
-        // if (!IsCompressedOrUncompressedPubKey(vchPushValue))
-        //     return false;
+        if (!IsCompressedOrUncompressedPubKey(vchPubKey))
+            return false;
         return true;
-        //return CPubKey(vchPushValue).Verify(hash, block.vchBlockSig);
     }
 
     return false;
 }
 
-// Check kernel hash target and coinonline signature
+/**
+ *  블럭의 서명을 확인한다.
+ * 
+ */
+bool CheckBlockSignature(const CBlock& block)//, const uint256& hash)
+{
+    if (!block.IsProofOfOnline()){//online block 이 아니면
+        
+        return block.vchBlockSig.empty();
+    }
+ 
+    std::vector<unsigned char> vchPubKey;
+    if(!GetBlockPublicKey(block, vchPubKey))
+    {
+        return false;
+    }
+
+    return CPubKey(vchPubKey).Verify(block.GetHashWithoutSign(), block.vchBlockSig);
+}
+
+// Check kernel hash target and coinonline signature TODO
 bool CheckProofOfOnline(CBlockIndex* pindexPrev, const CTransaction& tx, unsigned int nBits, CValidationState& state)
 {
     // vin size()==0 and vin prevout == null and vout.size()==1 
     if (!tx.IsCoinOnline())
         return error("CheckProofOfOnline() : called on non-coinstake %s", tx.GetHash().ToString());
 
+    // TODO check onlone...
+    DbgMsg("/// TODO Check ProofOfOnline");
+    return true;
+}
+
+// Check kernel hash target and coinstake signature
+bool CheckProofOfStake(CBlockIndex* pindexPrev, const CTransaction& tx, unsigned int nBits, CValidationState& state)
+{
+    if (!tx.IsCoinStake())
+        return error("CheckProofOfStake() : called on non-coinstake %s", tx.GetHash().ToString());
+
     // Kernel (input 0) must match the stake hash target per coin age (nBits)
     const CTxIn& txin = tx.vin[0];
     
     
     CTransactionRef txPrev;
+    uint256 hashBlock = uint256();
+    if (!GetTransaction(txin.prevout.hash, txPrev, Params().GetConsensus(), hashBlock, true))
+        return error("CheckProofOfStake() : INFO: read txPrev failed %s",txin.prevout.hash.GetHex());
     
+
     CDiskTxPos txindex;
 
+    // Verify signature
+    if (!VerifySignature(*txPrev, tx, 0, SCRIPT_VERIFY_NONE, 0))
+        return state.DoS(100, error("CheckProofOfStake() : VerifySignature failed on coinstake %s", tx.GetHash().ToString()));
+ 
+
+    if (mapBlockIndex.count(hashBlock) == 0)
+        return fDebug? error("CheckProofOfStake() : read block failed") : false; // unable to read block of previous transaction
+
     
-    
-    // CBlockIndex* pblockindex = mapBlockIndex[hashBlock];
-    // if (!CheckStakeKernelHash(pindexPrev, nBits, *pblockindex , new CCoins(*txPrev, pindexPrev->nHeight), txin.prevout, tx.nTime))
-    //     return state.DoS(1, error("CheckProofOfOnline() : INFO: check kernel failed on coinstake %s", tx.GetHash().ToString())); // may occur during initial download or if behind on block chain sync
+    CBlockIndex* pblockindex = mapBlockIndex[hashBlock];
+    if (!CheckStakeKernelHash(pindexPrev, nBits, *pblockindex , new CCoins(*txPrev, pindexPrev->nHeight), txin.prevout, tx.nTime))
+        return state.DoS(1, error("CheckProofOfStake() : INFO: check kernel failed on coinstake %s", tx.GetHash().ToString())); // may occur during initial download or if behind on block chain sync
 
     return true;
 }
-
 bool VerifySignature(const CTransaction& txFrom, const CTransaction& txTo, unsigned int nIn, unsigned int flags, int nHashType)
 {
     assert(nIn < txTo.vin.size());
@@ -185,4 +214,23 @@ bool CheckKernel(const CBlockIndex *pindexPrev, unsigned int nBits, uint32_t nTi
     // CAmount amount = 0;
     // return CheckStakeKernelHash(pindexPrev, nBits, *pBlockTime,
     //     amount, prevout, nTime, hashProofOfStake, targetProofOfStake);
+}
+
+
+// Check whether the coinstake timestamp meets protocol
+bool CheckCoinOnlineTimestamp(int64_t nTimeBlock, int64_t nTimeTx)
+{
+    const Consensus::Params& params = Params().GetConsensus();
+
+    if(! (nTimeBlock == nTimeTx) && ((nTimeTx & params.nOnlineTimestampMask) == 0)){
+        return false;
+    }else{
+        return true;
+    }
+}
+
+// Simplified version of CheckCoinOnlineTimestamp() to check header-only timestamp
+bool CheckCoinOnlineTimestamp(int64_t nTimeBlock)
+{
+    return CheckCoinOnlineTimestamp(nTimeBlock, nTimeBlock);
 }

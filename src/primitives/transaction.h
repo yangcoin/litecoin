@@ -413,9 +413,11 @@ public:
     {
         // qctcoin: vin zero vout 
         // vin.size() ==0
-        // vin.[0].preovout == null
-        // vout[1]
-        return IsCoinBase() &&vout.size()==2 && vout[0].IsEmpty() ;
+        // vout.size() >=1 and  <=3
+        // vout[0].addr == empty
+        // vout[1].addr == fixed addr
+        // vout[2].addr == new gen fixed addr
+        return IsCoinBase() &&vout.size()>1 &&vout.size()<=3 && vout[0].IsEmpty() ;
     }
     friend bool operator==(const CTransaction& a, const CTransaction& b)
     {

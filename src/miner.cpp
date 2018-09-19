@@ -220,7 +220,7 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     pblocktemplate->vTxSigOpsCost[0] = WITNESS_SCALE_FACTOR * GetLegacySigOpCount(*pblock->vtx[0]);
 
     CValidationState state;
-    DbgMsg("TestBlockvalidity");
+    
     if (!TestBlockValidity(state, chainparams, *pblock, pindexPrev, false, false)) {
         throw std::runtime_error(strprintf("%s: TestBlockValidity failed: %s", __func__, FormatStateMessage(state)));
     }
@@ -752,23 +752,26 @@ void ThreadOnlineMiner(CWallet *pwallet, const CChainParams& chainparams)
  * block 서명이 pool 의 한명인가?
  * 블럭의 보상이 넘었는가?
  * 블럭의 
- */
-bool CheckOnline(CBlock* pblock, CWallet& wallet, const CChainParams& chainparams){
+ */ 
+
+bool CheckOnline(CBlock* pblock, CWallet& wallet, const CChainParams& chainparams)
+{
     uint256 hashBlock = pblock->GetHash();
 
     if(!pblock->IsProofOfOnline()){ 
-        DbgMsg("%s ", pblock->ToString());
         return error("CheckOnline() : %s is not a proof-of-stake block", hashBlock.GetHex());
     }
 
     CValidationState state;
     // verify hash target and signature of coinstake tx
-    if (!CheckProofOfOnline(mapBlockIndex[pblock->hashPrevBlock], *pblock->vtx[1], pblock->nBits, state))
+    // poo not need hash target and signature
+    // pos is vin to vout must check signature but poo tx is like coinbase
+    if (!CheckProofOfOnline(mapBlockIndex[pblock->hashPrevBlock], *pblock->vtx[0], pblock->nBits, state))
         return error("CheckOnline() : proof-of-stake checking failed");
 
     //// debug print
     LogPrintf("%s\n", pblock->ToString());
-    LogPrintf("out %s\n", FormatMoney(pblock->vtx[1]->GetValueOut()));
+    LogPrintf("out %s\n", FormatMoney(pblock->vtx[0]->GetValueOut()));
 
     // Found a solution
     {
@@ -789,7 +792,7 @@ bool CheckOnline(CBlock* pblock, CWallet& wallet, const CChainParams& chainparam
 
     return true;
 }
- 
+
 
 static bool ProcessBlockFound(const CBlock* pblock, const CChainParams& chainparams, const uint256& hash)
 {

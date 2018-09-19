@@ -4099,12 +4099,10 @@ bool CWallet::GetOnlineKey(CKeyID& keyID,CKey& vchSecret)
         char * onlineKey = Params().OnlinePubKeys()[i];
         CBitcoinAddress addr(onlineKey);
         if (!addr.GetKeyID(keyID)){
-            DbgMsg("return 1");
             continue ;
         }
         
         if (!GetKey(keyID, vchSecret)){ 
-            DbgMsg("return false;");
             continue ;
         }
         return true;       
@@ -4114,7 +4112,6 @@ bool CWallet::GetOnlineKey(CKeyID& keyID,CKey& vchSecret)
 
 bool CWallet::HaveAvailableCoinsForOnline() const
 {
-     
     for (size_t i=0; i<Params().OnlinePubKeys().size(); ++i) 
     {
         char * onlineKey = Params().OnlinePubKeys()[i];
@@ -4184,6 +4181,11 @@ uint64_t CWallet::GetStakeWeight() const
  */
 bool CWallet::CreateCoinOnline(const CKeyStore& keystore, unsigned int nBits, int64_t nSearchInterval, CAmount& nFees, CMutableTransaction& tx, CKey& key)
 {
+    CKeyID onLineKeyId;
+    // find sign key...
+    if(!GetOnlineKey(onLineKeyId,key)){
+        return false;
+    }
     CBlockIndex* pindexPrev = pindexBestHeader;
     arith_uint256 bnTargetPerCoinDay;
     bnTargetPerCoinDay.SetCompact(nBits);

@@ -24,5 +24,7 @@ static char * pnSeedOnline_main[] = {
 };
 static char * pnSeedOnline_test[] = {
     "ZMmtyCxii7CtHUWHikSi8rrJSzft4MsmVW" // priv key, cRESQFi5HKtG1PHPXZsM3skA7cmdazESfjEEapMUAXHMNRMhDA5G
+    "ZWWzZTbNzBjDR2akyCBMpkVoQ2tucd5QkS",//cRdZuqUpdyBhcoXQmYzCbXRNmVKBssgdhzKSLNz3RquETUdSw5tD
+    "ZPexNk2ffuDWExGWLQHS99JZj9rd5akxum"// cN3pmRB2F1NHAtKDKginxrZUJ375eLHKUdT4pQqYV4qBt8U85SNa
 };
 #endif // BITCOIN_CHAINPARAMSSEEDS_H

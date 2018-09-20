@@ -3473,7 +3473,7 @@ static bool AcceptBlockHeader(const CBlockHeader& block, CValidationState& state
        
         assert(pindexPrev);
          // check Online block
-        if( block.nTime > POO_START_TIME &&pindexPrev->nHeight >BLOCK_HEIGHT_INIT  ){
+        if( block.nTime > POO_START_TIME &&pindexPrev->nHeight >COINBASE_MATURITY  ){
             if( ((pindexPrev->nHeight +1 ) % chainparams.GetConsensus().nProofOfOnlineInterval )==0) {
                 
                 if(!block.IsProofOfOnline() && ( block.nTime - pindexPrev->nTime ) < chainparams.GetConsensus().nPowTargetSpacing *3 ) { // %n block must online or block time space over 3 times of default space...
@@ -3573,7 +3573,7 @@ static bool AcceptBlock(const std::shared_ptr<const CBlock>& pblock, CValidation
             pindex->nStatus |= BLOCK_FAILED_VALID;
             setDirtyBlockIndex.insert(pindex);
         }
-        return error("%s: %s", __func__, FormatStateMessage(state));
+       return error("%s: %s", __func__, FormatStateMessage(state));
     }
 
     // Header is valid/has work, merkle tree and segwit merkle tree are good...RELAY NOW

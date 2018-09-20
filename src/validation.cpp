@@ -1247,6 +1247,10 @@ CAmount GetBlockSubsidy(const CBlockIndex * pindexPrev , const Consensus::Params
     } else {
         nSubsidy = BLOCK_REWARD_COIN_40; //
     }
+
+    if ( pindexPrev->nTime > POO_START_TIME && (pindexPrev->nHeight % consensusParams.nProofOfOnlineInterval)==0) {
+        nSubsidy = 0;
+    }
     //limit of reward
     if (pindexPrev != NULL && (pindexPrev->nMoneySupply + nSubsidy) >= MAX_MONEY) {
 		LogPrintf("Max Money.... no more reward[pow]\n");

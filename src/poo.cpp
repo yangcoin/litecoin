@@ -284,6 +284,7 @@ bool CheckCoinOnlineTimestamp(int64_t nTimeBlock, int64_t nTimeTx)
     const Consensus::Params& params = Params().GetConsensus();
 
     if(! (nTimeBlock == nTimeTx) && ((nTimeTx & params.nOnlineTimestampMask) == 0)){
+        DbgMsg( "%d %d %d " ,nTimeBlock ,nTimeTx ,nTimeTx & params.nOnlineTimestampMask);
         return false;
     }else{
         return true;

@@ -4260,9 +4260,9 @@ bool CWallet::CreateCoinOnline(const CKeyStore& keystore, unsigned int nBits, in
 bool CWallet::SignPoOBlock(CBlock& block, CWallet& wallet, int64_t& nFees)
 {
     // if we are trying to sign
-    //    something except proof-of-stake block template
+    //    something except proof-of-online block template
     if (!block.vtx[0]->vout[0].IsEmpty()){
-    	LogPrintf("something except proof-of-stake block\n");
+    	LogPrintf("something except proof-of-online block\n");
     	return false;
     }
 
@@ -4301,9 +4301,10 @@ bool CWallet::SignPoOBlock(CBlock& block, CWallet& wallet, int64_t& nFees)
         if (wallet.CreateCoinOnline(wallet, block.nBits, 1, nFees, txCoinOnline, key))
         {
             // if have other tx allow time limit zero else allow time is pow block limit 
-            if (( block.vtx.size()>1&&txCoinOnline.nTime >= pindexBestHeader->GetPastTimeLimit()+1)||txCoinOnline.nTime >= pindexBestHeader->GetPastTimeLimit() + 60)
+            // 거래가 있으면 이전 블럭 +1 이면 허용하고, 거래가 없으면 60이후에 받아 들인다?
+            // but 체크하는 부분이 존재하지 않는다. 블럭을 받아 들일때 확인되어야 한다. TODO
+            if (( block.vtx.size()>1 && txCoinOnline.nTime >= pindexBestHeader->GetPastTimeLimit()+1)||txCoinOnline.nTime >= pindexBestHeader->GetPastTimeLimit() + 60)
             {
-                DbgMsg("tx:%d, limit:%d gap:%d",txCoinOnline.nTime , pindexBestHeader->GetPastTimeLimit(), ( txCoinOnline.nTime - pindexBestHeader->GetPastTimeLimit()));
                 // make sure coinstake would meet timestamp protocol
                 //    as it would be the same as the block timestamp
             	//txCoinBase.nTime = block.nTime = txCoinOnline.nTime;
@@ -4318,13 +4319,19 @@ bool CWallet::SignPoOBlock(CBlock& block, CWallet& wallet, int64_t& nFees)
 
                 block.hashMerkleRoot = BlockMerkleRoot(block);
                 // append a signature to our block
-                return key.Sign(block.GetHashWithoutSign(), block.vchBlockSig);
+                bool signRet = key.Sign(block.GetHashWithoutSign(), block.vchBlockSig);
+                if(!signRet){
+                    DbgMsg("Sign fail..");
+                }
+                return signRet;
+            }else{
+                DbgMsg("time stamp ... ? %d " ,pindexBestHeader->GetPastTimeLimit());
             }
         }else{
             DbgMsg("CreateCoin fail. what!!! ");
         }
     }else{
-        DbgMsg("searchTime skip nSearchTime :%d ,nLastCoinStakeSearchTime :%d " , nSearchTime , nLastCoinStakeSearchTime);
+        DbgMsg("searchTime skip nSearchTime :%d ,nLastCoinStakeSearchTime :%d  gap:%d " , nSearchTime , nLastCoinStakeSearchTime ,nSearchTime -  nLastCoinStakeSearchTime);
     }
 
     return false;

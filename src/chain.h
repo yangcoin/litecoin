@@ -363,14 +363,14 @@ public:
     // {
     //     return (nStatus & BLOCK_PROOF_OF_ONLINE);
     // }
-    void SetProofOfOnline()
-    {
-        nStatus |= BLOCK_PROOF_OF_ONLINE;
-    }
-    void SetProofOfStake()
-    {
-        nStatus |= BLOCK_PROOF_OF_STAKE;
-    }
+    // void SetProofOfOnline()
+    // {
+    //     nStatus |= BLOCK_PROOF_OF_ONLINE;
+    // }
+    // void SetProofOfStake()
+    // {
+    //     nStatus |= BLOCK_PROOF_OF_STAKE;
+    // }
     std::string ToString() const
     {
         return strprintf("CBlockIndex(pprev=%p, nHeight=%d, merkle=%s, hashBlock=%s, nMoneySupply=%s)",

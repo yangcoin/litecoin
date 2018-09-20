@@ -712,7 +712,7 @@ void ThreadOnlineMiner(CWallet *pwallet, const CChainParams& chainparams)
         }
 
         CBlockIndex* pindexPrev = chainActive.Tip();
-        if(pindexPrev->nHeight % chainparams.GetConsensus().nProofOfOnlineInterval !=0){
+        if( (pindexPrev->nHeight -1)  % chainparams.GetConsensus().nProofOfOnlineInterval !=0){
             DbgMsg("skip not online block. %d %d " , pindexPrev->nHeight ,chainparams.GetConsensus().nProofOfOnlineInterval);
 
             MilliSleep(nMinerSleep * 10);
@@ -739,11 +739,13 @@ void ThreadOnlineMiner(CWallet *pwallet, const CChainParams& chainparams)
                 LogPrintf("ThreadOnlineMiner(): Valid future PoS block was orphaned before becoming valid");
                 continue;
             }
-            CheckOnline(pblock, *pwallet, chainparams);
+            bool result = CheckOnline(pblock, *pwallet, chainparams);
+            DbgMsg("check Online result :%s " , result?"true":"false");
             SetThreadPriority(THREAD_PRIORITY_LOWEST);
             MilliSleep(nMinerSleep );
         }
         else { 
+            DbgMsg("signPooBlock fail...");
             MilliSleep(nMinerSleep );
         }
     }

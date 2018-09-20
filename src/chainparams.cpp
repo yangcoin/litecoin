@@ -256,7 +256,7 @@ public:
         consensus.defaultAssumeValid = uint256S("0x00"); //8711
         
         // poo interval and timestamp mask
-        consensus.nOnlineTimestampMask = 0xf; // 10
+        consensus.nOnlineTimestampMask = 0xf; // 15
         consensus.nProofOfOnlineInterval = 2;// 7
         
         pchMessageStart[0] = 0x79;

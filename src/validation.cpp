@@ -1248,9 +1248,9 @@ CAmount GetBlockSubsidy(const CBlockIndex * pindexPrev , const Consensus::Params
         nSubsidy = BLOCK_REWARD_COIN_40; //
     }
 
-    if ( pindexPrev->nTime > POO_START_TIME && (pindexPrev->nHeight % consensusParams.nProofOfOnlineInterval)==0) {
-        nSubsidy = 0;
-    }
+    // if ( pindexPrev->nTime > POO_START_TIME && (pindexPrev->nHeight % consensusParams.nProofOfOnlineInterval)==0) {
+    //     nSubsidy = 0;
+    // }
     //limit of reward
     if (pindexPrev != NULL && (pindexPrev->nMoneySupply + nSubsidy) >= MAX_MONEY) {
 		LogPrintf("Max Money.... no more reward[pow]\n");
@@ -1907,6 +1907,9 @@ static int64_t nTimeIndex = 0;
 static int64_t nTimeCallbacks = 0;
 static int64_t nTimeTotal = 0;
 
+/**
+ * Connect Block... 
+ */
 bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pindex,
                   CCoinsViewCache& view, const CChainParams& chainparams, bool fJustCheck)
 {
@@ -1915,7 +1918,6 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
     int64_t nTimeStart = GetTimeMicros();
     if (block.IsProofOfOnline())
     {
-        pindex->SetProofOfOnline();
     }else{
         pindex->prevoutStake.SetNull();
     }
@@ -2029,7 +2031,8 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
         flags |= SCRIPT_VERIFY_WITNESS;
         flags |= SCRIPT_VERIFY_NULLDUMMY;
     }
-
+   
+    
     int64_t nTime2 = GetTimeMicros(); nTimeForks += nTime2 - nTime1;
     LogPrint("bench", "    - Fork checks: %.2fms [%.2fs]\n", 0.001 * (nTime2 - nTime1), nTimeForks * 0.000001);
 
@@ -2189,7 +2192,12 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
     int64_t nTime3 = GetTimeMicros(); nTimeConnect += nTime3 - nTime2;
     LogPrint("bench", "      - Connect %u transactions: %.2fms (%.3fms/tx, %.3fms/txin) [%.2fs]\n", (unsigned)block.vtx.size(), 0.001 * (nTime3 - nTime2), 0.001 * (nTime3 - nTime2) / block.vtx.size(), nInputs <= 1 ? 0 : 0.001 * (nTime3 - nTime2) / (nInputs-1), nTimeConnect * 0.000001);
     // TODO check poo reward...
-    CAmount blockReward = nFees + GetBlockSubsidy(pindex->pprev, chainparams.GetConsensus());
+    CAmount blockReward = 0;
+    if( pindex->IsProofOfOnline()) {
+        blockReward = nFees;
+    } else {
+        blockReward = nFees + GetBlockSubsidy(pindex->pprev, chainparams.GetConsensus());
+    }
     if (block.vtx[0]->GetValueOut() > blockReward)
         return state.DoS(100,
                          error("ConnectBlock(): coinbase pays too much (actual=%d vs limit=%d)",
@@ -3131,9 +3139,7 @@ bool FindUndoPos(CValidationState &state, int nFile, CDiskBlockPos &pos, unsigne
 
 bool CheckBlockHeader(const CBlockHeader& block, CValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW)
 {
-    // Check proof of work matches claimed amount
-    CBlockIndex pblockIdx = CBlockIndex(block);
-    if(pblockIdx.IsProofOfOnline()){
+    if( block.IsProofOfOnline()) {// is poo no check hash
         return true;
     }
     // check online block height 
@@ -3146,6 +3152,7 @@ bool CheckBlockHeader(const CBlockHeader& block, CValidationState& state, const 
 
     return true;
 }
+
 
 bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW, bool fCheckMerkleRoot, bool fCheckSig)
 {
@@ -3196,12 +3203,12 @@ bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::P
         }
     }
 
-     // Check coinonline timestamp
-    if (block.IsProofOfOnline() && !CheckCoinOnlineTimestamp(block.GetBlockTime(), block.vtx[0]->nTime)){ 
+     
+    if (block.IsProofOfOnline()) {
+        // Check coinonline timestamp
+         if( !CheckCoinOnlineTimestamp(block.GetBlockTime(), block.vtx[0]->nTime))
             return state.DoS(50, error("CheckBlock(): coinonline timestamp violation nTimeBlock=%d nTimeTx=%u", block.GetBlockTime(), block.vtx[0]->nTime),
             		REJECT_INVALID, "bad-cs-time");
-    }
-    if (block.IsProofOfOnline()) {
         // Coinbase output must be empty if proof-of-online block
         if (block.vtx[0]->vin.size()> 1 || !block.vtx[0]->vout[0].IsEmpty())
             return state.DoS(100, error("CheckBlock(): coinbase output not empty for proof-of-stake block"),
@@ -3209,11 +3216,6 @@ bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::P
 
         // Second transaction must be coinstake, the rest must not be
         if (block.vtx.size() < 1 || !block.vtx[0]->IsCoinOnline()) { 
-            // DbgMsg("%d %d %d %d %d" , block.vtx.size() 
-            //     , block.vtx[0]->vin.size()
-            //     , block.vtx[0]->vin.prevout.IsNull()
-            //     , block.vtx[0]->vout.size()
-            //     , block.vtx[0]->vout[0].IsEmpty());
             return state.DoS(100, error("CheckBlock(): second tx is not coinstake"),
                                 REJECT_INVALID, "bad-cs-missing");
         }
@@ -3331,7 +3333,7 @@ bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationState& sta
     // Check proof of work
     if (block.nBits != GetNextWorkRequired(pindexPrev, &block, consensusParams))
         return state.DoS(100, false, REJECT_INVALID, "bad-diffbits", false, "incorrect proof of work");
-
+    
     // Check timestamp against prev
     if (block.GetBlockTime() <= pindexPrev->GetMedianTimePast())
         return state.Invalid(false, REJECT_INVALID, "time-too-old", "block's timestamp is too early");
@@ -3364,7 +3366,8 @@ bool ContextualCheckBlock(const CBlock& block, CValidationState& state, const Co
     if (VersionBitsState(pindexPrev, consensusParams, Consensus::DEPLOYMENT_CSV, versionbitscache) == THRESHOLD_ACTIVE) {
         nLockTimeFlags |= LOCKTIME_MEDIAN_TIME_PAST;
     }
-
+    if (block.IsProofOfOnline() && !CheckCoinOnlineTimestamp(block.GetBlockTime(), (int64_t)block.vtx[0]->nTime))
+        return state.Invalid(false, REJECT_INVALID, "check-coinstake-timestamp", "coinstake timestamp violation");
     int64_t nLockTimeCutoff = (nLockTimeFlags & LOCKTIME_MEDIAN_TIME_PAST)
                               ? pindexPrev->GetMedianTimePast()
                               : block.GetBlockTime();
@@ -3467,7 +3470,25 @@ static bool AcceptBlockHeader(const CBlockHeader& block, CValidationState& state
         if (pindexPrev->nStatus & BLOCK_FAILED_MASK)
             return state.DoS(100, error("%s: prev block invalid", __func__), REJECT_INVALID, "bad-prevblk");
 
+       
         assert(pindexPrev);
+         // check Online block
+        if( block.nTime > POO_START_TIME &&pindexPrev->nHeight >BLOCK_HEIGHT_INIT  ){
+            if( ((pindexPrev->nHeight +1 ) % chainparams.GetConsensus().nProofOfOnlineInterval )==0) {
+                
+                if(!block.IsProofOfOnline() && ( block.nTime - pindexPrev->nTime ) < chainparams.GetConsensus().nPowTargetSpacing *3 ) { // %n block must online or block time space over 3 times of default space...
+                    return state.DoS(100, error("ConnectBlock(): must online block"),
+                                    REJECT_INVALID, "bad-online");
+                }
+                
+            }else {
+                if( block.IsProofOfOnline() ){
+                    return state.DoS(100, error("ConnectBlock(): must pow block"),
+                                    REJECT_INVALID, "bad-pow block");
+                }
+            }
+        }
+
         if (fCheckpointsEnabled && !CheckIndexAgainstCheckpoint(pindexPrev, state, chainparams, hash))
             return error("%s: CheckIndexAgainstCheckpoint(): %s", __func__, state.GetRejectReason().c_str());
 

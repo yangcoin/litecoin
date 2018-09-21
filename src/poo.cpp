@@ -117,10 +117,10 @@ bool CheckProofOfOnline(CBlockIndex* pindexPrev, const CTransaction& tx, unsigne
 //   quantities so as to generate blocks faster, degrading the system back into
 //   a proof-of-work situation.
 //
-bool CheckStakeKernelHash(CBlockIndex* pindexPrev, unsigned int nBits, uint32_t blockFromTime, CAmount prevoutValue, const COutPoint& prevout, unsigned int nTimeBlock, uint256& hashProofOfStake, uint256& targetProofOfStake, bool fPrintProofOfStake)
+bool CheckOnlineKernelHash(CBlockIndex* pindexPrev, unsigned int nBits, uint32_t blockFromTime, CAmount prevoutValue, const COutPoint& prevout, unsigned int nTimeBlock, uint256& hashProofOfStake, uint256& targetProofOfStake, bool fPrintProofOfStake)
 {
     if (nTimeBlock < blockFromTime)  // Transaction timestamp violation
-        return error("CheckStakeKernelHash() : nTime violation");
+        return error("CheckOnlineKernelHash() : nTime violation");
 
     // Base target
     arith_uint256 bnTarget;
@@ -143,7 +143,7 @@ bool CheckStakeKernelHash(CBlockIndex* pindexPrev, unsigned int nBits, uint32_t 
 
     if (fPrintProofOfStake)
     {
-        LogPrintf("CheckStakeKernelHash() : check modifier=%s nTimeBlockFrom=%u nPrevout=%u nTimeBlock=%u hashProof=%s\n",
+        LogPrintf("CheckOnlineKernelHash() : check modifier=%s nTimeBlockFrom=%u nPrevout=%u nTimeBlock=%u hashProof=%s\n",
             nStakeModifier.GetHex().c_str(),
             blockFromTime, prevout.n, nTimeBlock,
             hashProofOfStake.ToString());
@@ -186,7 +186,7 @@ bool CheckProofOfStake(CBlockIndex* pindexPrev, const CTransaction& tx, unsigned
 
     
     CBlockIndex* pblockindex = mapBlockIndex[hashBlock];
-    // if (!CheckStakeKernelHash(pindexPrev, nBits, *pblockindex , new CCoins(*txPrev, pindexPrev->nHeight), txin.prevout, tx.nTime))
+    // if (!CheckOnlineKernelHash(pindexPrev, nBits, *pblockindex , new CCoins(*txPrev, pindexPrev->nHeight), txin.prevout, tx.nTime))
     //     return state.DoS(1, error("CheckProofOfStake() : INFO: check kernel failed on coinstake %s", tx.GetHash().ToString())); // may occur during initial download or if behind on block chain sync
 
     return true;
@@ -224,7 +224,7 @@ bool VerifySignature(const CTransaction& txFrom, const CTransaction& txTo, unsig
 //   quantities so as to generate blocks faster, degrading the system back into
 //   a proof-of-work situation.
 //
-// bool CheckStakeKernelHash(const CBlockIndex* pindexPrev, 
+// bool CheckOnlineKernelHash(const CBlockIndex* pindexPrev, 
 //                             unsigned int nBits,  
 //                             CBlockIndex& blockFrom, 
 //                             const CCoins* txPrev, 
@@ -238,7 +238,7 @@ bool VerifySignature(const CTransaction& txFrom, const CTransaction& txTo, unsig
     // if (blockFrom.GetBlockTime() + Params().GetConsensus().nStakeMinAge > nTimeTx){ // Min age requirement
     //     DbgMsg("too early? %d %d %d gap:%d" , blockFrom.GetBlockTime() ,Params().GetConsensus().nStakeMinAge ,nTimeTx,
     //             blockFrom.GetBlockTime() + Params().GetConsensus().nStakeMinAge - nTimeTx);
-    //     return error("CheckStakeKernelHash() : min age violation");
+    //     return error("CheckOnlineKernelHash() : min age violation");
     // }
     // // Base target
     // arith_uint256 bnTarget;
@@ -273,7 +273,7 @@ bool CheckKernel(const CBlockIndex *pindexPrev, unsigned int nBits, uint32_t nTi
     // uint256 hashProofOfStake, targetProofOfStake;
 
     // CAmount amount = 0;
-    // return CheckStakeKernelHash(pindexPrev, nBits, *pBlockTime,
+    // return CheckOnlineKernelHash(pindexPrev, nBits, *pBlockTime,
     //     amount, prevout, nTime, hashProofOfStake, targetProofOfStake);
 }
 

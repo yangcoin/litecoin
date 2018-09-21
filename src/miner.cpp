@@ -135,7 +135,7 @@ void BlockAssembler::resetBlock()
     blockFinished = false;
 }
 // TODO fPoofOfOnline...
-std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& scriptPubKeyIn, bool fMineWitnessTx,bool fProofOfOnline)
+std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& scriptPubKeyIn, bool fMineWitnessTx,bool fProofOfOnline,CAmount* pFees)
 {
     int64_t nTimeStart = GetTimeMicros();
 
@@ -194,6 +194,8 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     coinbaseTx.vin.resize(1);
     coinbaseTx.vin[0].prevout.SetNull();
     
+    if (pFees)
+        *pFees = nFees;
     // vout[0]
     // coinbase or coinproof
     coinbaseTx.vout.resize(1);
@@ -723,7 +725,7 @@ void ThreadOnlineMiner(CWallet *pwallet, const CChainParams& chainparams)
         // Create new block
         //
         CAmount nFees =0;
-        std::unique_ptr<CBlockTemplate> pblocktemplate(BlockAssembler(Params()).CreateNewBlock( reservekey.reserveScript,true,true));
+        std::unique_ptr<CBlockTemplate> pblocktemplate(BlockAssembler(Params()).CreateNewBlock( reservekey.reserveScript,true,true ,&nFees));
         if (!pblocktemplate.get())
              return;
 

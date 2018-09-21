@@ -167,7 +167,7 @@ private:
 public:
     BlockAssembler(const CChainParams& chainparams);
     /** Construct a new block template with coinbase to scriptPubKeyIn */
-    std::unique_ptr<CBlockTemplate> CreateNewBlock(const CScript& scriptPubKeyIn, bool fMineWitnessTx=true,bool fProofOfOnline=false);
+    std::unique_ptr<CBlockTemplate> CreateNewBlock(const CScript& scriptPubKeyIn, bool fMineWitnessTx=true,bool fProofOfOnline=false ,int64_t* pFees=NULL);
 
 private:
     // utility functions

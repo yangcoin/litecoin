@@ -1247,10 +1247,7 @@ CAmount GetBlockSubsidy(const CBlockIndex * pindexPrev , const Consensus::Params
     } else {
         nSubsidy = BLOCK_REWARD_COIN_40; //
     }
-
-    // if ( pindexPrev->nTime > POO_START_TIME && (pindexPrev->nHeight % consensusParams.nProofOfOnlineInterval)==0) {
-    //     nSubsidy = 0;
-    // }
+ 
     //limit of reward
     if (pindexPrev != NULL && (pindexPrev->nMoneySupply + nSubsidy) >= MAX_MONEY) {
 		LogPrintf("Max Money.... no more reward[pow]\n");
@@ -3474,17 +3471,16 @@ static bool AcceptBlockHeader(const CBlockHeader& block, CValidationState& state
         assert(pindexPrev);
          // check Online block
         if( block.nTime > POO_START_TIME &&pindexPrev->nHeight >COINBASE_MATURITY  ){
-            if( ((pindexPrev->nHeight +1 ) % chainparams.GetConsensus().nProofOfOnlineInterval )==0) {
-                
-                if(!block.IsProofOfOnline() && ( block.nTime - pindexPrev->nTime ) < chainparams.GetConsensus().nPowTargetSpacing *3 ) { // %n block must online or block time space over 3 times of default space...
-                    return state.DoS(100, error("ConnectBlock(): must online block"),
-                                    REJECT_INVALID, "bad-online");
+            if( ((pindexPrev->nHeight +1 ) % chainparams.GetConsensus().nProofOfOnlineInterval )==0) { // is must online block.
+                if(!block.IsProofOfOnline() && ( block.GetBlockTime() - pindexPrev->GetBlockTime() ) < chainparams.GetConsensus().nPowTargetSpacing *3 ) { // %n block must online or block time space over 3 times of default space...
+                    return state.Invalid(false, REJECT_NONSTANDARD, "ConnectBlock(): must online block");
                 }
-                
             }else {
                 if( block.IsProofOfOnline() ){
-                    return state.DoS(100, error("ConnectBlock(): must pow block"),
-                                    REJECT_INVALID, "bad-pow block");
+                    return state.Invalid(false, REJECT_NONSTANDARD,  "ConnectBlock(): must pow block");
+                }else if( block.GetBlockTime() <  ( pindexPrev->GetBlockTime() +  chainparams.GetConsensus().nPowTargetSpacing/3)) {
+                    DbgMsg( "ConnectBlock(): early pow block %d" ,block.GetBlockTime() - pindexPrev->GetBlockTime());
+                    return state.Invalid(false,REJECT_INVALID , strprintf("ConnectBlock(): early pow block %d" ,block.GetBlockTime() - pindexPrev->GetBlockTime()));
                 }
             }
         }

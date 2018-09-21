@@ -56,12 +56,12 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
         return nProofOfWorkLimit;
     }
     //too fast
-    if (pblock->GetBlockTime() <  ( pindexLast->GetBlockTime() +  params.nPowTargetSpacing/3)){
-        unsigned int ret =pindexLast->nBits / 2;
-        if(fDebug)
-            LogPrint("mine", "prevhieght:%d too fast block %08x\n ",pindexLast->nHeight, ret);
-        return ret;
-    }
+    // if (pblock->GetBlockTime() <  ( pindexLast->GetBlockTime() +  params.nPowTargetSpacing/3)){
+    //     unsigned int ret =pindexLast->nBits / 2;
+    //     if(fDebug)
+    //         LogPrint("mine", "prevhieght:%d too fast block %08x\n ",pindexLast->nHeight, ret);
+    //     return ret;
+    // }
     
 
     // Go back by what we want to be 14 days worth of blocks

@@ -77,10 +77,12 @@ bool CheckBlockSignature(const CBlock& block)//, const uint256& hash)
     }
  
     std::vector<unsigned char> vchPubKey;
-    if(!GetBlockPublicKey(block, vchPubKey))
+    if(!GetBlockPublicKey(block, vchPubKey))// get block pubkey
     {
         return false;
     }
+    // pubkey is preset pubkey?
+    // TODO
 
     return CPubKey(vchPubKey).Verify(block.GetHashWithoutSign(), block.vchBlockSig);
 }

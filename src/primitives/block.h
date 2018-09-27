@@ -11,6 +11,7 @@
 #include "uint256.h"
 #include "consensus/params.h"
 static const int SER_WITHOUT_SIGNATURE = 1 << 3;
+static const int VERSION_BLOCK_SIG =  1024;
 /** Nodes collect new transactions into a block, hash them into a hash tree,
  * and scan through nonce values to make the block's hash satisfy proof-of-work
  * requirements.  When they solve the proof-of-work, they broadcast the block
@@ -45,12 +46,13 @@ public:
         READWRITE(nTime);
         READWRITE(nBits);
         READWRITE(nNonce);
-        if(nTime> POO_START_TIME) { 
+        if(nTime> POO_START_TIME && (this->nVersion & VERSION_BLOCK_SIG)) { 
             READWRITE(prevoutStake);
             if (!(s.GetType() & SER_WITHOUT_SIGNATURE))
                 READWRITE(vchBlockSig);
-            
-            
+        }else{
+            vchBlockSig.clear();
+            prevoutStake.SetNull();    
         }
     }
 

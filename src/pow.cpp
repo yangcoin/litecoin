@@ -22,6 +22,7 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
         return nProofOfWorkLimit;
     }
     
+
     // Only change once per difficulty adjustment interval
     // DifficultyAdjustmentInterval = nPowTargetTimespan (1day, 86400) / nPowTargetSpacing (1min, 60 )  = 1440
     // 하루의 시간 만큼 예상해서 구동된다.
@@ -78,7 +79,16 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
     for (int i = 0; pindexFirst && i < blockstogoback; i++){ 
         if(pindexFirst->nHeight<=1)//root
             break;
+        
         pindexFirst = pindexFirst->pprev;
+        if(pindexFirst->IsProofOfOnline() ) {
+            blockstogoback++;
+            continue;
+        }
+        if(pindexFirst->nBits == nProofOfWorkLimit ){
+            blockstogoback++;
+            continue;
+        }
     }
     
     assert(pindexFirst);
@@ -128,6 +138,8 @@ unsigned int CalculateNextWorkRequired(const CBlockIndex* pindexLast, int64_t nF
     if (bnNew > bnPowLimit){ 
         bnNew = bnPowLimit;
     }
+    DbgMsg("new %s"  , bnNew.ToString() );
+    DbgMsg("prv %s"  , bnOld.ToString() );
     return bnNew.GetCompact();
 }
 

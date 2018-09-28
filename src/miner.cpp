@@ -50,8 +50,7 @@ uint64_t nLastBlockSize = 0;
 uint64_t nLastBlockWeight = 0;
 
 int64_t nLastCoinStakeSearchInterval = 0;
-unsigned int nMinerSleep = 1000;//5초
-static bool ProcessBlockFound(const CBlock* pblock, const CChainParams& chainparams, const uint256& hash);
+unsigned int nMinerSleep = 1000;//5초 
 class ScoreCompare
 {
 public:
@@ -790,41 +789,16 @@ bool CheckOnline(CBlock* pblock, CWallet& wallet, const CChainParams& chainparam
             LOCK(wallet.cs_wallet);
             wallet.mapRequestCount[hashBlock] = 0;
         }
-
+         GetMainSignals().BlockFound(pblock->GetHash());
         // Process this block the same as if we had received it from another node
-        if (!ProcessBlockFound(pblock, chainparams, pblock->GetHash()))
-            return error("CheckOnline() : ProcessBlock, block not accepted");
+        // CValidationState state;
+        std::shared_ptr<const CBlock> shared_pblock = std::make_shared<const CBlock>(*pblock);
+        if (!ProcessNewBlock(Params(), shared_pblock, true, NULL)){ 
+            return error("BitcoinMiner: ProcessNewBlock, block not accepted");
+        }
+        
     }
 
     return true;
 }
-
-
-static bool ProcessBlockFound(const CBlock* pblock, const CChainParams& chainparams, const uint256& hash)
-{
-    LogPrintf("generated %s\n", FormatMoney(pblock->vtx[0]->vout[0].nValue));
-
-    // Found a solution
-    {
-        LOCK(cs_main);
-        if (pblock->hashPrevBlock != chainActive.Tip()->GetBlockHash())
-            return error("BitcoinMiner: generated block is stale");
-    }
-
-    // Inform about the new block
-    GetMainSignals().BlockFound(pblock->GetHash());
-
-    // Process this block the same as if we had received it from another node
-    // CValidationState state;
-    std::shared_ptr<const CBlock> shared_pblock = std::make_shared<const CBlock>(*pblock);
-
-    
-    if (!ProcessNewBlock(Params(), shared_pblock, true, NULL)){ 
-         return error("BitcoinMiner: ProcessNewBlock, block not accepted");
-    }
-   
-    // if (!ProcessNewBlock(state, chainparams, NULL, pblock, true, NULL, hash))
-    //     return error("BitcoinMiner: ProcessNewBlock, block not accepted");
-
-    return true;
-}
+ 

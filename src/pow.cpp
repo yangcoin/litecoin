@@ -18,7 +18,6 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
 
     // Genesis block
     if (pindexLast == NULL||pindexLast->nHeight <=  COINBASE_MATURITY ) { 
-        LogPrint("mine", "init Limit %d ,%d\n" ,pindexLast->nHeight ,BLOCK_HEIGHT_INIT);
         return nProofOfWorkLimit;
     }
     
@@ -75,6 +74,20 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
 
     // Go back by what we want to be 1 days worth of blocks
     const CBlockIndex* pindexFirst = pindexLast;
+    const CBlockIndex* pindexNewLast = pindexLast;
+    // found last normal block to calc real pow diff.
+    while(true) {
+        if(pindexNewLast->nHeight<=1)//root
+            break;
+        if(pindexNewLast->IsProofOfOnline()||pindexNewLast->IsProofOfStake()) {
+            pindexNewLast = pindexNewLast->pprev; 
+        }
+        else if(pindexNewLast->nBits== nProofOfWorkLimit) {
+            pindexNewLast = pindexNewLast->pprev; 
+        }else{ 
+            break;
+        }
+    }
     
     for (int i = 0; pindexFirst && i < blockstogoback; i++){ 
         if(pindexFirst->nHeight<=1)//root
@@ -85,7 +98,7 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
     }
     assert(pindexFirst);
 
-    return CalculateNextWorkRequired(pindexLast, pindexFirst->GetBlockTime(), params);
+    return CalculateNextWorkRequired(pindexNewLast, pindexFirst->GetBlockTime(), params);
 }
 
 /**
@@ -130,6 +143,8 @@ unsigned int CalculateNextWorkRequired(const CBlockIndex* pindexLast, int64_t nF
     if (bnNew > bnPowLimit){ 
         bnNew = bnPowLimit;
     }
+    //LogPrint("pow","new %s\n"  , bnNew.ToString() );
+    //LogPrint("pow","prv %s\n"  , bnOld.ToString() );
     return bnNew.GetCompact();
 }
 

@@ -469,10 +469,10 @@ UniValue getblocktemplate(const JSONRPCRequest& request)
 
     if(!g_connman)
         throw JSONRPCError(RPC_CLIENT_P2P_DISABLED, "Error: Peer-to-peer functionality missing or disabled");
-
-    if (g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL) == 0)
-        throw JSONRPCError(RPC_CLIENT_NOT_CONNECTED, "Yangcoin is not connected!");
-
+    if( Params().NetworkIDString() != CBaseChainParams::TESTNET) { 
+        if (g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL) == 0)
+            throw JSONRPCError(RPC_CLIENT_NOT_CONNECTED, "Yangcoin is not connected!");
+    }
     if (IsInitialBlockDownload())
         throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Yangcoin is downloading blocks...");
 

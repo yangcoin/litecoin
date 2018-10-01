@@ -258,11 +258,7 @@ public:
         nStakeModifier = uint256();
         prevoutStake   = block.prevoutStake; 
         vchBlockSig    = block.vchBlockSig; 
-        // if(block.IsProofOfOnline()){
-        //     nStatus |=BLOCK_PROOF_OF_ONLINE;
-        // }else if( block.IsProofOfStake()) {
-        //     nStatus |=BLOCK_PROOF_OF_STAKE;
-        // }
+        
     }
 
     CDiskBlockPos GetBlockPos() const {
@@ -350,27 +346,7 @@ public:
     {
         return !IsProofOfStake()&&!IsProofOfStake();
     }
-    // bool IsProofOfWork() const
-    // {
-    //     return !IsProofOfStake()&&!IsProofOfOnline();
-    // }
-
-    // bool IsProofOfStake() const
-    // {
-    //     return (nStatus & BLOCK_PROOF_OF_STAKE);
-    // }
-    // bool IsProofOfOnline() const
-    // {
-    //     return (nStatus & BLOCK_PROOF_OF_ONLINE);
-    // }
-    // void SetProofOfOnline()
-    // {
-    //     nStatus |= BLOCK_PROOF_OF_ONLINE;
-    // }
-    // void SetProofOfStake()
-    // {
-    //     nStatus |= BLOCK_PROOF_OF_STAKE;
-    // }
+     
     std::string ToString() const
     {
         return strprintf("CBlockIndex(pprev=%p, nHeight=%d, merkle=%s, hashBlock=%s, nMoneySupply=%s)",
@@ -455,11 +431,10 @@ public:
         READWRITE(nBits);
         READWRITE(nNonce);
         READWRITE(nMoneySupply);
-        if(nTime > POO_START_TIME ){ 
+        if(nTime > POO_START_TIME &&(nVersion &VERSION_BLOCK_SIG)){ 
             READWRITE(vchBlockSig);
             READWRITE(nStakeModifier);
             READWRITE(prevoutStake);
-            
         }
     }
 

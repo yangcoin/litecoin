@@ -102,6 +102,21 @@ public:
         }
         return ret;
     }
+     CBlockHeader& operator=(const CBlockHeader& other) //qtum
+    {
+        if (this != &other)
+        {
+            this->nVersion       = other.nVersion;
+            this->hashPrevBlock  = other.hashPrevBlock;
+            this->hashMerkleRoot = other.hashMerkleRoot;
+            this->nTime          = other.nTime;
+            this->nBits          = other.nBits;
+            this->nNonce         = other.nNonce;
+            this->vchBlockSig    = other.vchBlockSig;
+            this->prevoutStake   = other.prevoutStake;
+        }
+        return *this;
+    }
 };
 
 

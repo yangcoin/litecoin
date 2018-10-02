@@ -73,20 +73,7 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
 
     // Go back by what we want to be 1 days worth of blocks
     const CBlockIndex* pindexFirst = pindexLast;
-    const CBlockIndex* pindexNewLast = pindexLast;
-    // found last normal block to calc real pow diff.
-    while (true && params.IsV2(pblock->GetBlockTime())) {
-        if (pindexNewLast->nHeight <= 1) //root
-            break;
-        if (pindexNewLast->IsProofOfOnline() || pindexNewLast->IsProofOfStake()) {
-            pindexNewLast = pindexNewLast->pprev;
-        } else if (pindexNewLast->nBits == nProofOfWorkLimit) {
-            pindexNewLast = pindexNewLast->pprev;
-        } else {
-            break;
-        }
-    }
-
+    
     for (int i = 0; pindexFirst && i < blockstogoback; i++) {
         if (pindexFirst->nHeight <= 1) //root
             break;
@@ -94,7 +81,7 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
     }
     assert(pindexFirst);
 
-    return CalculateNextWorkRequired(pindexNewLast, pindexFirst->GetBlockTime(), params);
+    return CalculateNextWorkRequired(pindexLast, pindexFirst->GetBlockTime(), params);
 }
 
 /**
@@ -139,8 +126,10 @@ unsigned int CalculateNextWorkRequired(const CBlockIndex* pindexLast, int64_t nF
     if (bnNew > bnPowLimit) {
         bnNew = bnPowLimit;
     }
-    //LogPrint("pow","new %s\n"  , bnNew.ToString() );
-    //LogPrint("pow","prv %s\n"  , bnOld.ToString() );
+    if(( (pindexLast->nHeight +1) % params.nProofOfOnlineInterval)!=0 &&fDebug) { 
+        LogPrint("pow","new %s\n"  , bnNew.ToString() );
+        LogPrint("pow","prv %s\n"  , bnOld.ToString() );
+    }
     return bnNew.GetCompact();
 }
 

@@ -235,6 +235,7 @@ public:
         nNonce         = 0;
 
         nMoneySupply = 0;
+        // For sig
         vchBlockSig.clear();
         nStakeModifier = uint256();
         prevoutStake.SetNull();
@@ -316,7 +317,7 @@ public:
     }
     int64_t GetPastTimeLimit() const
     {
-            return GetBlockTime();
+        return GetBlockTime();
         
     }
     enum { nMedianTimeSpan=11 };

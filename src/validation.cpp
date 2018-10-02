@@ -3471,7 +3471,8 @@ static bool AcceptBlockHeader(const CBlockHeader& block, CValidationState& state
 
        
         assert(pindexPrev);
-         // check Online block
+        // check Online block from v2 protocol.
+        // v2 
         if( chainparams.GetConsensus().IsV2( block.nTime )&&pindexPrev->nHeight > BLOCK_HEIGHT_INIT  ){
             if( ((pindexPrev->nHeight +1 ) % chainparams.GetConsensus().nProofOfOnlineInterval )==0) { // is must online block.
                 if(!block.IsProofOfOnline() && ( block.GetBlockTime() - pindexPrev->GetBlockTime() ) < chainparams.GetConsensus().nPowTargetSpacing *3 ) { // %n block must online or block time space over 3 times of default space...

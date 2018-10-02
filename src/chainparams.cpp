@@ -151,7 +151,7 @@ public:
         consensus.defaultAssumeValid = uint256S("0x00");
 
         consensus.nOnlineTimestampMask = 0xf; // 10
-        consensus.nProofOfOnlineInterval = 2;// 
+        consensus.nProofOfOnlineInterval = 10;// 
         
         /**
          * The message start string is designed to be unlikely to occur in normal data.
@@ -258,7 +258,7 @@ public:
         
         // poo interval and timestamp mask
         consensus.nOnlineTimestampMask = 0xf; // 15
-        consensus.nProofOfOnlineInterval = 2;// 7 block interval every n block poo;  if n ==2  height 000,002,004, ... , 012, 014.
+        consensus.nProofOfOnlineInterval = 6;// 7 block interval every n block poo;  if n ==2  height 000,002,004, ... , 012, 014.
         
 
         pchMessageStart[0] = 0x79;

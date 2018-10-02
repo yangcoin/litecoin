@@ -1216,7 +1216,7 @@ bool ReadBlockFromDisk(CBlock& block, const CDiskBlockPos& pos, const Consensus:
             return error("ReadBlockFromDisk: Errors in block header at %s [%d] ", pos.ToString(), block.nTime);
         }
     }else{
-        DbgMsg("### !!!! check other type!!! ");
+        DbgMsg("### !!!! check other type!!!  TODO...");
     }
 
     return true;
@@ -2449,8 +2449,9 @@ void static UpdateTip(CBlockIndex *pindexNew, const CChainParams& chainParams) {
         for (int i = 0; i < 100 && pindex != NULL; i++)
         {
             int32_t nExpectedVersion = ComputeBlockVersion(pindex->pprev, chainParams.GetConsensus());
-            if (pindex->nVersion > VERSIONBITS_LAST_OLD_BLOCK_VERSION && (pindex->nVersion & ~nExpectedVersion) != 0)
+            if (pindex->nVersion > VERSIONBITS_LAST_OLD_BLOCK_VERSION && (pindex->nVersion & ~nExpectedVersion) != 0) { 
                 ++nUpgraded;
+            }
             pindex = pindex->pprev;
         }
         if (nUpgraded > 0)
@@ -2987,6 +2988,7 @@ CBlockIndex* AddToBlockIndex(const CBlockHeader& block)
         pindexNew->BuildSkip();
     }
     pindexNew->nTimeMax = (pindexNew->pprev ? std::max(pindexNew->pprev->nTimeMax, pindexNew->nTime) : pindexNew->nTime);
+    // TODO check nchainWork...
     pindexNew->nChainWork = (pindexNew->pprev ? pindexNew->pprev->nChainWork : 0) + GetBlockProof(*pindexNew);
     pindexNew->RaiseValidity(BLOCK_VALID_TREE);
     if (pindexBestHeader == NULL || pindexBestHeader->nChainWork < pindexNew->nChainWork)
@@ -3470,7 +3472,7 @@ static bool AcceptBlockHeader(const CBlockHeader& block, CValidationState& state
        
         assert(pindexPrev);
          // check Online block
-        if( block.nTime > POO_START_TIME &&pindexPrev->nHeight >COINBASE_MATURITY  ){
+        if( chainparams.GetConsensus().IsV2( block.nTime )&&pindexPrev->nHeight > BLOCK_HEIGHT_INIT  ){
             if( ((pindexPrev->nHeight +1 ) % chainparams.GetConsensus().nProofOfOnlineInterval )==0) { // is must online block.
                 if(!block.IsProofOfOnline() && ( block.GetBlockTime() - pindexPrev->GetBlockTime() ) < chainparams.GetConsensus().nPowTargetSpacing *3 ) { // %n block must online or block time space over 3 times of default space...
                     return state.Invalid(false, REJECT_NONSTANDARD, "ConnectBlock(): must online block");
@@ -3617,7 +3619,8 @@ bool ProcessNewBlock(const CChainParams& chainparams, const std::shared_ptr<cons
         if (ret) {
             // Store to disk
             ret = AcceptBlock(pblock, state, chainparams, &pindex, fForceProcessing, NULL, fNewBlock);
-            DbgMsg("AcceptBlock result:%d" , ret);
+            if(!ret)
+                DbgMsg("AcceptBlock Fail ,%s" , state.GetRejectReason()) ;
         }else{
             DbgMsg("Check Block Fail ,%s" , state.GetDebugMessage());
         }

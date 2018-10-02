@@ -716,9 +716,8 @@ void ThreadOnlineMiner(CWallet *pwallet, const CChainParams& chainparams)
         }
 
         CBlockIndex* pindexPrev = chainActive.Tip();
-        if( (pindexPrev->nHeight -1)  % chainparams.GetConsensus().nProofOfOnlineInterval !=0){
+        if( ((pindexPrev->nHeight +1)  % chainparams.GetConsensus().nProofOfOnlineInterval) != 0){
             DbgMsg("skip not online block. %d %d " , pindexPrev->nHeight ,chainparams.GetConsensus().nProofOfOnlineInterval);
-
             MilliSleep(nMinerSleep * 10);
             continue;
         }

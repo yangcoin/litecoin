@@ -9,6 +9,7 @@
 #include "uint256.h"
 #include <map>
 #include <string>
+#include "primitives/transaction.h"
 
 namespace Consensus {
 
@@ -66,6 +67,8 @@ struct Params {
     uint256 defaultAssumeValid;
     int nOnlineTimestampMask;
     int nProofOfOnlineInterval;//
+    
+    bool IsV2(int64_t nTime) const {return nTime >= POO_START_TIME; }
 };
 } // namespace Consensus
 

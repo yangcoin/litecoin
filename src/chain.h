@@ -431,7 +431,7 @@ public:
         READWRITE(nBits);
         READWRITE(nNonce);
         READWRITE(nMoneySupply);
-        if(nTime > POO_START_TIME &&(nVersion &VERSION_BLOCK_SIG)){ 
+        if(nTime >= POO_START_TIME &&(nVersion &VERSION_BLOCK_SIG)){ 
             READWRITE(vchBlockSig);
             READWRITE(nStakeModifier);
             READWRITE(prevoutStake);

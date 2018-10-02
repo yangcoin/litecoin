@@ -46,7 +46,7 @@ public:
         READWRITE(nTime);
         READWRITE(nBits);
         READWRITE(nNonce);
-        if(nTime> POO_START_TIME && (this->nVersion & VERSION_BLOCK_SIG)) { 
+        if(nTime>= POO_START_TIME && (this->nVersion & VERSION_BLOCK_SIG)) { 
             READWRITE(prevoutStake);
             if (!(s.GetType() & SER_WITHOUT_SIGNATURE))
                 READWRITE(vchBlockSig);

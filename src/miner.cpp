@@ -686,7 +686,7 @@ void ThreadOnlineMiner(CWallet *pwallet, const CChainParams& chainparams)
     bool fIsTest = true;
     int nCount =0;
     while (true){
-        if(GetTime() <= POO_START_TIME) {
+        if(!chainparams.GetConsensus().IsV2(GetTime())) {
             DbgMsg("SLEPP POO NOT ACTIVE...");
             MilliSleep(5000);
             

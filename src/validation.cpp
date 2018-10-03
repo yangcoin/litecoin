@@ -3481,8 +3481,11 @@ static bool AcceptBlockHeader(const CBlockHeader& block, CValidationState& state
             }else {
                 if( block.IsProofOfOnline() ){
                     return state.Invalid(false, REJECT_NONSTANDARD,  "ConnectBlock(): must pow block");
-                }else if( block.GetBlockTime() <  ( pindexPrev->GetBlockTime() +  chainparams.GetConsensus().nPowTargetSpacing/3)) {
-                    DbgMsg( "ConnectBlock(): early pow block %d" ,block.GetBlockTime() - pindexPrev->GetBlockTime());
+                } else if( block.GetBlockTime() <  ( pindexPrev->GetBlockTime() +  chainparams.GetConsensus().nPowTargetSpacing/3)) {
+                    DbgMsg( "ConnectBlock(): early pow block current:%d , %d = %d - %d" ,
+                        GetTime(),
+                        block.GetBlockTime() - pindexPrev->GetBlockTime(),
+                        block.GetBlockTime(), pindexPrev->GetBlockTime());
                     return state.Invalid(false,REJECT_INVALID , strprintf("ConnectBlock(): early pow block %d" ,block.GetBlockTime() - pindexPrev->GetBlockTime()));
                 }
             }
@@ -3623,12 +3626,12 @@ bool ProcessNewBlock(const CChainParams& chainparams, const std::shared_ptr<cons
             if(!ret)
                 DbgMsg("AcceptBlock Fail ,%s" , state.GetRejectReason()) ;
         }else{
-            DbgMsg("Check Block Fail ,%s" , state.GetDebugMessage());
+            DbgMsg("Check Block Fail ,%s" , state.GetRejectReason());
         }
         CheckBlockIndex(chainparams.GetConsensus());
         if (!ret) {
             GetMainSignals().BlockChecked(*pblock, state);
-            return error("%s: AcceptBlock FAILED", __func__);
+            return error("%s: AcceptBlock FAILED(%s)", __func__ ,state.GetRejectReason());
         }
     }
 

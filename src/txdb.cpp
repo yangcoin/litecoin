@@ -379,10 +379,13 @@ bool CBlockTreeDB::LoadBlockIndexGuts(boost::function<CBlockIndex*(const uint256
 
 
 bool CBlockTreeDB::blockOnchainActive(const uint256 &hash) {
+    if (mapBlockIndex.count(hash) == 0){
+        return false;
+    }
     CBlockIndex* pblockindex = mapBlockIndex[hash];
-
+    
     if (!chainActive.Contains(pblockindex)) {
-	return false;
+	    return false;
     }
 
     return true;

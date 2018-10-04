@@ -65,8 +65,10 @@ struct Params {
     int64_t DifficultyAdjustmentInterval() const { return nPowTargetTimespan / nPowTargetSpacing; }
     uint256 nMinimumChainWork;
     uint256 defaultAssumeValid;
-    int nOnlineTimestampMask;
+    int nStakeTimestampMask;
     int nProofOfOnlineInterval;//
+    /* pos */
+    unsigned int nStakeMinAge;
     
     bool IsV2(int64_t nTime) const {return nTime >= POO_START_TIME; }
 };

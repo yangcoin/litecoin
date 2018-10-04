@@ -14,42 +14,27 @@
 #include "script/sign.h"
 #include <stdint.h>
 
+#include "pos.h"
+
 using namespace std;
-
-/**
- * signed by foundation pubkey
- */
-bool isSigedByFoundation(CBlock block);
-/**
- * sign fundation private key
- */
-bool signBlock();
-
+ 
 /**
  * need PoO block
  */
 bool checkNeedPoO();
 
-
-struct CStakeCache{
-    CStakeCache(CBlockHeader blockFrom_, CDiskTxPos txindex_, const CTransaction txPrev_) : blockFrom(blockFrom_), txindex(txindex_), txPrev(txPrev_){
-    }
-    CBlockHeader blockFrom;
-    CDiskTxPos txindex;
-    const CTransaction txPrev;
-};
-
+ 
 // Check whether the coinstake timestamp meets protocol
 bool CheckCoinOnlineTimestamp(int64_t nTimeBlock, int64_t nTimeTx);
 bool CheckCoinOnlineTimestamp(int64_t nTimeBlock);
-bool CheckKernel(CBlockIndex* pindexPrev, unsigned int nBits, uint32_t nTime, const COutPoint& prevout, uint32_t* pBlockTime = NULL);
+bool CheckPoOKernel(CBlockIndex* pindexPrev, unsigned int nBits, uint32_t nTime, const COutPoint& prevout, uint32_t* pBlockTime = NULL);
 
 bool CheckOnlineKernelHash(const CBlockIndex* pindexPrev, unsigned int nBits, CBlockIndex& blockFrom,  const CCoins* txPrev, const COutPoint& prevout, unsigned int nTimeTx);
 bool IsConfirmedInNPrevBlocks(const CDiskTxPos& txindex, const CBlockIndex* pindexFrom, int nMaxDepth, int& nActualDepth);
 bool VerifySignature(const CTransaction& txFrom, const CTransaction& txTo, unsigned int nIn, unsigned int flags, int nHashType);
 bool CheckProofOfOnline(CBlockIndex* pindexPrev, const CTransaction& tx, unsigned int nBits, CValidationState &state);
-void CacheKernel(std::map<COutPoint, CStakeCache>& cache, const COutPoint& prevout);
-bool CheckKernel(const CBlockIndex *pindexPrev, unsigned int nBits, uint32_t nTime,  uint32_t *pBlockTime);
+void CachePoOKernel(std::map<COutPoint, CStakeCache>& cache, const COutPoint& prevout);
+bool CheckPoOKernel(const CBlockIndex *pindexPrev, unsigned int nBits, uint32_t nTime,  uint32_t *pBlockTime);
 
 
 /** check block sign by org **/

@@ -18,6 +18,7 @@
 #include "script/script_error.h"
 #include "sync.h"
 #include "versionbits.h"
+#include "txdb.h"
 
 #include <algorithm>
 #include <exception>
@@ -205,6 +206,8 @@ static const unsigned int MIN_BLOCKS_TO_KEEP = 288;
 
 static const signed int DEFAULT_CHECKBLOCKS = 6 * 4;
 static const unsigned int DEFAULT_CHECKLEVEL = 3;
+
+extern int64_t nLastCoinStakeSearchInterval;
 
 
 struct CTimestampIndexIteratorKey {
@@ -956,6 +959,8 @@ bool GetAddressUnspent(uint160 addressHash, int type, std::vector<std::pair<CAdd
 bool WriteBlockToDisk(const CBlock& block, CDiskBlockPos& pos, const CMessageHeader::MessageStartChars& messageStart);
 bool ReadBlockFromDisk(CBlock& block, const CDiskBlockPos& pos, const Consensus::Params& consensusParams);
 bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex, const Consensus::Params& consensusParams);
+bool ReadFromDisk(CMutableTransaction& tx, CDiskTxPos& txindex, CBlockTreeDB& txdb, COutPoint prevout);
+bool ReadFromDisk(CMutableTransaction& tx, CDiskTxPos& txindex);
 
 /** Functions for validating blocks and updating the block tree */
 

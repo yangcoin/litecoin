@@ -18,6 +18,7 @@
 #include "policy/policy.h"
 #include "pow.h"
 #include "poo.h"
+#include "pos.h"
 
 #include "primitives/block.h"
 #include "primitives/transaction.h"
@@ -595,7 +596,9 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
     // Coinbase is only valid in a block, not as a loose transaction
     if (tx.IsCoinBase())
         return state.DoS(100, false, REJECT_INVALID, "coinbase");
-
+    if (tx.IsCoinStake())
+        return state.DoS(100, error("AcceptToMemoryPool: coinstake as individual tx"),
+        				 REJECT_INVALID, "coinstake");
     // Reject transactions with witness before segregated witness activates (override with -prematurewitness)
     bool witnessEnabled = IsWitnessEnabled(chainActive.Tip(), Params().GetConsensus());
     if (!GetBoolArg("-prematurewitness",false) && tx.HasWitness() && !witnessEnabled) {
@@ -1420,6 +1423,8 @@ void UpdateCoins(const CTransaction& tx, CCoinsViewCache& inputs, CTxUndo &txund
                 CTxInUndo& undo = txundo.vprevout.back();
                 undo.nHeight = coins->nHeight;
                 undo.fCoinBase = coins->fCoinBase;
+                undo.fCoinStake = coins->fCoinStake;
+                undo.nTime = coins->nTime;
                 undo.nVersion = coins->nVersion;
             }
         }
@@ -1911,11 +1916,15 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
                   CCoinsViewCache& view, const CChainParams& chainparams, bool fJustCheck)
 {
     AssertLockHeld(cs_main);
-
+    assert((pindex->phashBlock == nullptr) ||
+           (*pindex->phashBlock == block.GetHash()));
     int64_t nTimeStart = GetTimeMicros();
     if (block.IsProofOfOnline())
     {
-    }else{
+    }else if (block.IsProofOfStake()) {
+        pindex->prevoutStake = block.vtx[1]->vin[0].prevout;
+
+    }  else{
         pindex->prevoutStake.SetNull();
     }
     
@@ -1933,6 +1942,31 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
         if (!fJustCheck)
             view.SetBestBlock(pindex->GetBlockHash());
         return true;
+    }
+    //POS
+    if(!fJustCheck) { 
+        pindex->nStakeModifier = ComputeStakeModifier(pindex->pprev, block.IsProofOfStake() ? block.vtx[1]->vin[0].prevout.hash : pindex->GetBlockHash());
+    }
+    // Check proof-of-stake
+    if (block.IsProofOfStake() ) {
+         const COutPoint &prevout = block.vtx[1]->vin[0].prevout;
+
+         const CCoins *coins = view.AccessCoins(prevout.hash);
+          if (!coins)
+              return state.DoS(100, error("%s: kernel input unavailable", __func__),
+                                REJECT_INVALID, "bad-cs-kernel");
+
+        
+        const CTxIn& txin = block.vtx[1]->vin[0];
+        CTransactionRef txPrev;
+        uint256 hashBlock = uint256();
+        if (!GetTransaction(txin.prevout.hash, txPrev, Params().GetConsensus(), hashBlock, true))
+            return error("CheckProofOfStake() : INFO: read txPrev failed %s",txin.prevout.hash.GetHex());
+        
+        CBlockIndex* pblockindex = mapBlockIndex[hashBlock];
+         if (!CheckStakeKernelHash(pindex->pprev, block.nBits,*pblockindex, coins, prevout, block.vtx[1]->nTime))
+              return state.DoS(100, error("%s: proof-of-stake hash doesn't match nBits", __func__),
+                                 REJECT_INVALID, "bad-cs-proofhash");
     }
 
     bool fScriptChecks = true;
@@ -4739,3 +4773,42 @@ public:
         mapBlockIndex.clear();
     }
 } instance_of_cmaincleanup;
+
+
+bool ReadFromDisk(CMutableTransaction& tx, CDiskTxPos& txindex, CBlockTreeDB& txdb, COutPoint prevout)
+{
+    if (!txdb.ReadTxIndex(prevout.hash, txindex)){
+    	LogPrintf("no tx index %s \n", prevout.hash.ToString());
+    	return false;
+    }
+    
+    if (!ReadFromDisk(tx, txindex))
+        return false;
+    if (prevout.n >= tx.vout.size())
+    {
+        return false;
+    }
+    return true;
+}
+
+bool ReadFromDisk(CMutableTransaction& tx, CDiskTxPos& txindex)
+{
+    CAutoFile filein(OpenBlockFile(txindex, true), SER_DISK, CLIENT_VERSION);
+    if (filein.IsNull())
+        return error("CTransaction::ReadFromDisk() : OpenBlockFile failed");
+
+    // Read transaction
+    CBlockHeader header;
+    try {
+        filein >> header;
+        fseek(filein.Get(), txindex.nTxOffset, SEEK_CUR);
+        // CTransaction tx1(deserialize, filein);
+        // tx = &tx1;
+         filein >> tx;
+    }
+    catch (const std::exception& e) {
+        return error("%s: Deserialize or I/O error - %s", __func__, e.what());
+    }
+
+    return true;
+}

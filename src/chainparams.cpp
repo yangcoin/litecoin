@@ -150,8 +150,9 @@ public:
         //consensus.defaultAssumeValid = uint256S("0x1673fa904a93848eca83d5ca82c7af974511a7e640e22edc2976420744f2e56a"); //1155631
         consensus.defaultAssumeValid = uint256S("0x00");
 
-        consensus.nOnlineTimestampMask = 0xf; // 10
+        consensus.nStakeTimestampMask = 0xf; // 10
         consensus.nProofOfOnlineInterval = 10;// 
+        consensus.nStakeMinAge = 8 * 60 * 60; // 8 hours
         
         /**
          * The message start string is designed to be unlikely to occur in normal data.
@@ -257,9 +258,9 @@ public:
         consensus.defaultAssumeValid = uint256S("0x00"); //8711
         
         // poo interval and timestamp mask
-        consensus.nOnlineTimestampMask = 0xf; // 15
+        consensus.nStakeTimestampMask = 0xf; // 15
         consensus.nProofOfOnlineInterval = 6;// 7 block interval every n block poo;  if n ==2  height 000,002,004, ... , 012, 014.
-        
+        consensus.nStakeMinAge = 1 * 60 * 60; // 1 hours
 
         pchMessageStart[0] = 0x79;
         pchMessageStart[1] = 0x61;
@@ -357,8 +358,11 @@ public:
         // By default assume that the signatures in ancestors of this block are valid.
         consensus.defaultAssumeValid = uint256S("0x00");
 
-        consensus.nOnlineTimestampMask = 0xf; // 10
+        consensus.nStakeTimestampMask = 0xf; // 10
         consensus.nProofOfOnlineInterval = 10;// 
+        consensus.nStakeMinAge = 8 * 60 * 60; // 8 hours
+
+        
         pchMessageStart[0] = 0x79;
         pchMessageStart[1] = 0x61;
         pchMessageStart[2] = 0x6e;

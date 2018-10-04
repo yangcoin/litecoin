@@ -15,6 +15,7 @@
 static const int SERIALIZE_TRANSACTION_NO_WITNESS = 0x40000000;
 
 const  int64_t POO_START_TIME = 1537237800;//2018-09-18 2:30 UTC
+const  int64_t POS_START_TIME = 1538629136;//2018-10-04 6:00 UTC
 static const uint8_t ONLINE_BLOCK_VERSION = 0xA0;
 static const int WITNESS_SCALE_FACTOR = 4;
 
@@ -248,11 +249,7 @@ inline void UnserializeTransaction(TxType& tx, Stream& s) {
     const bool fAllowWitness = !(s.GetVersion() & SERIALIZE_TRANSACTION_NO_WITNESS);
 
     s >> tx.nVersion;
-#if TX_TIMESTAMP == 1
     s >> tx.nTime;//For PoS
-#else
-    
-#endif    
     unsigned char flags = 0;
     tx.vin.clear();
     tx.vout.clear();
@@ -288,9 +285,8 @@ inline void SerializeTransaction(const TxType& tx, Stream& s) {
     const bool fAllowWitness = !(s.GetVersion() & SERIALIZE_TRANSACTION_NO_WITNESS);
 
     s << tx.nVersion;
-#if TX_TIMESTAMP == 1  
     s << tx.nTime;
-#endif    
+    
     unsigned char flags = 0;
     // Consistency check
     if (fAllowWitness) {
@@ -315,6 +311,7 @@ inline void SerializeTransaction(const TxType& tx, Stream& s) {
     s << tx.nLockTime;
 }
 
+static const int32_t STAKE_VERSION=3;
 
 /** The basic transaction that is broadcasted on the network and contained in
  * blocks.  A transaction can contain multiple inputs and outputs.
@@ -329,7 +326,7 @@ public:
     // adapting relay policy by bumping MAX_STANDARD_VERSION, and then later date
     // bumping the default CURRENT_VERSION at which point both CURRENT_VERSION and
     // MAX_STANDARD_VERSION will be equal.
-    static const int32_t MAX_STANDARD_VERSION=2;
+    static const int32_t MAX_STANDARD_VERSION=3;
 
     // The local variables are made const to prevent unintended modification
     // without updating the cached hash value. However, CTransaction is not

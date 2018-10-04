@@ -12,7 +12,7 @@
 #include "uint256.h"
 #include "util.h"
 #include "validation.h"
-unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader* pblock, const Consensus::Params& params)
+unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader* pblock, const Consensus::Params& params,bool fProofOfStake)
 {
     unsigned int nProofOfWorkLimit = UintToArith256(params.powLimit).GetCompact();
 
@@ -20,34 +20,6 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
     if (pindexLast == NULL || pindexLast->nHeight <= BLOCK_HEIGHT_INIT) {
         return nProofOfWorkLimit;
     }
-
-
-    // Only change once per difficulty adjustment interval
-    // DifficultyAdjustmentInterval = nPowTargetTimespan (1day, 86400) / nPowTargetSpacing (1min, 60 )  = 1440
-    // 하루의 시간 만큼 예상해서 구동된다.
-    // 난이도 조절이 되지 않는다.
-    // if ((pindexLast->nHeight+1) % params.DifficultyAdjustmentInterval() != 0)//특정주기에 도달하지 않으면... 매번 동작한다.
-    // {
-    //     if (params.fPowAllowMinDifficultyBlocks) //mainnet false, only test,regnet
-    //     {
-    //         // Special difficulty rule for testnet:
-    //         // we use MinDiffculty for mainnet
-    //         // If the new block's timestamp is more than 2* 10 minutes
-    //         // then allow mining of a min-difficulty block.
-    //         if (pblock->GetBlockTime() > pindexLast->GetBlockTime() + params.nPowTargetSpacing*4)//4분... 아차피 동작하지 않지만...
-    //             return nProofOfWorkLimit;
-    //         else
-    //         {
-    //             // Return the last non-special-min-difficulty-rules-block
-    //             const CBlockIndex* pindex = pindexLast;
-    //             while (pindex->pprev && pindex->nHeight % params.DifficultyAdjustmentInterval() != 0 && pindex->nBits == nProofOfWorkLimit)
-    //                 pindex = pindex->pprev;
-    //             return pindex->nBits;
-    //         }
-    //     }
-
-    //     return pindexLast->nBits;
-    // }
 
     //every time set retarget...
     //
@@ -87,7 +59,7 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
 /**
 지정된 시간만큼으로 다음 난이도를 결정한다.
 **/
-unsigned int CalculateNextWorkRequired(const CBlockIndex* pindexLast, int64_t nFirstBlockTime, const Consensus::Params& params)
+unsigned int CalculateNextWorkRequired(const CBlockIndex* pindexLast, int64_t nFirstBlockTime, const Consensus::Params& params,bool fProofOfStake)
 {
     // 난이도조절을 하지 않게 했다면...
     if (params.fPowNoRetargeting) { //fPowNoRetargeting = false

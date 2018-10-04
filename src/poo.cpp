@@ -71,19 +71,26 @@ bool GetBlockPublicKey(const CBlock& block, std::vector<unsigned char>& vchPubKe
  */
 bool CheckBlockSignature(const CBlock& block)//, const uint256& hash)
 {
-    if (!block.IsProofOfOnline()){//online block 이 아니면
+    if (block.IsProofOfWork()){//online block 이 아니면
         
         return block.vchBlockSig.empty();
     }
- 
+    if (block.vchBlockSig.empty()){
+        LogPrintf(" POS BLOCK \n%s" , block.ToString());
+        LogPrintf("CheckBlockSignature: Bad Block (Pos)- vchBlockSig empty\n");
+        return false;
+    }
+
     std::vector<unsigned char> vchPubKey;
-    if(!GetBlockPublicKey(block, vchPubKey))// get block pubkey
+    if(!GetBlockPublicKey(block, vchPubKey))
     {
         return false;
     }
-    // pubkey is preset pubkey?
-    // TODO
+    if(block.IsProofOfOnline() ) {
 
+
+        DbgMsg("must provided key..... !!!!!!!!!! TODOTODODO");
+    }
     return CPubKey(vchPubKey).Verify(block.GetHashWithoutSign(), block.vchBlockSig);
 }
 
@@ -265,7 +272,7 @@ bool VerifySignature(const CTransaction& txFrom, const CTransaction& txTo, unsig
  * 이전에 사용한 코인.
  * 블럭시간
  */
-bool CheckKernel(const CBlockIndex *pindexPrev, unsigned int nBits, uint32_t nTime,  uint32_t *pBlockTime)
+bool CheckPoOKernel(const CBlockIndex *pindexPrev, unsigned int nBits, uint32_t nTime,  uint32_t *pBlockTime)
 {
     // TODO 
     // 경쟁 관계를 만들어야 한다.
@@ -285,8 +292,8 @@ bool CheckCoinOnlineTimestamp(int64_t nTimeBlock, int64_t nTimeTx)
 {
     const Consensus::Params& params = Params().GetConsensus();
 
-    if(! (nTimeBlock == nTimeTx) && ((nTimeTx & params.nOnlineTimestampMask) == 0)){
-        DbgMsg( "%d %d %d " ,nTimeBlock ,nTimeTx ,nTimeTx & params.nOnlineTimestampMask);
+    if(! (nTimeBlock == nTimeTx) && ((nTimeTx & params.nStakeTimestampMask) == 0)){
+        DbgMsg( "%d %d %d " ,nTimeBlock ,nTimeTx ,nTimeTx & params.nStakeTimestampMask);
         return false;
     }else{
         return true;

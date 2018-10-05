@@ -40,7 +40,14 @@ extern CFeeRate payTxFee;
 extern unsigned int nTxConfirmTarget;
 extern bool bSpendZeroConfChange;
 extern bool fSendFreeTransactions;
+
 extern bool fWalletRbf;
+
+
+extern bool fWalletUnlockStakingOnly;
+
+extern CAmount nMinimumInputValue;
+
 
 static const unsigned int DEFAULT_KEYPOOL_SIZE = 100;
 //! -paytxfee default
@@ -283,7 +290,7 @@ public:
     mutable bool fImmatureWatchCreditCached;
     mutable bool fAvailableWatchCreditCached;
     mutable bool fChangeCached;
-    mutable bool fImmatureStakeCreditCached;
+    
     mutable CAmount nDebitCached;
     mutable CAmount nCreditCached;
     mutable CAmount nImmatureCreditCached;
@@ -295,7 +302,7 @@ public:
     mutable CAmount nChangeCached;
 
     mutable CAmount nImmatureStakeCreditCached;
-
+    mutable bool fImmatureStakeCreditCached;
     CWalletTx()
     {
         Init(NULL);
@@ -335,6 +342,8 @@ public:
         nImmatureWatchCreditCached = 0;
         nChangeCached = 0;
         nOrderPos = -1;
+        fImmatureStakeCreditCached = false;
+        nImmatureStakeCreditCached = 0;
     }
 
     ADD_SERIALIZE_METHODS;

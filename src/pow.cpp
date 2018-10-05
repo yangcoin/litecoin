@@ -14,6 +14,9 @@
 #include "validation.h"
 unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader* pblock, const Consensus::Params& params,bool fProofOfStake)
 {
+    if(fProofOfStake){
+        return UintToArith256(params.powLimit).GetCompact();
+    };
     unsigned int nProofOfWorkLimit = UintToArith256(params.powLimit).GetCompact();
 
     // Genesis block
@@ -56,6 +59,13 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
     return CalculateNextWorkRequired(pindexLast, pindexFirst->GetBlockTime(), params);
 }
 
+static arith_uint256 GetTargetLimit(int64_t nTime, bool fProofOfStake, const Consensus::Params& params)
+{
+    uint256 nLimit;
+    nLimit = params.powLimit;
+    
+    return UintToArith256(nLimit);
+}
 /**
 지정된 시간만큼으로 다음 난이도를 결정한다.
 **/
@@ -84,7 +94,7 @@ unsigned int CalculateNextWorkRequired(const CBlockIndex* pindexLast, int64_t nF
     bnOld = bnNew;
 
     // Yangcoin: intermediate uint256 can overflow by 1 bit
-    const arith_uint256 bnPowLimit = UintToArith256(params.powLimit);
+    const arith_uint256 bnPowLimit =  GetTargetLimit(pindexLast->GetBlockTime(),fProofOfStake, params);
     bool fShift = bnNew.bits() > bnPowLimit.bits() - 1;
     if (fShift) {
         bnNew >>= 1;

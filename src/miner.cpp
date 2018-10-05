@@ -176,7 +176,7 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     // transaction (which in most cases can be a no-op).
     fIncludeWitness = IsWitnessEnabled(pindexPrev, chainparams.GetConsensus()) && fMineWitnessTx;
 
-    addPriorityTxs();
+    addPriorityTxs(blockType==BlockTYPE::BLOCK_TYPE_POS, pblock->nTime);
     int nPackagesSelected = 0;
     int nDescendantsUpdated = 0;
     addPackageTxs(nPackagesSelected, nDescendantsUpdated);
@@ -220,6 +220,9 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     if(blockType==BlockTYPE::BLOCK_TYPE_POW)
         UpdateTime(pblock, chainparams.GetConsensus(), pindexPrev);
     pblock->nBits          = GetNextWorkRequired(pindexPrev, pblock, chainparams.GetConsensus());
+    pblock->nNonce         = 0;
+    pblocktemplate->vTxSigOpsCost[0] = WITNESS_SCALE_FACTOR * GetLegacySigOpCount(*pblock->vtx[0]);
+
     if(false){
         arith_uint256 bnNew;
         arith_uint256 bnOld;
@@ -227,8 +230,6 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
         bnOld.SetCompact(pindexPrev->nBits);
         LogPrint("pow", "\nprev:%s\nnext:%s\n" ,bnOld.ToString(), bnNew.ToString());
     }
-    pblock->nNonce         = 0;
-    pblocktemplate->vTxSigOpsCost[0] = WITNESS_SCALE_FACTOR * GetLegacySigOpCount(*pblock->vtx[0]);
 
     CValidationState state;
     
@@ -573,7 +574,7 @@ void BlockAssembler::addPackageTxs(int &nPackagesSelected, int &nDescendantsUpda
     }
 }
 
-void BlockAssembler::addPriorityTxs()
+void BlockAssembler::addPriorityTxs(bool fProofOfStake, int blockTime)
 {
     // How much of the block should be dedicated to high-priority transactions,
     // included regardless of the fees they pay
@@ -621,7 +622,8 @@ void BlockAssembler::addPriorityTxs()
         // cannot accept witness transactions into a non-witness block
         if (!fIncludeWitness && iter->GetTx().HasWitness())
             continue;
-
+        if ((fProofOfStake && iter->GetTx().nTime > (unsigned int)blockTime))
+            continue;
         // If tx is dependent on other mempool txs which haven't yet been included
         // then put it in the waitSet
         if (isStillDependent(iter)) {
@@ -867,19 +869,20 @@ void ThreadStakeMiner(CWallet *pwallet, const CChainParams& chainparams)
             MilliSleep(1000);
         }
 
-        
-        while (g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL) < 1 || IsInitialBlockDownload()){
-            nLastCoinStakeSearchInterval = 0;
-            fTryToSync = true;
-            MilliSleep(1000);
-        }
+        if(Params().NetworkIDString() != CBaseChainParams::TESTNET) { 
+            while (g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL) < 1 || IsInitialBlockDownload()){
+                nLastCoinStakeSearchInterval = 0;
+                fTryToSync = true;
+                MilliSleep(1000);
+            }
 
-        if (fTryToSync){
-            fTryToSync = false;
-            //연결수가 3보가 작거나, 동기화 시간이 10 분을 넘었으면 1분간 쉰다.
-            if (g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL)  < 3 || pindexBestHeader->GetBlockTime() < GetTime() - 10 * 60){
-                MilliSleep(60000);
-                continue;
+            if (fTryToSync){
+                fTryToSync = false;
+                //연결수가 3보가 작거나, 동기화 시간이 10 분을 넘었으면 1분간 쉰다.
+                if (g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL)  < 3 || pindexBestHeader->GetBlockTime() < GetTime() - 10 * 60){
+                    MilliSleep(60000);
+                    continue;
+                }
             }
         }
         if(!pwallet->HaveAvailableCoinsForStaking()) {

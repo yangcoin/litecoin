@@ -15,6 +15,7 @@
 #include "util.h"
 #include "utilstrencodings.h"
 #include "version.h"
+#include "consensus/tx_verify.h"
 
 #include <iostream>
 

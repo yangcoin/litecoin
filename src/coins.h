@@ -149,7 +149,7 @@ public:
                 a.nHeight == b.nHeight &&
                 a.nVersion == b.nVersion &&
                 a.vout == b.vout &&
-                (a.nVersion>=STAKE_VERSION)? a.nTime == b.nTime:true;
+                (a.nVersion>=TX_VERSION_STAKE)? a.nTime == b.nTime:true;
     }
     friend bool operator!=(const CCoins &a, const CCoins &b) {
         return !(a == b);
@@ -191,7 +191,7 @@ public:
         }
         // coinbase height
         ::Serialize(s, VARINT(nHeight));
-        if(nVersion>=STAKE_VERSION)
+        if(nVersion>=TX_VERSION_STAKE)
             ::Serialize(s, VARINT(nTime));
     }
 
@@ -227,7 +227,7 @@ public:
         }
         // coinbase height
         ::Unserialize(s, VARINT(nHeight));
-        if(nVersion>=STAKE_VERSION)
+        if(nVersion>=TX_VERSION_STAKE)
             ::Unserialize(s, VARINT(nTime));
         Cleanup();
     }

@@ -98,10 +98,10 @@ unsigned int CalculateNextWorkRequired(const CBlockIndex* pindexLast, int64_t nF
     if (bnNew > bnPowLimit) {
         bnNew = bnPowLimit;
     }
-    if(( (pindexLast->nHeight +1) % params.nProofOfOnlineInterval)!=0 &&fDebug) { 
-        LogPrint("pow","new %s\n"  , bnNew.ToString() );
-        LogPrint("pow","prv %s\n"  , bnOld.ToString() );
-    }
+    // if(( (pindexLast->nHeight +1) % params.nProofOfOnlineInterval)!=0 &&fDebug) { 
+    //     LogPrint("pow","new %s\n"  , bnNew.ToString() );
+    //     LogPrint("pow","prv %s\n"  , bnOld.ToString() );
+    // }
     return bnNew.GetCompact();
 }
 

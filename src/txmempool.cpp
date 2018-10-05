@@ -9,6 +9,8 @@
 #include "consensus/consensus.h"
 #include "consensus/validation.h"
 #include "validation.h"
+#include <consensus/tx_verify.h>
+
 #include "policy/policy.h"
 #include "policy/fees.h"
 #include "streams.h"

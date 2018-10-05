@@ -17,6 +17,7 @@ static const int SERIALIZE_TRANSACTION_NO_WITNESS = 0x40000000;
 const  int64_t POO_START_TIME = 1537237800;//2018-09-18 2:30 UTC
 const  int64_t POS_START_TIME = 1538629136;//2018-10-04 6:00 UTC
 static const uint8_t ONLINE_BLOCK_VERSION = 0xA0;
+static const int32_t TX_VERSION_STAKE=3;
 static const int WITNESS_SCALE_FACTOR = 4;
 
 /** An outpoint - a combination of a transaction hash and an index n into its vout */
@@ -311,7 +312,7 @@ inline void SerializeTransaction(const TxType& tx, Stream& s) {
     s << tx.nLockTime;
 }
 
-static const int32_t STAKE_VERSION=3;
+
 
 /** The basic transaction that is broadcasted on the network and contained in
  * blocks.  A transaction can contain multiple inputs and outputs.

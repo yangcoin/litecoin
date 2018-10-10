@@ -705,12 +705,12 @@ void ThreadOnlineMiner(CWallet *pwallet, const CChainParams& chainparams)
             MilliSleep(1000);
         }
 
+        
+        while (g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL) < 1 || IsInitialBlockDownload()){
+            fTryToSync = true;
+            MilliSleep(1000);
+        }
         if(!fIsTest) { 
-            while (g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL) < 1 || IsInitialBlockDownload()){
-                fTryToSync = true;
-                MilliSleep(1000);
-            }
-
             if (!fIsTest&&fTryToSync){
                 fTryToSync = false;
                 //연결수가 3보가 작거나, 동기화 시간이 10 분을 넘었으면 1분간 쉰다.
@@ -869,13 +869,13 @@ void ThreadStakeMiner(CWallet *pwallet, const CChainParams& chainparams)
             MilliSleep(1000);
         }
 
+        
+        while (g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL) < 1 || IsInitialBlockDownload()){
+            nLastCoinStakeSearchInterval = 0;
+            fTryToSync = true;
+            MilliSleep(1000);
+        }
         if(Params().NetworkIDString() != CBaseChainParams::TESTNET) { 
-            while (g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL) < 1 || IsInitialBlockDownload()){
-                nLastCoinStakeSearchInterval = 0;
-                fTryToSync = true;
-                MilliSleep(1000);
-            }
-
             if (fTryToSync){
                 fTryToSync = false;
                 //연결수가 3보가 작거나, 동기화 시간이 10 분을 넘었으면 1분간 쉰다.

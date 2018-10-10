@@ -236,11 +236,7 @@ bool Consensus::CheckTxInputs(const CTransaction& tx, CValidationState& state, c
                     REJECT_INVALID, "bad-txns-premature-spend-of-coinbase",
                     strprintf("tried to spend coinbase at depth %d", nSpendHeight - coins->nHeight));
         }
-        // Check transaction timestamp
-        if (tx.nVersion==TX_VERSION_STAKE&&coins->nTime > tx.nTime) { 
-            return state.DoS(100, error("CheckInputs() : transaction timestamp earlier than input transaction"),
-                        REJECT_INVALID, "bad-txns-time-earlier-than-input");
-        }
+         
         // Check for negative or overflow input values
         nValueIn += coins->vout[prevout.n].nValue;
         if (!MoneyRange(coins->vout[prevout.n].nValue) || !MoneyRange(nValueIn))

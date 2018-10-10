@@ -18,23 +18,29 @@
  */
 class CTxInUndo
 {
+private:
+    //unsigned int nTime;   // if the outpoint was the last unspent: its time
 public:
     CTxOut txout;         // the txout data before being spent
     bool fCoinBase;       // if the outpoint was the last unspent: whether it belonged to a coinbase
     bool fCoinStake;
     unsigned int nHeight; // if the outpoint was the last unspent: its height
     int nVersion;         // if the outpoint was the last unspent: its version
-    unsigned int nTime;   // if the outpoint was the last unspent: its time
-    CTxInUndo() : txout(), fCoinBase(false), fCoinStake(false), nHeight(0), nVersion(0) ,nTime(0) {}
-    CTxInUndo(const CTxOut &txoutIn, bool fCoinBaseIn = false,bool fCoinStakeIn=false, unsigned int nHeightIn = 0, int nVersionIn = 0, unsigned int nTimeIn =0 ) : txout(txoutIn), fCoinBase(fCoinBaseIn), fCoinStake(fCoinStakeIn), nHeight(nHeightIn), nVersion(nVersionIn), nTime(nTimeIn) { }
+    CTxInUndo() : txout(), fCoinBase(false), fCoinStake(false), nHeight(0), nVersion(0)  {}
+    CTxInUndo(const CTxOut &txoutIn, bool fCoinBaseIn = false,
+                bool fCoinStakeIn=false, 
+                unsigned int nHeightIn = 0, 
+                int nVersionIn = 0 ) : txout(txoutIn), fCoinBase(fCoinBaseIn), fCoinStake(fCoinStakeIn), nHeight(nHeightIn), nVersion(nVersionIn) { }
 
     template<typename Stream>
     void Serialize(Stream &s) const {
-        ::Serialize(s, VARINT(nHeight*2+(fCoinBase ? 1 : 0)+ (fCoinStake ? 2 : 0)));
+        ::Serialize(s, VARINT( nHeight*4 + (fCoinBase ? 1 : 0)+ (fCoinStake ? 2 : 0)));
         if (nHeight > 0)
             ::Serialize(s, VARINT(this->nVersion));
-        if(this->nTime > POS_START_TIME)
-            ::Serialize(s, this->nTime );
+        if(fCoinStake){
+            fprintf(stdout,"stop\n");
+        }
+        
         ::Serialize(s, CTxOutCompressor(REF(txout)));
     }
 
@@ -42,13 +48,14 @@ public:
     void Unserialize(Stream &s) {
         unsigned int nCode = 0;
         ::Unserialize(s, VARINT(nCode));
-        nHeight = nCode / 2;
+        nHeight = nCode / 4;
         fCoinBase = nCode & 1;
         fCoinStake = nCode & 2;
+         if(fCoinStake){
+            fprintf(stdout,"stop\n");
+        }
         if (nHeight > 0)
             ::Unserialize(s, VARINT(this->nVersion));
-        if(this->nTime > POS_START_TIME)
-            ::Unserialize(s, this->nTime );
         ::Unserialize(s, REF(CTxOutCompressor(REF(txout))));
     }
 };

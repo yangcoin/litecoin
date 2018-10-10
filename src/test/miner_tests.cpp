@@ -8,6 +8,7 @@
 #include "consensus/merkle.h"
 #include "consensus/validation.h"
 #include "validation.h"
+#include "tx_verify.h"
 #include "miner.h"
 #include "policy/policy.h"
 #include "pubkey.h"

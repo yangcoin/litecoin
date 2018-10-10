@@ -15,6 +15,7 @@
 #include "hash.h"
 #include "crypto/scrypt.h"
 #include "validation.h"
+#include "tx_verify.h"
 #include "net.h"
 #include "policy/policy.h"
 #include "pow.h"

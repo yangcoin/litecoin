@@ -946,6 +946,7 @@ bool ReadBlockFromDisk(CBlock& block, const CDiskBlockPos& pos, const Consensus:
 bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex, const Consensus::Params& consensusParams);
 bool ReadFromDisk(CMutableTransaction& tx, CDiskTxPos& txindex, CBlockTreeDB& txdb, COutPoint prevout);
 bool ReadFromDisk(CMutableTransaction& tx, CDiskTxPos& txindex);
+bool ReadBlockFromDiskByTx(CBlock& block,CBlockTreeDB& txdb, uint256 txHash);
 
 /** Functions for validating blocks and updating the block tree */
 

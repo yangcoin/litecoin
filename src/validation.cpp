@@ -1015,6 +1015,23 @@ bool WriteBlockToDisk(const CBlock& block, CDiskBlockPos& pos, const CMessageHea
     return true;
 }
 
+bool ReadBlockFromDiskByTx(CBlock& block,CBlockTreeDB& txdb, uint256 txHash){
+    CMutableTransaction tx;
+    CDiskTxPos txindex;
+    if (!txdb.ReadTxIndex(txHash, txindex)){
+    	LogPrintf("no tx index %s \n", txHash.ToString());
+    	return false;
+    }
+    
+    if (!ReadFromDisk(tx, txindex))
+        return false;
+    
+    const CDiskBlockPos& pos = CDiskBlockPos(txindex.nFile, txindex.nPos);
+    if (!ReadBlockFromDisk(block, pos, Params().GetConsensus()))
+        return false;
+    return true;
+}
+
 bool ReadBlockFromDisk(CBlock& block, const CDiskBlockPos& pos, const Consensus::Params& consensusParams)
 {
     block.SetNull();
@@ -1243,7 +1260,6 @@ void UpdateCoins(const CTransaction& tx, CCoinsViewCache& inputs, CTxUndo &txund
                 undo.nHeight = coins->nHeight;
                 undo.fCoinBase = coins->fCoinBase;
                 undo.fCoinStake = coins->fCoinStake;
-                undo.nTime = coins->nTime;
                 undo.nVersion = coins->nVersion;
             }
         }
@@ -1430,7 +1446,6 @@ bool ApplyTxInUndo(const CTxInUndo& undo, CCoinsViewCache& view, const COutPoint
             fClean = fClean && error("%s: undo data overwriting existing transaction", __func__);
         coins->Clear();
         coins->fCoinBase = undo.fCoinBase;
-        coins->fCoinStake = undo.fCoinStake;
         coins->nHeight = undo.nHeight;
         coins->nVersion = undo.nVersion;
     } else {
@@ -1520,8 +1535,15 @@ bool DisconnectBlock(const CBlock& block, CValidationState& state, const CBlockI
             // but it must be corrected before txout nversion ever influences a network rule.
             if (outsBlock.nVersion < 0)
                 outs->nVersion = outsBlock.nVersion;
-            if (*outs != outsBlock)
+            if (*outs != outsBlock) {
+                CCoins outsBlock2(tx, pindex->nHeight);
+                DbgMsg("eq %s" , *outs == outsBlock?"true":"false");
+                DbgMsg("eq %s" , outsBlock2 == outsBlock?"true":"false");
+                CCoinsModifier outs2 = view.ModifyCoins(hash);
+                outs2->ClearUnspendable();
+                DbgMsg("eq %s" , *outs2 == outsBlock?"true":"false");
                 fClean = fClean && error("DisconnectBlock(): added transaction mismatch? database corrupted");
+            }
 
             // remove outputs
             outs->Clear();
@@ -1696,9 +1718,9 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
     int64_t nTimeStart = GetTimeMicros();
     if (block.IsProofOfOnline())
     {
+        
     }else if (block.IsProofOfStake()) {
         pindex->prevoutStake = block.vtx[1]->vin[0].prevout;
-
     }  else{
         pindex->prevoutStake.SetNull();
     }
@@ -1848,6 +1870,7 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
 
     std::vector<int> prevheights;
     CAmount nFees = 0;
+    CAmount nStakeReward = 0;
     int nInputs = 0;
     CAmount nSigOpsCost = 0;
     
@@ -1940,9 +1963,15 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
         txdata.emplace_back(tx);
         if (!tx.IsCoinBase())
         {
-            nFees += view.GetValueIn(tx)-tx.GetValueOut();
+            if (!tx.IsCoinStake())
+                nFees += view.GetValueIn(tx)-tx.GetValueOut();
+            if (tx.IsCoinStake())
+            {
+                nStakeReward = tx.GetValueOut() - view.GetValueIn(tx);
+                DbgMsg("nStake %i = %i - %i " ,nStakeReward , tx.GetValueOut() , view.GetValueIn(tx));
+            }
 
-                       std::vector<CScriptCheck> vChecks;
+            std::vector<CScriptCheck> vChecks;
             bool fCacheResults = fJustCheck; /* Don't cache results if we're actually connecting blocks (still consult the cache, though) */
             if (!CheckInputs(tx, state, view, fScriptChecks, flags, fCacheResults, txdata[i], nScriptCheckThreads ? &vChecks : NULL))
                 return error("ConnectBlock(): CheckInputs on %s failed with %s",
@@ -2001,12 +2030,24 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
     CAmount blockReward = 0;
     if( pindex->IsProofOfOnline()) {
         blockReward = nFees;
+    } else if (block.IsProofOfStake()) {
+        uint64_t nCoinAge;
+        if (!TransactionGetCoinAge(const_cast<CTransaction&>(*block.vtx[1]), nCoinAge))
+            return error("ConnectBlock() : %s unable to get coin age for coinstake", block.vtx[1]->GetHash().ToString());
+
+        CAmount blockReward = GetProofOfStakeReward( pindex->pprev,nCoinAge, nFees);
+
+        if (nStakeReward > blockReward)
+            return state.DoS(100, error("ConnectBlock() : coinstake pays too much(actual=%d vs calculated=%d)", nStakeReward, blockReward));
     } else {
         blockReward = nFees + GetBlockSubsidy(pindex->pprev, chainparams.GetConsensus());
     }
+
+
     if (block.vtx[0]->GetValueOut() > blockReward)
         return state.DoS(100,
-                         error("ConnectBlock(): coinbase pays too much (actual=%d vs limit=%d)",
+                         error("ConnectBlock(): coinbase pays too much (%s) (actual=%d vs limit=%d)",
+                               block.IsProofOfStake()?"pos":block.IsProofOfOnline()?"poo":"pow",
                                block.vtx[0]->GetValueOut(), blockReward),
                                REJECT_INVALID, "bad-cb-amount");
 

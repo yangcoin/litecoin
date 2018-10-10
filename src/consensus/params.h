@@ -10,6 +10,7 @@
 #include <map>
 #include <string>
 #include "primitives/transaction.h"
+#include "consensus/consensus.h"
 
 namespace Consensus {
 

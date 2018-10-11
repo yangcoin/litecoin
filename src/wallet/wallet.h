@@ -17,6 +17,7 @@
 #include "wallet/crypter.h"
 #include "wallet/walletdb.h"
 #include "wallet/rpcwallet.h"
+#include "util.h"
 
 #include <algorithm>
 #include <atomic>
@@ -907,7 +908,7 @@ public:
         {
             LOCK(cs_wallet);
             std::map<uint256, int>::iterator mi = mapRequestCount.find(hash);
-            if (mi != mapRequestCount.end())
+            if (mi != mapRequestCount.end()) 
                 (*mi).second++;
         }
     }

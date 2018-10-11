@@ -4368,10 +4368,6 @@ bool CWallet::SelectCoinsForStaking(CAmount& nTargetValue,   std::set<std::pair<
         if (nValueRet >= nTargetValue)
             break;
 
-        int64_t n = pcoin->tx->vout[i].nValue;
-        if(n < 1 *COIN){
-            continue;
-        }
         int64_t current = GetTime();
         // skip early tx.
         if( pcoin->GetTxTime() + Params().GetConsensus().nStakeMinAge >current ){ 

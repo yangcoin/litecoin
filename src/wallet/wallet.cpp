@@ -4369,6 +4369,7 @@ bool CWallet::SelectCoinsForStaking(CAmount& nTargetValue,   std::set<std::pair<
             break;
 
         int64_t current = GetTime();
+        int64_t n = pcoin->tx->vout[i].nValue;
         // skip early tx.
         if( pcoin->GetTxTime() + Params().GetConsensus().nStakeMinAge >current ){ 
             DbgMsg("Skip too early tx ...  %d + %d > %d (gap: %d min) ,coin:%d " ,

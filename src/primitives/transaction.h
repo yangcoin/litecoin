@@ -465,12 +465,31 @@ struct CMutableTransaction
     CMutableTransaction(deserialize_type, Stream& s) {
         Unserialize(s);
     }
+    bool IsCoinBase() const
+    {
+        return (vin.size() == 1 && vin[0].prevout.IsNull());
+    }
 
+    bool IsCoinStake() const
+    {
+        // ppcoin: the coin stake transaction is marked with the first output empty
+        return (vin.size() > 0 && (!vin[0].prevout.IsNull()) && vout.size() >= 2 && vout[0].IsEmpty());
+    }
+     bool IsCoinOnline() const
+    {
+        // qctcoin: vin zero vout 
+        // vin.size() ==0
+        // vout.size() >=1 and  <=3
+        // vout[0].addr == empty
+        // vout[1].addr == fixed addr
+        // vout[2].addr == new gen fixed addr
+        return IsCoinBase() &&vout.size()>1 &&vout.size()<=3 && vout[0].IsEmpty() ;
+    }
     /** Compute the hash of this CMutableTransaction. This is computed on the
      * fly, as opposed to GetHash() in CTransaction, which uses a cached result.
      */
     uint256 GetHash() const;
-    
+    std::string ToString() const;
     friend bool operator==(const CMutableTransaction& a, const CMutableTransaction& b)
     {
         return a.GetHash() == b.GetHash();

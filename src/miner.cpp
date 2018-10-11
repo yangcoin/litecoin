@@ -792,15 +792,7 @@ bool CheckOnline(CBlock* pblock, CWallet& wallet, const CChainParams& chainparam
         LOCK(cs_main);
         if (pblock->hashPrevBlock != chainActive.Tip()->GetBlockHash())
             return error("CheckOnline() : generated block is stale");
-
-        // Track how many getdata requests this block gets
-        {
-            LOCK(wallet.cs_wallet);
-            wallet.mapRequestCount[hashBlock] = 0;
-        }
-        GetMainSignals().BlockFound(pblock->GetHash());
-        // Process this block the same as if we had received it from another node
-        // CValidationState state;
+        
         std::shared_ptr<const CBlock> shared_pblock = std::make_shared<const CBlock>(*pblock);
         if (!ProcessNewBlock(Params(), shared_pblock, true, NULL)){ 
             return error("BitcoinMiner(poo): ProcessNewBlock, block not accepted");
@@ -832,14 +824,7 @@ bool CheckStake(CBlock* pblock, CWallet& wallet, const CChainParams& chainparams
         LOCK(cs_main);
         if (pblock->hashPrevBlock != chainActive.Tip()->GetBlockHash())
             return error("CheckStake() : generated block is stale");
-
-        // Track how many getdata requests this block gets
-        {
-            LOCK(wallet.cs_wallet);
-            wallet.mapRequestCount[hashBlock] = 0;
-        }
-
-        GetMainSignals().BlockFound(pblock->GetHash());
+       
         // Process this block the same as if we had received it from another node
         // CValidationState state;
         std::shared_ptr<const CBlock> shared_pblock = std::make_shared<const CBlock>(*pblock);

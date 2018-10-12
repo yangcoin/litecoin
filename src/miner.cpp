@@ -218,9 +218,9 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
 
     // Fill in header
     pblock->hashPrevBlock  = pindexPrev->GetBlockHash();
-    if(blockType==BlockTYPE::BLOCK_TYPE_POW)
+    //if(blockType==BlockTYPE::BLOCK_TYPE_POW)
         UpdateTime(pblock, chainparams.GetConsensus(), pindexPrev);
-    pblock->nBits          = GetNextWorkRequired(pindexPrev, pblock, chainparams.GetConsensus());
+    pblock->nBits          = GetNextWorkRequired(pindexPrev, pblock, chainparams.GetConsensus(),pblock->IsProofOfStake());
     pblock->nNonce         = 0;
     pblocktemplate->vTxSigOpsCost[0] = WITNESS_SCALE_FACTOR * GetLegacySigOpCount(*pblock->vtx[0]);
 
@@ -699,11 +699,10 @@ void ThreadOnlineMiner(CWallet *pwallet, const CChainParams& chainparams)
         if(!chainparams.GetConsensus().IsV2(GetTime())) {
             DbgMsg("SLEPP POO NOT ACTIVE...");
             MilliSleep(5000);
-            
             continue;
         }
         while (pwallet->IsLocked()){
-            MilliSleep(1000);
+            MilliSleep(5000);
         }
 
         
@@ -850,6 +849,11 @@ void ThreadStakeMiner(CWallet *pwallet, const CChainParams& chainparams)
     
     int nCount =0;
     while (true){
+        if(GetTime() < POS_START_TIME ) {
+            DbgMsg("SLEPP POS NOT ACTIVE...");
+            MilliSleep(5000);
+            continue;
+        }
         while (pwallet->IsLocked()){
             nLastCoinStakeSearchInterval = 0;
             MilliSleep(1000);
@@ -870,6 +874,12 @@ void ThreadStakeMiner(CWallet *pwallet, const CChainParams& chainparams)
                     continue;
                 }
             }
+        }
+        CBlockIndex* pindexPrev = chainActive.Tip();
+        if( ((pindexPrev->nHeight +1)  % chainparams.GetConsensus().nProofOfOnlineInterval) == 0){
+            DbgMsg("skip online block. %d %d " , pindexPrev->nHeight ,chainparams.GetConsensus().nProofOfOnlineInterval);
+            MilliSleep(1000 * 15);
+            continue;
         }
         if(!pwallet->HaveAvailableCoinsForStaking()) {
             MilliSleep(nMinerSleep);

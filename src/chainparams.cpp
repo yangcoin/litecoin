@@ -142,7 +142,7 @@ public:
         // Deployment of PoO
         consensus.vDeployments[Consensus::DEPLOYMENT_POO].bit = VERSION_BLOCK_SIG;
         consensus.vDeployments[Consensus::DEPLOYMENT_POO].nStartTime = POO_START_TIME; // January 28, 2017
-        consensus.vDeployments[Consensus::DEPLOYMENT_POO].nTimeout = 9999999999; // January 31st, 2018
+        consensus.vDeployments[Consensus::DEPLOYMENT_POO].nTimeout = 0; // January 31st, 2018
         // The best chain should have at least this much work.
         // consensus.nMinimumChainWork = uint256S("0x000000000000000000000000000000000000000000000006805c7318ce2736c0");
         consensus.nMinimumChainWork = uint256S("0x00");
@@ -233,7 +233,7 @@ public:
         consensus.powLimit = uint256S("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPowTargetTimespan = 1 * 1 * 60 * 60; // 1 hour  sec
         consensus.nPowTargetSpacing = 1 * 60;//1min
-     //   consensus.fPowAllowMinDifficultyBlocks = true;
+        
         consensus.fPowNoRetargeting = false;
         consensus.nRuleChangeActivationThreshold = 1512; // 75% for testchains
         consensus.nMinerConfirmationWindow = 2016; // nPowTargetTimespan / nPowTargetSpacing

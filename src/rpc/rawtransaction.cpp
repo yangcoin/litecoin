@@ -72,7 +72,9 @@ void TxToJSONExpanded(const CTransactionRef& ptx, const uint256 hashBlock, UniVa
     UniValue vin(UniValue::VARR);
     BOOST_FOREACH(const CTxIn& txin, tx.vin) {
         UniValue in(UniValue::VOBJ);
-        if (tx.IsCoinBase())
+        if( tx.IsCoinOnline()) 
+            in.push_back(Pair("coinonline", HexStr(txin.scriptSig.begin(), txin.scriptSig.end())));
+        else if (tx.IsCoinBase())
             in.push_back(Pair("coinbase", HexStr(txin.scriptSig.begin(), txin.scriptSig.end())));
         else {
             in.push_back(Pair("txid", txin.prevout.hash.GetHex()));

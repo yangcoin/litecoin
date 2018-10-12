@@ -1042,8 +1042,6 @@ bool ReadBlockFromDisk(CBlock& block, const CDiskBlockPos& pos, const Consensus:
         if (!CheckProofOfWork(block.GetPoWHash(), block.nBits, consensusParams)){ 
             return error("ReadBlockFromDisk: Errors in block header at %s [%d] ", pos.ToString(), block.nTime);
         }
-    }else{
-        DbgMsg("### !!!! check other type!!!  TODO...");
     }
 
     return true;

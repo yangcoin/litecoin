@@ -140,9 +140,9 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nTimeout = 0; // January 31st, 2018
 
         // Deployment of PoO
-        consensus.vDeployments[Consensus::DEPLOYMENT_POO].bit = 2;
-        consensus.vDeployments[Consensus::DEPLOYMENT_POO].nStartTime = 1536391627; // January 28, 2017
-        consensus.vDeployments[Consensus::DEPLOYMENT_POO].nTimeout = 0; // January 31st, 2018
+        consensus.vDeployments[Consensus::DEPLOYMENT_POO].bit = VERSION_BLOCK_SIG;
+        consensus.vDeployments[Consensus::DEPLOYMENT_POO].nStartTime = POO_START_TIME; // January 28, 2017
+        consensus.vDeployments[Consensus::DEPLOYMENT_POO].nTimeout = 9999999999; // January 31st, 2018
         // The best chain should have at least this much work.
         // consensus.nMinimumChainWork = uint256S("0x000000000000000000000000000000000000000000000006805c7318ce2736c0");
         consensus.nMinimumChainWork = uint256S("0x00");
@@ -251,6 +251,9 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nStartTime = 1; // January 1, 2017
         consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nTimeout = 0; // January 31st, 2018
 
+        consensus.vDeployments[Consensus::DEPLOYMENT_POO].bit = VERSION_BLOCK_SIG;
+        consensus.vDeployments[Consensus::DEPLOYMENT_POO].nStartTime = POO_START_TIME; // January 1, 2017
+        consensus.vDeployments[Consensus::DEPLOYMENT_POO].nTimeout = 0; // January 31st, 2018
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = uint256S("0x00");
 

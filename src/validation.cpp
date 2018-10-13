@@ -2985,8 +2985,10 @@ bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::P
     }
 
      // Check coinstake timestamp
-    if (block.IsProofOfStake() && !CheckCoinStakeTimestamp(block.GetBlockTime(), block.vtx[1]->nTime))
-            return state.DoS(50, error("CheckBlock(): coinstake timestamp violation nTimeBlock=%d nTimeTx=%u", block.GetBlockTime(), block.vtx[1]->nTime),
+    if ( (block.IsProofOfStake()||block.IsProofOfStake()) && !CheckCoinStakeTimestamp(block.GetBlockTime(), block.vtx[1]->nTime))
+            return state.DoS(50, error("CheckBlock(%s): coinstake timestamp violation nTimeBlock=%d nTimeTx=%u", 
+                    block.IsProofOfStake()?"stake":block.IsProofOfOnline()?"online":"pow",
+                    block.GetBlockTime(), block.vtx[1]->nTime),
             		REJECT_INVALID, "bad-cs-time");
 
     if (block.IsProofOfOnline()) {
@@ -2996,17 +2998,17 @@ bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::P
             		REJECT_INVALID, "bad-cs-time");
         // Coinbase output must be empty if proof-of-online block
         if (block.vtx[0]->vin.size()> 1 || !block.vtx[0]->vout[0].IsEmpty())
-            return state.DoS(100, error("CheckBlock(): coinbase output not empty for proof-of-stake block"),
+            return state.DoS(100, error("CheckBlock(): coinbase output not empty for proof-of-online block"),
                                 REJECT_INVALID, "bad-cb-not-empty");
 
         // Second transaction must be coinstake, the rest must not be
         if (block.vtx.size() < 1 || !block.vtx[0]->IsCoinOnline()) { 
-            return state.DoS(100, error("CheckBlock(): second tx is not coinstake"),
+            return state.DoS(100, error("CheckBlock(): second tx is not coinonline"),
                                 REJECT_INVALID, "bad-cs-missing");
         }
         for (unsigned int i = 1; i < block.vtx.size(); i++)
             if (block.vtx[i]->IsCoinOnline())
-                return state.DoS(100, error("CheckBlock(): more than one coinstake"),
+                return state.DoS(100, error("CheckBlock(): more than one coinonline"),
                                     REJECT_INVALID, "bad-cs-multiple");
     }
     else if (block.IsProofOfStake())

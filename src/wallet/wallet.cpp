@@ -4192,21 +4192,13 @@ bool CWallet::SignPoOBlock(CBlock& block, CWallet& wallet, int64_t& nFees)
     // int64_t nFees = -block.vTxFees[0];
     // DbgMsg("nFee %d " , nFees);
     if (nSearchTime <= nLastCoinStakeSearchTime){
-         LogPrint("poo" ,"searchTime skip nSearchTime :%d ,nLastCoinStakeSearchTime :%d  gap:%d " , nSearchTime , nLastCoinStakeSearchTime ,nSearchTime -  nLastCoinStakeSearchTime);
-    
+        LogPrint("poo" ,"searchTime skip nSearchTime :%d ,nLastCoinStakeSearchTime :%d  gap:%d " , nSearchTime , nLastCoinStakeSearchTime ,nSearchTime -  nLastCoinStakeSearchTime);
         return false;
     }
-    
-    // 목표 비트로 n( 1에서 60?으로 수정) 번 코인을 찾는다.
-    // int64_t nSearchInterval = nBestHeight+1 > 0 ? 1 : nSearchTime - nLastCoinStakeSearchTime;
-    // 
     /**
      * 코인온라인 생성.
      * 새로운 Tx 를 만들지 않는다.
      * 생성된 CoinBase에 vout 을 추가한다.
-     * 
-     * 
-     * 
      */
     if (!wallet.CreateCoinOnline(wallet, block.nBits, 1, nFees, txCoinOnline, key)) {
         DbgMsg("CreateCoin fail. what!!! ");
@@ -4228,7 +4220,6 @@ bool CWallet::SignPoOBlock(CBlock& block, CWallet& wallet, int64_t& nFees)
         //    our transactions set
         for (std::vector<CTransactionRef>::iterator it = block.vtx.begin(); it != block.vtx.end();)
             if ((*it)->nTime > block.nTime) { it = block.vtx.erase(it); } else { ++it; }
-
 
         block.hashMerkleRoot = BlockMerkleRoot(block);
         block.prevoutStake.SetNull();

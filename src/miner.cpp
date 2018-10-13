@@ -176,7 +176,6 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     // TODO: replace this with a call to main to assess validity of a mempool
     // transaction (which in most cases can be a no-op).
     fIncludeWitness = IsWitnessEnabled(pindexPrev, chainparams.GetConsensus()) && fMineWitnessTx;
-
     addPriorityTxs(blockType==BlockTYPE::BLOCK_TYPE_POS, pblock->nTime);
     int nPackagesSelected = 0;
     int nDescendantsUpdated = 0;
@@ -212,7 +211,7 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     pblock->vtx[0] = MakeTransactionRef(std::move(coinbaseTx));
     pblocktemplate->vchCoinbaseCommitment = GenerateCoinbaseCommitment(*pblock, pindexPrev, chainparams.GetConsensus());
     pblocktemplate->vTxFees[0] = -nFees;
-
+    
     uint64_t nSerializeSize = GetSerializeSize(*pblock, SER_NETWORK, PROTOCOL_VERSION);
     LogPrintf("CreateNewBlock(): total size: %u block weight: %u txs: %u fees: %ld sigops %d\n", nSerializeSize, GetBlockWeight(*pblock), nBlockTx, nFees, nBlockSigOpsCost);
 
@@ -233,7 +232,7 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     }
 
     CValidationState state;
-    
+
     if (!TestBlockValidity(state, chainparams, *pblock, pindexPrev, false, false)) {
         throw std::runtime_error(strprintf("%s: TestBlockValidity failed: %s", __func__, FormatStateMessage(state)));
     }
@@ -730,7 +729,6 @@ void ThreadOnlineMiner(CWallet *pwallet, const CChainParams& chainparams)
             MilliSleep(nMinerSleep * 10);
             continue;
         }
-        LogPrint("poo" , "start poo miner");
         //
         // Create new block
         //
@@ -740,7 +738,7 @@ void ThreadOnlineMiner(CWallet *pwallet, const CChainParams& chainparams)
              return;
 
         CBlock *pblock = &pblocktemplate->block;
-        
+
         // Trying to sign a block
         if (pwallet->SignPoOBlock(*pblock, *pwallet, nFees))
         {
@@ -750,14 +748,20 @@ void ThreadOnlineMiner(CWallet *pwallet, const CChainParams& chainparams)
                 LogPrintf("ThreadOnlineMiner(): Valid future PoS block was orphaned before becoming valid");
                 continue;
             }
+            MilliSleep(GetRandInt(nMinerSleep));
             bool result = CheckOnline(pblock, *pwallet, chainparams);
             DbgMsg("check Online result :%s " , result?"true":"false");
             SetThreadPriority(THREAD_PRIORITY_LOWEST);
-            MilliSleep(nMinerSleep );
+            if(result ) {
+                MilliSleep(nMinerSleep * 60 );
+            }
+            else {
+                MilliSleep(nMinerSleep  );
+            }
         }
         else { 
             DbgMsg("signPooBlock fail...");
-            MilliSleep(nMinerSleep );
+            MilliSleep(GetRandInt(nMinerSleep * 10));
         }
     }
 }
@@ -772,7 +776,7 @@ bool CheckOnline(CBlock* pblock, CWallet& wallet, const CChainParams& chainparam
     uint256 hashBlock = pblock->GetHash();
 
     if(!pblock->IsProofOfOnline()){ 
-        return error("CheckOnline() : %s is not a proof-of-stake block", hashBlock.GetHex());
+        return error("CheckOnline() : %s is not a proof-of-online block", hashBlock.GetHex());
     }
 
     CValidationState state;
@@ -780,11 +784,7 @@ bool CheckOnline(CBlock* pblock, CWallet& wallet, const CChainParams& chainparam
     // poo not need hash target and signature
     // pos is vin to vout must check signature but poo tx is like coinbase
     if (!CheckProofOfOnline(mapBlockIndex[pblock->hashPrevBlock], *pblock->vtx[0], pblock->nBits, state))
-        return error("CheckOnline() : proof-of-stake checking failed");
-
-    //// debug print
-    LogPrintf("%s\n", pblock->ToString());
-    LogPrintf("out %s\n", FormatMoney(pblock->vtx[0]->GetValueOut()));
+        return error("CheckOnline() : proof-of-online checking failed");
 
     // Found a solution
     {

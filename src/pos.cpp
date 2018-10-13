@@ -129,7 +129,6 @@ bool CheckProofOfStake(CBlockIndex* pindexPrev, const CTransaction& tx, unsigned
     if (!GetTransaction(txin.prevout.hash, txPrev, Params().GetConsensus(), hashBlock, true))
         return error("CheckProofOfStake() : INFO: read txPrev failed %s",txin.prevout.hash.GetHex());
     
-
     CDiskTxPos txindex;
 
     // Verify signature

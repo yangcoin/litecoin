@@ -93,13 +93,13 @@ bool CheckBlockSignature(const CBlock& block)//, const uint256& hash)
     std::vector<unsigned char> vchPubKey;
     if(!GetBlockPublicKey(block, vchPubKey))
     {
-        LogPrintf("poo" ,"GetBlockPubKey fail... \n");
+        LogPrint("poo" ,"GetBlockPubKey fail... \n");
         return false;
     }
     CPubKey pubKey(vchPubKey);
     if(block.IsProofOfOnline() ) {
         if(!IsOnlineKey(pubKey)) {
-            LogPrintf("poo" ,"Not Allow PubKey \n");
+            LogPrint("poo" ,"Not Allow PubKey \n");
             return false;
         }  
     }

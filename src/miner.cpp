@@ -129,7 +129,7 @@ void BlockAssembler::resetBlock()
     lastFewTxs = 0;
     blockFinished = false;
 }
-// TODO fPoofOfOnline...
+
 std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& scriptPubKeyIn, bool fMineWitnessTx,BlockTYPE blockType,CAmount* pFees)
 {
     int64_t nTimeStart = GetTimeMicros();

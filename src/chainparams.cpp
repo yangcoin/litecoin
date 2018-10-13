@@ -145,10 +145,10 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_POO].nTimeout = 0; // January 31st, 2018
         // The best chain should have at least this much work.
         // consensus.nMinimumChainWork = uint256S("0x000000000000000000000000000000000000000000000006805c7318ce2736c0");
-        consensus.nMinimumChainWork = uint256S("0x00");
+        consensus.defaultAssumeValid = uint256S("0x000000000000000000000000000000000000000000000000000000620c097e54"); //
         // By default assume that the signatures in ancestors of this block are valid.
         //consensus.defaultAssumeValid = uint256S("0x1673fa904a93848eca83d5ca82c7af974511a7e640e22edc2976420744f2e56a"); //1155631
-        consensus.defaultAssumeValid = uint256S("0x00");
+        consensus.defaultAssumeValid = uint256S("0x76b274d801f169653582571b51ef425298b9bcbdbf8c871c760886da4702b03a");//157000
 
         consensus.nStakeTimestampMask = 0xf; // 10
         consensus.nProofOfOnlineInterval = 10;// 
@@ -190,9 +190,11 @@ public:
 
         vFixedSeeds = std::vector<SeedSpec6>(pnSeed6_main, pnSeed6_main + ARRAYLEN(pnSeed6_main));
 
-        vOnlinePubKeys = std::vector<char *>();
-        for(int i =0;i<ARRAYLEN(pnSeedOnline_main);i++){
-            vOnlinePubKeys.push_back(  pnSeedOnline_main[i]);
+        vOnlinePubKeys = std::vector<CBitcoinAddress *>();
+        
+        for(int i =0;i<ARRAYLEN( pnSeedOnline_test);i++){
+            CBitcoinAddress* addr = new CBitcoinAddress(pnSeedOnline_main[i]);
+            vOnlinePubKeys.push_back( addr);
         }
 
         fMiningRequiresPeers = true;
@@ -253,12 +255,12 @@ public:
 
         consensus.vDeployments[Consensus::DEPLOYMENT_POO].bit = VERSION_BLOCK_SIG;
         consensus.vDeployments[Consensus::DEPLOYMENT_POO].nStartTime = POO_START_TIME; // January 1, 2017
-        consensus.vDeployments[Consensus::DEPLOYMENT_POO].nTimeout = 0; // January 31st, 2018
+        consensus.vDeployments[Consensus::DEPLOYMENT_POO].nTimeout = 9999999999; // January 31st, 2018
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = uint256S("0x00");
 
         // By default assume that the signatures in ancestors of this block are valid.
-        consensus.defaultAssumeValid = uint256S("0x00"); //8711
+        consensus.defaultAssumeValid = uint256S("0x0000000000000000000000000000000000000000000000000000001d760e6e6a"); //8711
         
         // poo interval and timestamp mask
         consensus.nStakeTimestampMask = 0xf; // 15
@@ -291,9 +293,11 @@ public:
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,142);//y
         
         
-        vOnlinePubKeys = std::vector<char *>();
+        vOnlinePubKeys = std::vector<CBitcoinAddress *>();
+        
         for(int i =0;i<ARRAYLEN( pnSeedOnline_test);i++){
-            vOnlinePubKeys.push_back( pnSeedOnline_test[i]);
+            CBitcoinAddress* addr = new CBitcoinAddress(pnSeedOnline_test[i]);
+            vOnlinePubKeys.push_back( addr);
         }
 
         

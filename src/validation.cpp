@@ -1003,60 +1003,6 @@ bool WriteBlockToDisk(const CBlock& block, CDiskBlockPos& pos, const CMessageHea
     return true;
 }
 
-bool ReadBlockFromDiskByTx(CBlock& block,CBlockTreeDB& txdb, uint256 txHash){
-    CMutableTransaction tx;
-    CDiskTxPos txindex;
-    if (!txdb.ReadTxIndex(txHash, txindex)){
-    	LogPrintf("no tx index %s \n", txHash.ToString());
-    	return false;
-    }
-    
-    if (!ReadFromDisk(tx, txindex))
-        return false;
-    
-    const CDiskBlockPos& pos = CDiskBlockPos(txindex.nFile, txindex.nPos);
-    if (!ReadBlockFromDisk(block, pos, Params().GetConsensus()))
-        return false;
-    return true;
-}
-
-bool ReadBlockFromDisk(CBlock& block, const CDiskBlockPos& pos, const Consensus::Params& consensusParams)
-{
-    block.SetNull();
-
-    // Open history file to read
-    CAutoFile filein(OpenBlockFile(pos, true), SER_DISK, CLIENT_VERSION);
-    if (filein.IsNull())
-        return error("ReadBlockFromDisk: OpenBlockFile failed for %s", pos.ToString());
-
-    // Read block
-    try {
-        filein >> block;
-    }
-    catch (const std::exception& e) {
-        return error("%s: Deserialize or I/O error - %s at %s", __func__, e.what(), pos.ToString());
-    }
-
-    // Check the header
-    if(block.IsProofOfWork()) { 
-        if (!CheckProofOfWork(block.GetPoWHash(), block.nBits, consensusParams)){ 
-            return error("ReadBlockFromDisk: Errors in block header at %s [%d] ", pos.ToString(), block.nTime);
-        }
-    }
-
-    return true;
-}
-
-bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex, const Consensus::Params& consensusParams)
-{
-    if (!ReadBlockFromDisk(block, pindex->GetBlockPos(), consensusParams))
-        return false;
-    if (block.GetHash() != pindex->GetBlockHash())
-        return error("ReadBlockFromDisk(CBlock&, CBlockIndex*): GetHash() doesn't match index for %s at %s",
-                pindex->ToString(), pindex->GetBlockPos().ToString());
-    return true;
-}
-
 CAmount GetBlockSubsidy(const CBlockIndex * pindexPrev , const Consensus::Params& consensusParams)
 {
     CAmount nSubsidy  = 0;
@@ -4631,5 +4577,59 @@ bool ReadFromDisk(CMutableTransaction& tx, CDiskTxPos& txindex)
         return error("%s: Deserialize or I/O error - %s", __func__, e.what());
     }
 
+    return true;
+}
+
+bool ReadBlockFromDiskByTx(CBlock& block,CBlockTreeDB& txdb, uint256 txHash){ 
+    CMutableTransaction tx;
+    CDiskTxPos txindex;
+    if (!txdb.ReadTxIndex(txHash, txindex)){
+    	LogPrintf("no tx index %s \n", txHash.ToString());
+    	return false;
+    }
+    
+    if (!ReadFromDisk(tx, txindex))
+        return false;
+    
+    const CDiskBlockPos& pos = CDiskBlockPos(txindex.nFile, txindex.nPos);
+    if (!ReadBlockFromDisk(block, pos, Params().GetConsensus()))
+        return false;
+    return true;
+}
+
+bool ReadBlockFromDisk(CBlock& block, const CDiskBlockPos& pos, const Consensus::Params& consensusParams)
+{
+    block.SetNull();
+
+    // Open history file to read
+    CAutoFile filein(OpenBlockFile(pos, true), SER_DISK, CLIENT_VERSION);
+    if (filein.IsNull())
+        return error("ReadBlockFromDisk: OpenBlockFile failed for %s", pos.ToString());
+
+    // Read block
+    try {
+        filein >> block;
+    }
+    catch (const std::exception& e) {
+        return error("%s: Deserialize or I/O error - %s at %s", __func__, e.what(), pos.ToString());
+    }
+
+    // Check the header
+    if(block.IsProofOfWork()) { 
+        if (!CheckProofOfWork(block.GetPoWHash(), block.nBits, consensusParams)){ 
+            return error("ReadBlockFromDisk: Errors in block header at %s [%d] ", pos.ToString(), block.nTime);
+        }
+    }
+
+    return true;
+}
+
+bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex, const Consensus::Params& consensusParams)
+{
+    if (!ReadBlockFromDisk(block, pindex->GetBlockPos(), consensusParams))
+        return false;
+    if (block.GetHash() != pindex->GetBlockHash())
+        return error("ReadBlockFromDisk(CBlock&, CBlockIndex*): GetHash() doesn't match index for %s at %s",
+                pindex->ToString(), pindex->GetBlockPos().ToString());
     return true;
 }

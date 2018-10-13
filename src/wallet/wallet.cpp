@@ -4042,9 +4042,8 @@ bool CWallet::GetOnlineKey(CKeyID& keyID,CKey& vchSecret)
      
     for (size_t i=0; i<Params().OnlinePubKeys().size(); ++i) 
     {
-        char * onlineKey = Params().OnlinePubKeys()[i];
-        CBitcoinAddress addr(onlineKey);
-        if (!addr.GetKeyID(keyID)){
+        CBitcoinAddress *addr = Params().OnlinePubKeys()[i];
+        if (!addr->GetKeyID(keyID)){
             continue ;
         }
         
@@ -4060,10 +4059,10 @@ bool CWallet::HaveAvailableCoinsForOnline() const
 {
     for (size_t i=0; i<Params().OnlinePubKeys().size(); ++i) 
     {
-        char * onlineKey = Params().OnlinePubKeys()[i];
-        CBitcoinAddress addr(onlineKey);
+        CBitcoinAddress *addr = Params().OnlinePubKeys()[i];
+        
         CKeyID keyID;
-        if (!addr.GetKeyID(keyID)){
+        if (!addr->GetKeyID(keyID)){
             continue ;
         }
             
@@ -4098,16 +4097,12 @@ bool CWallet::CreateCoinOnline(const CKeyStore& keystore, unsigned int nBits, in
         return false;
     }
     CBlockIndex* pindexPrev = pindexBestHeader;
-    arith_uint256 bnTargetPerCoinDay;
-    bnTargetPerCoinDay.SetCompact(nBits);
-
+    
     struct CMutableTransaction txNew(tx);
     txNew.vin[0].prevout.SetNull(); // make coinbase
     // Mark coin stake transaction
     CScript scriptEmpty;
     scriptEmpty.clear();
-
-    vector<const CWalletTx*> vwtxPrev;
 
     int64_t nCredit = nFees;
     if(nCredit <0 ){
@@ -4196,54 +4191,54 @@ bool CWallet::SignPoOBlock(CBlock& block, CWallet& wallet, int64_t& nFees)
 
     // int64_t nFees = -block.vTxFees[0];
     // DbgMsg("nFee %d " , nFees);
-    if (nSearchTime > nLastCoinStakeSearchTime)
-    {
-        // 목표 비트로 n( 1에서 60?으로 수정) 번 코인을 찾는다.
-        // int64_t nSearchInterval = nBestHeight+1 > 0 ? 1 : nSearchTime - nLastCoinStakeSearchTime;
-        // 
-        /**
-         * 코인온라인 생성.
-         * 새로운 Tx 를 만들지 않는다.
-         * 생성된 CoinBase에 vout 을 추가한다.
-         * 
-         * 
-         * 
-         */
-        if (wallet.CreateCoinOnline(wallet, block.nBits, 1, nFees, txCoinOnline, key))
-        {
-            // if have other tx allow time limit zero else allow time is pow block limit 
-            // 거래가 있으면 이전 블럭 +1 이면 허용하고, 거래가 없으면 60이후에 받아 들인다?
-            // but 체크하는 부분이 존재하지 않는다. 블럭을 받아 들일때 확인되어야 한다. TODO
-            if (( block.vtx.size()>1 && txCoinOnline.nTime >= pindexBestHeader->GetPastTimeLimit()+1)||txCoinOnline.nTime >= pindexBestHeader->GetPastTimeLimit() + 60)
-            {
-                // make sure coinstake would meet timestamp protocol
-                //    as it would be the same as the block timestamp
-            	//txCoinBase.nTime = block.nTime = txCoinOnline.nTime;
-                block.nTime = txCoinOnline.nTime;
-            	block.vtx[0] = MakeTransactionRef(txCoinOnline);
-
-                // we have to make sure that we have no future timestamps in
-                //    our transactions set
-                for (std::vector<CTransactionRef>::iterator it = block.vtx.begin(); it != block.vtx.end();)
-                    if ((*it)->nTime > block.nTime) { it = block.vtx.erase(it); } else { ++it; }
-
-
-                block.hashMerkleRoot = BlockMerkleRoot(block);
-                block.prevoutStake.SetNull();
-                
-                // append a signature to our block
-                return key.Sign(block.GetHashWithoutSign(), block.vchBlockSig);
-                
-            }else{
-                DbgMsg("time stamp ... ? %d " ,pindexBestHeader->GetPastTimeLimit());
-            }
-        }else{
-            DbgMsg("CreateCoin fail. what!!! ");
-        }
-    }else{
-        DbgMsg("searchTime skip nSearchTime :%d ,nLastCoinStakeSearchTime :%d  gap:%d " , nSearchTime , nLastCoinStakeSearchTime ,nSearchTime -  nLastCoinStakeSearchTime);
+    if (nSearchTime <= nLastCoinStakeSearchTime){
+         LogPrint("poo" ,"searchTime skip nSearchTime :%d ,nLastCoinStakeSearchTime :%d  gap:%d " , nSearchTime , nLastCoinStakeSearchTime ,nSearchTime -  nLastCoinStakeSearchTime);
+    
+        return false;
     }
+    
+    // 목표 비트로 n( 1에서 60?으로 수정) 번 코인을 찾는다.
+    // int64_t nSearchInterval = nBestHeight+1 > 0 ? 1 : nSearchTime - nLastCoinStakeSearchTime;
+    // 
+    /**
+     * 코인온라인 생성.
+     * 새로운 Tx 를 만들지 않는다.
+     * 생성된 CoinBase에 vout 을 추가한다.
+     * 
+     * 
+     * 
+     */
+    if (!wallet.CreateCoinOnline(wallet, block.nBits, 1, nFees, txCoinOnline, key)) {
+        DbgMsg("CreateCoin fail. what!!! ");
+        return false;
+    }
+    
+    // if have other tx allow time limit zero else allow time is pow block limit 
+    // 거래가 있으면 이전 블럭 +1 이면 허용하고, 거래가 없으면 60이후에 받아 들인다?
+    // but 체크하는 부분이 존재하지 않는다. 블럭을 받아 들일때 확인되어야 한다. TODO
+    if (( block.vtx.size()>1 && txCoinOnline.nTime >= pindexBestHeader->GetPastTimeLimit()+1)||txCoinOnline.nTime >= pindexBestHeader->GetPastTimeLimit() + 60)
+    {
+        // make sure coinstake would meet timestamp protocol
+        //    as it would be the same as the block timestamp
+        //txCoinBase.nTime = block.nTime = txCoinOnline.nTime;
+        block.nTime = txCoinOnline.nTime;
+        block.vtx[0] = MakeTransactionRef(txCoinOnline);
 
+        // we have to make sure that we have no future timestamps in
+        //    our transactions set
+        for (std::vector<CTransactionRef>::iterator it = block.vtx.begin(); it != block.vtx.end();)
+            if ((*it)->nTime > block.nTime) { it = block.vtx.erase(it); } else { ++it; }
+
+
+        block.hashMerkleRoot = BlockMerkleRoot(block);
+        block.prevoutStake.SetNull();
+        
+        // append a signature to our block
+        return key.Sign(block.GetHashWithoutSign(), block.vchBlockSig);
+        
+    }else{
+        DbgMsg("time stamp ... ? %d " ,pindexBestHeader->GetPastTimeLimit());
+    }
     return false;
 }
 

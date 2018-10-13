@@ -318,7 +318,6 @@ public:
     int64_t GetPastTimeLimit() const
     {
         return GetBlockTime();
-        
     }
     enum { nMedianTimeSpan=11 };
 

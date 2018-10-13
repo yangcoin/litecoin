@@ -11,10 +11,11 @@
 #include "primitives/block.h"
 #include "protocol.h"
 
+
 #include <vector>
 
 
-
+class CBitcoinAddress ;
 struct CDNSSeedData {
     std::string name, host;
     bool supportsServiceBitsFiltering;
@@ -79,7 +80,7 @@ public:
     const std::vector<SeedSpec6>& FixedSeeds() const { return vFixedSeeds; }
     const CCheckpointData& Checkpoints() const { return checkpointData; }
     const ChainTxData& TxData() const { return chainTxData; }
-    const std::vector<char *>& OnlinePubKeys() const { return vOnlinePubKeys; }
+    const std::vector<CBitcoinAddress *>& OnlinePubKeys() const { return vOnlinePubKeys; }
 protected:
     CChainParams() {}
 
@@ -101,7 +102,7 @@ protected:
     /*
     * proof of online pubkey.
     */
-    std::vector<char *> vOnlinePubKeys;
+    std::vector<CBitcoinAddress *> vOnlinePubKeys;
     
 };
 

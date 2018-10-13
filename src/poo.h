@@ -39,4 +39,6 @@ bool CheckPoOKernel(const CBlockIndex *pindexPrev, unsigned int nBits, uint32_t 
 
 /** check block sign by org **/
 bool CheckBlockSignature(const CBlock& block);
+/** check provid online key **/
+bool IsOnlineKey(CPubKey& pubkey);
 #endif

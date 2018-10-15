@@ -141,7 +141,7 @@ public:
 
         // The best chain should have at least this much work.
         // consensus.nMinimumChainWork = uint256S("0x000000000000000000000000000000000000000000000006805c7318ce2736c0");
-        consensus.defaultAssumeValid = uint256S("0x000000000000000000000000000000000000000000000000000000620c097e54"); //
+        consensus.nMinimumChainWork = uint256S("0x000000000000000000000000000000000000000000000000000000620c097e54"); //
         // By default assume that the signatures in ancestors of this block are valid.
         //consensus.defaultAssumeValid = uint256S("0x1673fa904a93848eca83d5ca82c7af974511a7e640e22edc2976420744f2e56a"); //1155631
         consensus.defaultAssumeValid = uint256S("0x76b274d801f169653582571b51ef425298b9bcbdbf8c871c760886da4702b03a");//157000
@@ -149,6 +149,11 @@ public:
         consensus.nStakeTimestampMask = 0xf; // 10
         consensus.nProofOfOnlineInterval = 10;// 
         consensus.nStakeMinAge = 8 * 60 * 60; // 8 hours
+
+
+        consensus.POO_START_TIME = 1539648000; // 10/16/2018 @ 0:00:00
+        consensus.POS_START_TIME = 1539691200; // 10/16/2018  @ 12:00:00
+        
         
         /**
          * The message start string is designed to be unlikely to occur in normal data.
@@ -251,10 +256,10 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nTimeout = 0; // January 31st, 2018
 
         // The best chain should have at least this much work.
-        consensus.nMinimumChainWork = uint256S("0x00");
+        consensus.nMinimumChainWork = uint256S("0x0000000000000000000000000000000000000000000000000000001f1311043f");
 
         // By default assume that the signatures in ancestors of this block are valid.
-        consensus.defaultAssumeValid = uint256S("0x0000000000000000000000000000000000000000000000000000001d760e6e6a"); //8711
+        consensus.defaultAssumeValid = uint256S("0xec08e3f1961ffe8b15158c074301943ebae0aad099107b2faed4055c7c47ab74"); //8711
         
         // poo interval and timestamp mask
         consensus.nStakeTimestampMask = 0xf; // 15
@@ -312,6 +317,7 @@ public:
         checkpointData = (CCheckpointData) {
             boost::assign::map_list_of
             (  0, uint256S("0x096ce3bbe32a7d43e1242feb97f517cd4506ec3eb03126dc6e8c34e6d3b18e20"))
+            (  7733, uint256S("0xec08e3f1961ffe8b15158c074301943ebae0aad099107b2faed4055c7c47ab74"))
         };
 
         chainTxData = ChainTxData{

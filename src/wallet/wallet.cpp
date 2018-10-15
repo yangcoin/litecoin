@@ -4377,7 +4377,6 @@ bool CWallet::SelectCoinsForStaking(CAmount& nTargetValue,   std::set<std::pair<
             nValueRet += coin.first;
         }
     }
-    DbgMsg("Stake tx count :%d" , setCoinsRet.size());
     return true;
 }
 

@@ -33,5 +33,7 @@ UniValue mempoolToJSON(bool fVerbose = false);
 /** Block header to JSON */
 UniValue blockheaderToJSON(const CBlockIndex* blockindex);
 
+
+double GetPoSKernelPS();
 #endif
 

@@ -36,6 +36,10 @@ static const CAmount PREMINE_MONEY_COIN =  18400000000 * COIN ;
 static const CAmount BLOCK_REWARD_COIN = 50 * COIN; 
 static const CAmount BLOCK_REWARD_COIN_45 = 45 * COIN; 
 static const CAmount BLOCK_REWARD_COIN_40 = 40 * COIN;
+
+static const CAmount STAKE_RATE = 0.01 * COIN; // year 0.01 %
+
+
 inline bool MoneyRange(const CAmount& nValue) { return (nValue >= 0 && nValue <= MAX_MONEY); }
 
 /**

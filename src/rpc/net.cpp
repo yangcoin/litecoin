@@ -20,10 +20,12 @@
 #include "version.h"
 
 #include <boost/foreach.hpp>
-
+#include "wallet/wallet.h"
 #include <univalue.h>
 
 using namespace std;
+
+double GetPoSKernelPS();
 
 UniValue getconnectioncount(const JSONRPCRequest& request)
 {
@@ -601,6 +603,45 @@ UniValue setnetworkactive(const JSONRPCRequest& request)
 
     return g_connman->GetNetworkActive();
 }
+
+UniValue getstakinginfo(const JSONRPCRequest& request)
+{
+    
+    if (request.fHelp || request.params.size() != 1) {
+        throw runtime_error(
+            "getstakinginfo\n"
+            "Returns an object containing staking-related information.");
+    }
+
+    uint64_t nWeight = 0;
+    if (pwalletMain)
+        nWeight = pwalletMain->GetStakeWeight();
+
+    uint64_t nNetworkWeight = GetPoSKernelPS();
+    bool staking = nLastCoinStakeSearchInterval && nWeight;
+    uint64_t nExpectedTime = staking ? (Params().GetConsensus().nPowTargetSpacing * nNetworkWeight / nWeight) : 0;
+
+    UniValue obj(UniValue::VOBJ);
+
+    obj.push_back(Pair("enabled", GetBoolArg("-staking", true)));
+    obj.push_back(Pair("staking", staking));
+    obj.push_back(Pair("errors", GetWarnings("statusbar")));
+
+    obj.push_back(Pair("currentblocksize", (uint64_t)nLastBlockSize));
+    obj.push_back(Pair("currentblocktx", (uint64_t)nLastBlockTx));
+
+    obj.push_back(Pair("difficulty", GetDifficulty(GetLastBlockIndex(pindexBestHeader, true))));
+    obj.push_back(Pair("search-interval", (int)nLastCoinStakeSearchInterval));
+
+    obj.push_back(Pair("weight", (uint64_t)nWeight));
+    obj.push_back(Pair("netstakeweight", (uint64_t)nNetworkWeight));
+
+    obj.push_back(Pair("expectedtime", nExpectedTime));
+
+    return obj;
+}
+ 
+
 
 static const CRPCCommand commands[] =
 { //  category              name                      actor (function)         okSafeMode

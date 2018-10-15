@@ -353,6 +353,9 @@ bool CBlockTreeDB::LoadBlockIndexGuts(boost::function<CBlockIndex*(const uint256
                 pindexNew->nStatus        = diskindex.nStatus;
                 pindexNew->nTx            = diskindex.nTx;
                 pindexNew->nMoneySupply   = diskindex.nMoneySupply;
+                pindexNew->nStakeModifier = diskindex.nStakeModifier;
+                pindexNew->prevoutStake   = diskindex.prevoutStake;
+                pindexNew->vchBlockSig    = diskindex.vchBlockSig; 
                 // Yangcoin: Disable PoW Sanity check while loading block index from disk.
                 // We use the sha256 hash for the block index for performance reasons, which is recorded for later use.
                 // CheckProofOfWork() uses the scrypt hash which is discarded after a block is accepted.
@@ -376,10 +379,13 @@ bool CBlockTreeDB::LoadBlockIndexGuts(boost::function<CBlockIndex*(const uint256
 
 
 bool CBlockTreeDB::blockOnchainActive(const uint256 &hash) {
+    if (mapBlockIndex.count(hash) == 0){
+        return false;
+    }
     CBlockIndex* pblockindex = mapBlockIndex[hash];
-
+    
     if (!chainActive.Contains(pblockindex)) {
-	return false;
+	    return false;
     }
 
     return true;

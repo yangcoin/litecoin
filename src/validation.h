@@ -13,10 +13,12 @@
 #include "amount.h"
 #include "chain.h"
 #include "coins.h"
+#include "key.h"
 #include "protocol.h" // For CMessageHeader::MessageStartChars
 #include "script/script_error.h"
 #include "sync.h"
 #include "versionbits.h"
+#include "txdb.h"
 
 #include <algorithm>
 #include <exception>
@@ -204,6 +206,8 @@ static const unsigned int MIN_BLOCKS_TO_KEEP = 288;
 
 static const signed int DEFAULT_CHECKBLOCKS = 6 * 4;
 static const unsigned int DEFAULT_CHECKLEVEL = 3;
+
+extern int64_t nLastCoinStakeSearchInterval;
 
 
 struct CTimestampIndexIteratorKey {
@@ -851,28 +855,8 @@ bool CheckInputs(const CTransaction& tx, CValidationState &state, const CCoinsVi
 
 /** Apply the effects of this transaction on the UTXO set represented by view */
 void UpdateCoins(const CTransaction& tx, CCoinsViewCache& inputs, int nHeight);
+ 
 
-/** Transaction validation functions */
-
-/** Context-independent validity checks */
-bool CheckTransaction(const CTransaction& tx, CValidationState& state, bool fCheckDuplicateInputs=true);
-
-namespace Consensus {
-
-/**
- * Check whether all inputs of this transaction are valid (no double spends and amounts)
- * This does not modify the UTXO set. This does not check scripts and sigs.
- * Preconditions: tx.IsCoinBase() is false.
- */
-bool CheckTxInputs(const CTransaction& tx, CValidationState& state, const CCoinsViewCache& inputs, int nSpendHeight);
-
-} // namespace Consensus
-
-/**
- * Check if transaction is final and can be included in a block with the
- * specified height and time. Consensus critical.
- */
-bool IsFinalTx(const CTransaction &tx, int nBlockHeight, int64_t nBlockTime);
 
 /**
  * Check if transaction will be final in the next block to be created.
@@ -955,12 +939,15 @@ bool GetAddressUnspent(uint160 addressHash, int type, std::vector<std::pair<CAdd
 bool WriteBlockToDisk(const CBlock& block, CDiskBlockPos& pos, const CMessageHeader::MessageStartChars& messageStart);
 bool ReadBlockFromDisk(CBlock& block, const CDiskBlockPos& pos, const Consensus::Params& consensusParams);
 bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex, const Consensus::Params& consensusParams);
+bool ReadFromDisk(CMutableTransaction& tx, CDiskTxPos& txindex, CBlockTreeDB& txdb, COutPoint prevout);
+bool ReadFromDisk(CMutableTransaction& tx, CDiskTxPos& txindex);
+bool ReadBlockFromDiskByTx(CBlock& block,CBlockTreeDB& txdb, uint256 txHash);
 
 /** Functions for validating blocks and updating the block tree */
 
 /** Context-independent validity checks */
 bool CheckBlockHeader(const CBlockHeader& block, CValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW = true);
-bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW = true, bool fCheckMerkleRoot = true);
+bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW = true, bool fCheckMerkleRoot = true , bool fCheckSig = true);
 
 /** Context-dependent validity checks.
  *  By "context", we mean only the previous block headers, but not the UTXO

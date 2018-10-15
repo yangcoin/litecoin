@@ -15,9 +15,12 @@
 #include "hash.h"
 #include "crypto/scrypt.h"
 #include "validation.h"
+#include "consensus/tx_verify.h"
 #include "net.h"
 #include "policy/policy.h"
 #include "pow.h"
+#include "poo.h"
+
 #include "primitives/transaction.h"
 #include "script/standard.h"
 #include "timedata.h"
@@ -47,6 +50,8 @@ uint64_t nLastBlockTx = 0;
 uint64_t nLastBlockSize = 0;
 uint64_t nLastBlockWeight = 0;
 
+int64_t nLastCoinStakeSearchInterval = 0;
+unsigned int nMinerSleep = 1000;//5초 
 class ScoreCompare
 {
 public:
@@ -65,12 +70,7 @@ int64_t UpdateTime(CBlockHeader* pblock, const Consensus::Params& consensusParam
 
     if (nOldTime < nNewTime)
         pblock->nTime = nNewTime;
-
-    // Updating time can change work required on testnet:
-    // if (consensusParams.fPowAllowMinDifficultyBlocks){ 
-    //     pblock->nBits = GetNextWorkRequired(pindexPrev, pblock, consensusParams);
-    //     DbgMsg("nBit %08x", pblock->nBits);
-    // }
+ 
     pblock->nBits = GetNextWorkRequired(pindexPrev, pblock, consensusParams);
     return nNewTime - nOldTime;
 }
@@ -130,7 +130,7 @@ void BlockAssembler::resetBlock()
     blockFinished = false;
 }
 
-std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& scriptPubKeyIn, bool fMineWitnessTx)
+std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& scriptPubKeyIn, bool fMineWitnessTx,BlockTYPE blockType,CAmount* pFees)
 {
     int64_t nTimeStart = GetTimeMicros();
 
@@ -141,7 +141,7 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     if(!pblocktemplate.get())
         return nullptr;
     pblock = &pblocktemplate->block; // pointer for convenience
-
+    
     // Add dummy coinbase tx as first transaction
     pblock->vtx.emplace_back();
     pblocktemplate->vTxFees.push_back(-1); // updated at end
@@ -149,13 +149,18 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
 
     LOCK2(cs_main, mempool.cs);
     CBlockIndex* pindexPrev = chainActive.Tip();
+    
     nHeight = pindexPrev->nHeight + 1;
 
     pblock->nVersion = ComputeBlockVersion(pindexPrev, chainparams.GetConsensus());
-    // -regtest only: allow overriding block.nVersion with
+     // -regtest only: allow overriding block.nVersion with
     // -blockversion=N to test forking scenarios
     if (chainparams.MineBlocksOnDemand())
         pblock->nVersion = GetArg("-blockversion", pblock->nVersion);
+    if(blockType==BlockTYPE::BLOCK_TYPE_POO||blockType==BlockTYPE::BLOCK_TYPE_POS){
+        pblock->nVersion |= VERSION_BLOCK_SIG;
+    }
+     
 
     pblock->nTime = GetAdjustedTime();
     const int64_t nMedianTimePast = pindexPrev->GetMedianTimePast();
@@ -171,8 +176,7 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     // TODO: replace this with a call to main to assess validity of a mempool
     // transaction (which in most cases can be a no-op).
     fIncludeWitness = IsWitnessEnabled(pindexPrev, chainparams.GetConsensus()) && fMineWitnessTx;
-
-    addPriorityTxs();
+    addPriorityTxs(blockType==BlockTYPE::BLOCK_TYPE_POS, pblock->nTime);
     int nPackagesSelected = 0;
     int nDescendantsUpdated = 0;
     addPackageTxs(nPackagesSelected, nDescendantsUpdated);
@@ -187,26 +191,48 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     CMutableTransaction coinbaseTx;
     coinbaseTx.vin.resize(1);
     coinbaseTx.vin[0].prevout.SetNull();
+    
+    if (pFees)
+        *pFees = nFees;
+    // vout[0]
+    // coinbase or coinproof
     coinbaseTx.vout.resize(1);
-    coinbaseTx.vout[0].scriptPubKey = scriptPubKeyIn;
-    coinbaseTx.vout[0].nValue = nFees + GetBlockSubsidy(pindexPrev, chainparams.GetConsensus());
+    
+    if(blockType==BlockTYPE::BLOCK_TYPE_POO){
+        coinbaseTx.vout[0].SetEmpty();
+    }else if (blockType==BlockTYPE::BLOCK_TYPE_POS){ 
+        coinbaseTx.vout[0].scriptPubKey.clear();
+        coinbaseTx.vout[0].nValue = 0;
+    }else{
+        coinbaseTx.vout[0].scriptPubKey = scriptPubKeyIn;
+        coinbaseTx.vout[0].nValue = nFees + GetBlockSubsidy(pindexPrev, chainparams.GetConsensus());
+    }
     coinbaseTx.vin[0].scriptSig = CScript() << nHeight << OP_0;
     pblock->vtx[0] = MakeTransactionRef(std::move(coinbaseTx));
     pblocktemplate->vchCoinbaseCommitment = GenerateCoinbaseCommitment(*pblock, pindexPrev, chainparams.GetConsensus());
     pblocktemplate->vTxFees[0] = -nFees;
-
+    
     uint64_t nSerializeSize = GetSerializeSize(*pblock, SER_NETWORK, PROTOCOL_VERSION);
     LogPrintf("CreateNewBlock(): total size: %u block weight: %u txs: %u fees: %ld sigops %d\n", nSerializeSize, GetBlockWeight(*pblock), nBlockTx, nFees, nBlockSigOpsCost);
 
     // Fill in header
     pblock->hashPrevBlock  = pindexPrev->GetBlockHash();
-    UpdateTime(pblock, chainparams.GetConsensus(), pindexPrev);
-    pblock->nBits          = GetNextWorkRequired(pindexPrev, pblock, chainparams.GetConsensus());
-    DbgMsg("nBit %08x", pblock->nBits);
+    //if(blockType==BlockTYPE::BLOCK_TYPE_POW)
+        UpdateTime(pblock, chainparams.GetConsensus(), pindexPrev);
+    pblock->nBits          = GetNextWorkRequired(pindexPrev, pblock, chainparams.GetConsensus(),pblock->IsProofOfStake());
     pblock->nNonce         = 0;
     pblocktemplate->vTxSigOpsCost[0] = WITNESS_SCALE_FACTOR * GetLegacySigOpCount(*pblock->vtx[0]);
 
+    if(false){
+        arith_uint256 bnNew;
+        arith_uint256 bnOld;
+        bnNew.SetCompact(pblock->nBits);
+        bnOld.SetCompact(pindexPrev->nBits);
+        LogPrint("pow", "\nprev:%s\nnext:%s\n" ,bnOld.ToString(), bnNew.ToString());
+    }
+
     CValidationState state;
+
     if (!TestBlockValidity(state, chainparams, *pblock, pindexPrev, false, false)) {
         throw std::runtime_error(strprintf("%s: TestBlockValidity failed: %s", __func__, FormatStateMessage(state)));
     }
@@ -548,7 +574,7 @@ void BlockAssembler::addPackageTxs(int &nPackagesSelected, int &nDescendantsUpda
     }
 }
 
-void BlockAssembler::addPriorityTxs()
+void BlockAssembler::addPriorityTxs(bool fProofOfStake, int blockTime)
 {
     // How much of the block should be dedicated to high-priority transactions,
     // included regardless of the fees they pay
@@ -596,7 +622,8 @@ void BlockAssembler::addPriorityTxs()
         // cannot accept witness transactions into a non-witness block
         if (!fIncludeWitness && iter->GetTx().HasWitness())
             continue;
-
+        if ((fProofOfStake && iter->GetTx().nTime > (unsigned int)blockTime))
+            continue;
         // If tx is dependent on other mempool txs which haven't yet been included
         // then put it in the waitSet
         if (isStillDependent(iter)) {
@@ -648,3 +675,246 @@ void IncrementExtraNonce(CBlock* pblock, const CBlockIndex* pindexPrev, unsigned
     pblock->vtx[0] = MakeTransactionRef(std::move(txCoinbase));
     pblock->hashMerkleRoot = BlockMerkleRoot(*pblock);
 }
+
+/**
+ * Proof Of Online miner
+ * 
+ */
+void ThreadOnlineMiner(CWallet *pwallet, const CChainParams& chainparams)
+{
+    LogPrintf("staking start....");
+    if(!pwallet->HaveAvailableCoinsForOnline()) {
+        return;
+    }
+
+    SetThreadPriority(THREAD_PRIORITY_LOWEST);
+
+    // Make this thread recognisable as the mining thread
+    RenameThread("poo-miner");
+
+    CReserveKey reservekey(pwallet);
+
+    bool fTryToSync = true;
+    bool fIsTest = true;
+    int nCount =0;
+    while (true){
+
+        if(!chainparams.GetConsensus().IsV2Time(GetTime())) {
+            DbgMsg("SLEPP POO NOT ACTIVE...");
+            MilliSleep(50000);
+            continue;
+        }
+        while (pwallet->IsLocked()){
+            MilliSleep(5000);
+        }
+
+        
+        while (g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL) < 1 || IsInitialBlockDownload()){
+            fTryToSync = true;
+            MilliSleep(1000);
+        }
+        if(!fIsTest) { 
+            if (!fIsTest&&fTryToSync){
+                fTryToSync = false;
+                //연결수가 3보가 작거나, 동기화 시간이 10 분을 넘었으면 1분간 쉰다.
+                if (g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL)  < 3 || pindexBestHeader->GetBlockTime() < GetTime() - 10 * 60){
+                    MilliSleep(60000);
+                    continue;
+                }
+            }
+        }
+        if(!pwallet->HaveAvailableCoinsForOnline()) {
+            return;
+        }
+
+        CBlockIndex* pindexPrev = chainActive.Tip();
+        if( ((pindexPrev->nHeight +1)  % chainparams.GetConsensus().nProofOfOnlineInterval) != 0){
+            DbgMsg("skip not online block. %d %d " , pindexPrev->nHeight ,chainparams.GetConsensus().nProofOfOnlineInterval);
+            MilliSleep(nMinerSleep * 10);
+            continue;
+        }
+        //
+        // Create new block
+        //
+        CAmount nFees =0;
+        std::unique_ptr<CBlockTemplate> pblocktemplate(BlockAssembler(Params()).CreateNewBlock( reservekey.reserveScript,true,BlockTYPE::BLOCK_TYPE_POO ,&nFees));
+        if (!pblocktemplate.get())
+             return;
+
+        CBlock *pblock = &pblocktemplate->block;
+
+        // Trying to sign a block
+        if (pwallet->SignPoOBlock(*pblock, *pwallet, nFees))
+        {
+            SetThreadPriority(THREAD_PRIORITY_NORMAL);
+            if (chainActive.Tip()->GetBlockHash() != pblock->hashPrevBlock) {
+                //another block was received while building ours, scrap progress
+                LogPrintf("ThreadOnlineMiner(): Valid future PoS block was orphaned before becoming valid");
+                continue;
+            }
+            MilliSleep(GetRandInt(nMinerSleep));
+            bool result = CheckOnline(pblock, *pwallet, chainparams);
+            DbgMsg("check Online result :%s " , result?"true":"false");
+            SetThreadPriority(THREAD_PRIORITY_LOWEST);
+            if(result ) {
+                MilliSleep(nMinerSleep * 60 );
+            }
+            else {
+                MilliSleep(nMinerSleep  );
+            }
+        }
+        else { 
+            DbgMsg("signPooBlock fail...");
+            MilliSleep(GetRandInt(nMinerSleep * 5));
+        }
+    }
+}
+/**
+ * block 서명이 pool 의 한명인가?
+ * 블럭의 보상이 넘었는가?
+ * 블럭의 
+ */ 
+
+bool CheckOnline(CBlock* pblock, CWallet& wallet, const CChainParams& chainparams)
+{
+    uint256 hashBlock = pblock->GetHash();
+
+    if(!pblock->IsProofOfOnline()){ 
+        return error("CheckOnline() : %s is not a proof-of-online block", hashBlock.GetHex());
+    }
+
+    CValidationState state;
+    // verify hash target and signature of coinstake tx
+    // poo not need hash target and signature
+    // pos is vin to vout must check signature but poo tx is like coinbase
+    if (!CheckProofOfOnline(mapBlockIndex[pblock->hashPrevBlock], *pblock->vtx[0], pblock->nBits, state))
+        return error("CheckOnline() : proof-of-online checking failed");
+
+    // Found a solution
+    {
+        LOCK(cs_main);
+        if (pblock->hashPrevBlock != chainActive.Tip()->GetBlockHash())
+            return error("CheckOnline() : generated block is stale");
+        
+        std::shared_ptr<const CBlock> shared_pblock = std::make_shared<const CBlock>(*pblock);
+        if (!ProcessNewBlock(Params(), shared_pblock, true, NULL)){ 
+            return error("BitcoinMiner(poo): ProcessNewBlock, block not accepted");
+        }
+        
+    }
+
+    return true;
+}
+
+bool CheckStake(CBlock* pblock, CWallet& wallet, const CChainParams& chainparams)
+{
+    uint256 hashBlock = pblock->GetHash();
+
+    if(!pblock->IsProofOfStake())
+        return error("CheckStake() : %s is not a proof-of-stake block", hashBlock.GetHex());
+
+    CValidationState state;
+    // verify hash target and signature of coinstake tx
+    if (!CheckProofOfStake(mapBlockIndex[pblock->hashPrevBlock], *pblock->vtx[1], pblock->nBits, state))
+        return error("CheckStake() : proof-of-stake checking failed");
+
+    //// debug print
+    LogPrintf("%s\n", pblock->ToString());
+    LogPrintf("out %s\n", FormatMoney(pblock->vtx[1]->GetValueOut()));
+
+    // Found a solution
+    {
+        LOCK(cs_main);
+        if (pblock->hashPrevBlock != chainActive.Tip()->GetBlockHash())
+            return error("CheckStake() : generated block is stale");
+       
+        // Process this block the same as if we had received it from another node
+        // CValidationState state;
+        std::shared_ptr<const CBlock> shared_pblock = std::make_shared<const CBlock>(*pblock);
+        if (!ProcessNewBlock(Params(), shared_pblock, true, NULL)){ 
+            return error("BitcoinMiner(pos): ProcessNewBlock, block not accepted");
+        }
+    }
+
+    return true;
+}
+void ThreadStakeMiner(CWallet *pwallet, const CChainParams& chainparams)
+{
+    LogPrintf("staking start....");
+
+    SetThreadPriority(THREAD_PRIORITY_LOWEST);
+
+    // Make this thread recognisable as the mining thread
+    RenameThread("pos-miner");
+
+    CReserveKey reservekey(pwallet);
+
+    bool fTryToSync = true;
+    
+    int nCount =0;
+    while (true){
+        if( !chainparams.GetConsensus().IsPosTime( GetTime()) ) {
+            DbgMsg("SLEPP POS NOT ACTIVE...");
+            MilliSleep(6000);
+            continue;
+        }
+        while (pwallet->IsLocked()){
+            nLastCoinStakeSearchInterval = 0;
+            MilliSleep(1000);
+        }
+
+        
+        while (g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL) < 1 || IsInitialBlockDownload()){
+            nLastCoinStakeSearchInterval = 0;
+            fTryToSync = true;
+            MilliSleep(1000);
+        }
+        if(Params().NetworkIDString() != CBaseChainParams::TESTNET) { 
+            if (fTryToSync){
+                fTryToSync = false;
+                //연결수가 3보가 작거나, 동기화 시간이 10 분을 넘었으면 1분간 쉰다.
+                if (g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL)  < 3 || pindexBestHeader->GetBlockTime() < GetTime() - 10 * 60){
+                    MilliSleep(60000);
+                    continue;
+                }
+            }
+        }
+        CBlockIndex* pindexPrev = chainActive.Tip();
+        if( ((pindexPrev->nHeight +1)  % chainparams.GetConsensus().nProofOfOnlineInterval) == 0){
+            DbgMsg("skip online block. %d %d " , pindexPrev->nHeight ,chainparams.GetConsensus().nProofOfOnlineInterval);
+            MilliSleep(1000 * 15);
+            continue;
+        }
+        if(!pwallet->HaveAvailableCoinsForStaking()) {
+            MilliSleep(nMinerSleep);
+            continue;
+        }
+        //
+        // Create new block
+        //
+        int64_t nFees;
+        std::unique_ptr<CBlockTemplate> pblocktemplate(BlockAssembler(Params()).CreateNewBlock( reservekey.reserveScript,true,BlockTYPE::BLOCK_TYPE_POS, &nFees));
+        //std::unique_ptr<CBlockTemplate> pblocktemplate(CreateNewBlock(chainparams, reservekey.reserveScript, &nFees, true));
+        if (!pblocktemplate.get())
+             return;
+
+        CBlock *pblock = &pblocktemplate->block;
+        // Trying to sign a block
+        if (pwallet->SignPoSBlock(*pblock, *pwallet, nFees))
+        {
+            SetThreadPriority(THREAD_PRIORITY_NORMAL);
+            if (chainActive.Tip()->GetBlockHash() != pblock->hashPrevBlock) {
+                //another block was received while building ours, scrap progress
+                LogPrintf("ThreadStakeMiner(): Valid future PoS block was orphaned before becoming valid");
+                continue;
+            }
+            CheckStake(pblock, *pwallet, chainparams);
+            SetThreadPriority(THREAD_PRIORITY_LOWEST);
+            MilliSleep(nMinerSleep );
+        }
+        else { 
+            MilliSleep(nMinerSleep );
+        }
+    }
+}
+ 

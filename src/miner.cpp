@@ -683,6 +683,9 @@ void IncrementExtraNonce(CBlock* pblock, const CBlockIndex* pindexPrev, unsigned
 void ThreadOnlineMiner(CWallet *pwallet, const CChainParams& chainparams)
 {
     LogPrintf("staking start....");
+    if(!pwallet->HaveAvailableCoinsForOnline()) {
+        return;
+    }
 
     SetThreadPriority(THREAD_PRIORITY_LOWEST);
 
@@ -695,9 +698,10 @@ void ThreadOnlineMiner(CWallet *pwallet, const CChainParams& chainparams)
     bool fIsTest = true;
     int nCount =0;
     while (true){
+
         if(!chainparams.GetConsensus().IsV2Time(GetTime())) {
             DbgMsg("SLEPP POO NOT ACTIVE...");
-            MilliSleep(5000);
+            MilliSleep(50000);
             continue;
         }
         while (pwallet->IsLocked()){

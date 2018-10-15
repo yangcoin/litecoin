@@ -151,8 +151,8 @@ public:
         consensus.nStakeMinAge = 8 * 60 * 60; // 8 hours
 
 
-        consensus.POO_START_TIME = 1539648000; // 10/16/2018 @ 0:00:00
-        consensus.POS_START_TIME = 1539691200; // 10/16/2018  @ 12:00:00
+        consensus.POO_START_TIME = 1539583200; // 10/15/2018 @ 6:00:00   gmt +9( seoul 10/15/2018 15:00:00)
+        consensus.POS_START_TIME = 1539680400; // 10/15/2018 @ 9:00:00   gmt +9( seoul 10/15/2018 18:00:00)
         
         
         /**

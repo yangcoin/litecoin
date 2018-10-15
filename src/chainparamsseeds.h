@@ -18,9 +18,13 @@ static SeedSpec6 pnSeed6_test[] = {
     {{0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xff,0xff,0xd2,0x7a,0x0a,0x2b}, 23011}
 };
 static char * pnSeedOnline_main[] = {
-    "YQw9rPR1cpFLRYeyKgT99NggNFJUifv5T5",
-    "Yidn1vWNioXdcoB1LwxwQiXLWBWhW3Cmov",
-    "YVuDDD2Xyd8T2xvPyH5Z6FMrR6JERFkyhe"
+    "YRqZRto9qXTMy13wmgWUQY28ECcNwnednE",
+    "YhPzqLKEFusePwmsesLNLqpvzo4zaW8iT6",
+    "YgxxsQdEs7bY97tEzAT8BdyvZzG9fkuy7H" ,
+    "YeMSX5Tdz9qW8VCL94sSaEo4JziytAGM2W" ,
+    "YWkskYPQuutJGCdqcPGPF21UVBCfJ4pGKH" ,
+    "Yc2Fc7zgTuh5gyfxUxNssDu1boFnCRrNrm" ,
+    "YgEw7ueZinJgZj9QjbspiXRJGpRKWURJZt" 
 };
 static char * pnSeedOnline_test[] = {
     "ZMmtyCxii7CtHUWHikSi8rrJSzft4MsmVW", // priv key, cRESQFi5HKtG1PHPXZsM3skA7cmdazESfjEEapMUAXHMNRMhDA5G

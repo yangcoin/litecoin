@@ -695,7 +695,7 @@ void ThreadOnlineMiner(CWallet *pwallet, const CChainParams& chainparams)
     bool fIsTest = true;
     int nCount =0;
     while (true){
-        if(!chainparams.GetConsensus().IsV2(GetTime())) {
+        if(!chainparams.GetConsensus().IsV2Time(GetTime())) {
             DbgMsg("SLEPP POO NOT ACTIVE...");
             MilliSleep(5000);
             continue;
@@ -849,9 +849,9 @@ void ThreadStakeMiner(CWallet *pwallet, const CChainParams& chainparams)
     
     int nCount =0;
     while (true){
-        if(GetTime() < POS_START_TIME ) {
+        if( !chainparams.GetConsensus().IsPosTime( GetTime()) ) {
             DbgMsg("SLEPP POS NOT ACTIVE...");
-            MilliSleep(5000);
+            MilliSleep(6000);
             continue;
         }
         while (pwallet->IsLocked()){

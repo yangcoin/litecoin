@@ -20,8 +20,7 @@ static const int64_t MAX_BLOCK_SIGOPS_COST = 80000;
 static const int COINBASE_MATURITY = 500;
 
 
-static const  int64_t POO_START_TIME = 1537237800;//2018-09-18 2:30 UTC
-static const  int64_t POS_START_TIME = 1538629136;//2018-10-04 6:00 UTC
+
 // static const uint8_t ONLINE_BLOCK_VERSION = 0xA0;
 static const int VERSION_BLOCK_SIG =  1024;
 static const int32_t TX_VERSION_STAKE=3;

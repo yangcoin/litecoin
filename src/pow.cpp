@@ -30,7 +30,7 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
         return nProofOfWorkLimit;
     }
     //too fast
-    if (!params.IsV2(pblock->GetBlockTime()) && (pblock->GetBlockTime() < (pindexLast->GetBlockTime() + params.nPowTargetSpacing / 3))) {
+    if (!params.IsV2Time(pblock->GetBlockTime()) && (pblock->GetBlockTime() < (pindexLast->GetBlockTime() + params.nPowTargetSpacing / 3))) {
         unsigned int ret = pindexLast->nBits / 2;
         if (fDebug)
             LogPrint("mine", "prevhieght:%d too fast block %08x\n ", pindexLast->nHeight, ret);

@@ -35,7 +35,6 @@ bool IsConfirmedInNPrevBlocks(const CDiskTxPos& txindex, const CBlockIndex* pind
 bool CheckProofOfOnline(CBlockIndex* pindexPrev, const CTransaction& tx, unsigned int nBits, CValidationState &state);
 void CachePoOKernel(std::map<COutPoint, CStakeCache>& cache, const COutPoint& prevout);
 
-
 /** check block sign by org **/
 bool CheckBlockSignature(const CBlock& block);
 /** check provid online key **/

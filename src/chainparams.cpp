@@ -250,9 +250,6 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nStartTime = 1; // January 1, 2017
         consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nTimeout = 0; // January 31st, 2018
 
-        consensus.vDeployments[Consensus::DEPLOYMENT_POO].bit = VERSION_BLOCK_SIG;
-        consensus.vDeployments[Consensus::DEPLOYMENT_POO].nStartTime = POO_START_TIME; // January 1, 2017
-        consensus.vDeployments[Consensus::DEPLOYMENT_POO].nTimeout = 999999999999ULL; // January 31st, 2018
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = uint256S("0x00");
 
@@ -264,6 +261,9 @@ public:
         consensus.nProofOfOnlineInterval = 6;// 7 block interval every n block poo;  if n ==2  height 000,002,004, ... , 012, 014.
         consensus.nStakeMinAge = 1 * 60 * 60; // 1 hours
 
+        consensus.POO_START_TIME = 1537237800 ;
+        consensus.POS_START_TIME = 1538629136;
+        
         pchMessageStart[0] = 0x79;
         pchMessageStart[1] = 0x61;
         pchMessageStart[2] = 0x6e;
@@ -366,6 +366,9 @@ public:
         consensus.nProofOfOnlineInterval = 10;// 
         consensus.nStakeMinAge = 8 * 60 * 60; // 8 hours
 
+        consensus.POO_START_TIME = 1537237800 ;
+        consensus.POS_START_TIME = 1538629136;
+        
         
         pchMessageStart[0] = 0x79;
         pchMessageStart[1] = 0x61;

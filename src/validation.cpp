@@ -1650,8 +1650,16 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
     int64_t nTimeStart = GetTimeMicros();
     if (block.IsProofOfOnline())
     {
-        
+        if(!chainparams.GetConsensus().IsV2Time(block.nTime)) {
+            return state.DoS(100, error("%s: Not Allow Poo Block time ", __func__),
+                                REJECT_INVALID, "bad-time-poo");
+        }
     }else if (block.IsProofOfStake()) {
+
+        if(!chainparams.GetConsensus().IsPosTime(block.nTime)) {
+            return state.DoS(100, error("%s: Not Allow Poo Block time ", __func__),
+                                REJECT_INVALID, "bad-time-poo");
+        }
         pindex->prevoutStake = block.vtx[1]->vin[0].prevout;
     }  else{
         pindex->prevoutStake.SetNull();
@@ -2924,11 +2932,17 @@ bool CheckBlockHeader(const CBlockHeader& block, CValidationState& state, const 
     if( block.IsProofOfOnline()||block.IsProofOfStake()) {// is poo no check hash
         return true;
     }
-    // check online block height 
-
-
-    // Check proof of work matches claimed amount
-
+    if(block.IsProofOfOnline() ) {
+        if(!consensusParams.IsV2Time(block.nTime) ) {
+            return state.DoS(50, false, REJECT_INVALID, "poo-time-error", false, "proof of online failed");
+        }
+        
+    }
+    if(block.IsProofOfStake() ) {
+        if(!consensusParams.IsPosTime(block.nTime) ) {
+            return state.DoS(50, false, REJECT_INVALID, "pos-time-error", false, "proof of stake failed");
+        }
+    }
     if (fCheckPOW && !CheckProofOfWork(block.GetPoWHash(), block.nBits, consensusParams))
         return state.DoS(50, false, REJECT_INVALID, "high-hash", false, "proof of work failed");
 
@@ -3277,7 +3291,7 @@ static bool AcceptBlockHeader(const CBlockHeader& block, CValidationState& state
         assert(pindexPrev);
         // check Online block from v2 protocol.
         // v2 
-        if( chainparams.GetConsensus().IsV2( block.nTime )&&pindexPrev->nHeight > BLOCK_HEIGHT_INIT  ){
+        if( chainparams.GetConsensus().IsV2Time( block.nTime )&&pindexPrev->nHeight > BLOCK_HEIGHT_INIT  ){
             if( ((pindexPrev->nHeight +1 ) % chainparams.GetConsensus().nProofOfOnlineInterval )==0) { // is must online block.
                 if(!block.IsProofOfOnline() && ( block.GetBlockTime() - pindexPrev->GetBlockTime() ) < chainparams.GetConsensus().nPowTargetSpacing *3 ) { // %n block must online or block time space over 3 times of default space...
                     return state.Invalid(false, REJECT_NONSTANDARD, "ConnectBlock(): must online block");

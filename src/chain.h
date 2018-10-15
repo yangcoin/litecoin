@@ -8,12 +8,13 @@
 
 #include "arith_uint256.h"
 #include "primitives/block.h"
+
 #include "pow.h"
 #include "tinyformat.h"
 #include "uint256.h"
 #include "utilmoneystr.h"
 #include <vector>
-
+#include "chainparams.h"
 class CBlockFileInfo
 {
 public:
@@ -431,7 +432,7 @@ public:
         READWRITE(nBits);
         READWRITE(nNonce);
         READWRITE(nMoneySupply);
-        if((nVersion &VERSION_BLOCK_SIG)){ 
+        if((this->nVersion &VERSION_BLOCK_SIG) ){ 
             READWRITE(vchBlockSig);
             READWRITE(nStakeModifier);
             READWRITE(prevoutStake);

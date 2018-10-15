@@ -761,7 +761,7 @@ void ThreadOnlineMiner(CWallet *pwallet, const CChainParams& chainparams)
         }
         else { 
             DbgMsg("signPooBlock fail...");
-            MilliSleep(GetRandInt(nMinerSleep * 10));
+            MilliSleep(GetRandInt(nMinerSleep * 5));
         }
     }
 }

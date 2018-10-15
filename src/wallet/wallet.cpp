@@ -4121,14 +4121,10 @@ bool CWallet::CreateCoinOnline(const CKeyStore& keystore, unsigned int nBits, in
             // COutPoint prevoutStake = COutPoint(pcoin.first->GetHash(), pcoin.second);
             
             uint32_t nBlockTime;
-            LogPrintf("looking for coinstake TODO CheckKernel\n");
-            if (CheckPoOKernel(pindexPrev, nBits, txNew.nTime - n,  &nBlockTime))
+
             {
-    //             // Found a kernel
-    //             LogPrintf("CreateCoinOnline : kernel found\n");
                 vector<vector<unsigned char> > vSolutions;
                 txnouttype whichType;
-                
                 // 
                 boost::shared_ptr<CReserveScript> coinbaseScript(new CReserveScript());
 
@@ -4144,15 +4140,9 @@ bool CWallet::CreateCoinOnline(const CKeyStore& keystore, unsigned int nBits, in
             } 
         }
     }
-        // if (fKernelFound)
-            // break; // if kernel is found stop searching
-    // TODO
-    // if (nCredit == 0 )// no tx... skip create tx
-    //     return false;
     
     txNew.vout[1].nValue = nCredit;
-
-        
+    
     unsigned int nBytes = ::GetSerializeSize(txNew, SER_NETWORK, PROTOCOL_VERSION);
     if (nBytes >= MAX_STANDARD_TX_WEIGHT)
         return error("CreateCoinOnline : exceeded coinstake size limit");

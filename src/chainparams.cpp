@@ -139,10 +139,6 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nStartTime = 0; // January 28, 2017
         consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nTimeout = 0; // January 31st, 2018
 
-        // Deployment of PoO
-        consensus.vDeployments[Consensus::DEPLOYMENT_POO].bit = VERSION_BLOCK_SIG;
-        consensus.vDeployments[Consensus::DEPLOYMENT_POO].nStartTime = POO_START_TIME; // January 28, 2017
-        consensus.vDeployments[Consensus::DEPLOYMENT_POO].nTimeout = 0; // January 31st, 2018
         // The best chain should have at least this much work.
         // consensus.nMinimumChainWork = uint256S("0x000000000000000000000000000000000000000000000006805c7318ce2736c0");
         consensus.defaultAssumeValid = uint256S("0x000000000000000000000000000000000000000000000000000000620c097e54"); //

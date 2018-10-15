@@ -112,30 +112,6 @@ bool CheckProofOfOnline(CBlockIndex* pindexPrev, const CTransaction& tx, unsigne
     // vin size()==0 and vin prevout == null and vout.size()==1 
     if (!tx.IsCoinOnline())
         return error("CheckProofOfOnline() : called on non-coinstake %s", tx.GetHash().ToString());
-    // TODO check onlone...
-    DbgMsg("/// TODO Check ProofOfOnline");
-    return true;
-}
-
-
-/**
- * 최소 비트를 확인한다.
- * 이전 블럭.
- * bit.
- * 이전에 사용한 코인.
- * 블럭시간
- */
-bool CheckPoOKernel(const CBlockIndex *pindexPrev, unsigned int nBits, uint32_t nTime,  uint32_t *pBlockTime)
-{
-    // TODO 
-    // 경쟁 관계를 만들어야 한다.
-    // n개의 online miner 들간의 경쟁관계... 
-    // 최소 시간...
-    // CAmount amount = 0;
-    // return CheckOnlineKernelHash(pindexPrev, nBits, *pBlockTime,
-    //     amount, prevout, nTime, hashProofOfStake, targetProofOfStake);
-    if(nTime < Params().GetConsensus().nStakeTimestampMask) //15 sec
-        return false;
     return true;
 }
 

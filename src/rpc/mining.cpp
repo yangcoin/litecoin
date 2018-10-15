@@ -124,6 +124,7 @@ UniValue generateBlocks(boost::shared_ptr<CReserveScript> coinbaseScript, int nG
         
         while (nMaxTries > 0 && pblock->nNonce < nInnerLoopCount && !CheckProofOfWork(pblock->GetPoWHash(), pblock->nBits, Params().GetConsensus())) {
             if(nMaxTries%10000==0){
+                DbgMsg("PoWHash: %s ,%x", pblock->GetPoWHash().ToString(),pblock->nBits);
                 DbgMsg("Search %u \n%s" ,nMaxTries,pblock->ToString() );
             }
             ++pblock->nNonce;
@@ -468,13 +469,14 @@ UniValue getblocktemplate(const JSONRPCRequest& request)
 
     if(!g_connman)
         throw JSONRPCError(RPC_CLIENT_P2P_DISABLED, "Error: Peer-to-peer functionality missing or disabled");
+    if( Params().NetworkIDString() != CBaseChainParams::TESTNET) { 
+        if (g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL) == 0)
+            throw JSONRPCError(RPC_CLIENT_NOT_CONNECTED, "Yangcoin is not connected!");
+        if (IsInitialBlockDownload())
+            throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Yangcoin is downloading blocks...");
 
-    if (g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL) == 0)
-        throw JSONRPCError(RPC_CLIENT_NOT_CONNECTED, "Yangcoin is not connected!");
-
-    if (IsInitialBlockDownload())
-        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Yangcoin is downloading blocks...");
-
+    }
+    
     static unsigned int nTransactionsUpdatedLast;
 
     if (!lpval.isNull())

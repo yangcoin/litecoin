@@ -1,0 +1,11 @@
+{
+    "apps": [{
+        "name": "yangcoind",
+        "script": "/Users/user/dev/blockchain/yangcoin/yangcoin/src/yangcoind",
+        "watch": false,
+        "args":[
+            "--datadir=/Users/user/dev/blockchain/yangcoin/yangcoin/data-debug",
+            "--printtoconsole"
+        ]
+    }]
+}

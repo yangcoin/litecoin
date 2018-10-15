@@ -12,12 +12,14 @@
 #include "memusage.h"
 #include "serialize.h"
 #include "uint256.h"
-
 #include <assert.h>
 #include <stdint.h>
 
 #include <boost/foreach.hpp>
 #include <boost/unordered_map.hpp>
+/**
+ * TODO cointake version must upgrade wallet db.
+ */
 
 /** 
  * Pruned version of CTransaction: only retains metadata and unspent transaction outputs
@@ -76,7 +78,7 @@ class CCoins
 public:
     //! whether transaction is a coinbase
     bool fCoinBase;
-
+    bool fCoinStake;
     //! unspent transaction outputs; spent outputs are .IsNull(); spent outputs at the end of the array are dropped
     std::vector<CTxOut> vout;
 
@@ -86,9 +88,10 @@ public:
     //! version of the CTransaction; accesses to this value should probably check for nHeight as well,
     //! as new tx version will probably only be introduced at certain heights
     int nVersion;
-
+    
     void FromTx(const CTransaction &tx, int nHeightIn) {
         fCoinBase = tx.IsCoinBase();
+        fCoinStake = tx.IsCoinStake();
         vout = tx.vout;
         nHeight = nHeightIn;
         nVersion = tx.nVersion;
@@ -102,13 +105,14 @@ public:
 
     void Clear() {
         fCoinBase = false;
+        fCoinStake = false;
         std::vector<CTxOut>().swap(vout);
         nHeight = 0;
         nVersion = 0;
     }
 
     //! empty constructor
-    CCoins() : fCoinBase(false), vout(0), nHeight(0), nVersion(0) { }
+    CCoins() : fCoinBase(false),fCoinStake(false), vout(0), nHeight(0), nVersion(0) { }
 
     //!remove spent outputs at the end of vout
     void Cleanup() {
@@ -128,9 +132,11 @@ public:
 
     void swap(CCoins &to) {
         std::swap(to.fCoinBase, fCoinBase);
+        std::swap(to.fCoinStake, fCoinStake);
         to.vout.swap(vout);
         std::swap(to.nHeight, nHeight);
         std::swap(to.nVersion, nVersion);
+        
     }
 
     //! equality test
@@ -139,6 +145,7 @@ public:
          if (a.IsPruned() && b.IsPruned())
              return true;
          return a.fCoinBase == b.fCoinBase &&
+                //a.fCoinStake == b.fCoinStake &&
                 a.nHeight == b.nHeight &&
                 a.nVersion == b.nVersion &&
                 a.vout == b.vout;
@@ -152,7 +159,10 @@ public:
     bool IsCoinBase() const {
         return fCoinBase;
     }
-
+    bool IsCoinStake() const
+    {
+        return fCoinStake;
+    }
     template<typename Stream>
     void Serialize(Stream &s) const {
         unsigned int nMaskSize = 0, nMaskCode = 0;
@@ -180,6 +190,7 @@ public:
         }
         // coinbase height
         ::Serialize(s, VARINT(nHeight));
+        
     }
 
     template<typename Stream>

@@ -64,7 +64,7 @@ static inline void popstack(vector<valtype>& stack)
     stack.pop_back();
 }
 
-bool static IsCompressedOrUncompressedPubKey(const valtype &vchPubKey) {
+bool IsCompressedOrUncompressedPubKey(const valtype &vchPubKey) {
     if (vchPubKey.size() < 33) {
         //  Non-canonical public key: too short
         return false;
@@ -1129,10 +1129,8 @@ public:
         // Serialize nVersion
         ::Serialize(s, txTo.nVersion);
         // Serialize nTime
-#if TX_TIMESTAMP == 1     
-        ::Serialize(s, txTo.nTime);
-#endif
 
+        ::Serialize(s, txTo.nTime);
         // Serialize vin
         unsigned int nInputs = fAnyoneCanPay ? 1 : txTo.vin.size();
         ::WriteCompactSize(s, nInputs);
@@ -1209,9 +1207,7 @@ uint256 SignatureHash(const CScript& scriptCode, const CTransaction& txTo, unsig
         // Version
         ss << txTo.nVersion;
         // nTime for POS
-#if TX_TIMESTAMP == 1
         ss << txTo.nTime;//
-#endif        
         // Input prevouts/nSequence (none/all, depending on flags)
         ss << hashPrevouts;
         ss << hashSequence;

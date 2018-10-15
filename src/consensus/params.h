@@ -9,6 +9,8 @@
 #include "uint256.h"
 #include <map>
 #include <string>
+#include "primitives/transaction.h"
+#include "consensus/consensus.h"
 
 namespace Consensus {
 
@@ -17,6 +19,7 @@ enum DeploymentPos
     DEPLOYMENT_TESTDUMMY,
     DEPLOYMENT_CSV, // Deployment of BIP68, BIP112, and BIP113.
     DEPLOYMENT_SEGWIT, // Deployment of BIP141, BIP143, and BIP147.
+    DEPLOYMENT_POO,
     // NOTE: Also add new deployments to VersionBitsDeploymentInfo in versionbits.cpp
     MAX_VERSION_BITS_DEPLOYMENTS
 };
@@ -63,6 +66,15 @@ struct Params {
     int64_t DifficultyAdjustmentInterval() const { return nPowTargetTimespan / nPowTargetSpacing; }
     uint256 nMinimumChainWork;
     uint256 defaultAssumeValid;
+    int nStakeTimestampMask;
+    int nProofOfOnlineInterval;//
+    /* pos */
+    unsigned int nStakeMinAge;
+
+    int64_t POO_START_TIME;
+    int64_t POS_START_TIME;
+    bool IsV2Time(int64_t nTime) const {return nTime >= POO_START_TIME; }
+    bool IsPosTime(int64_t nTime) const {return nTime >= POS_START_TIME; }
 };
 } // namespace Consensus
 

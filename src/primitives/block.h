@@ -9,6 +9,9 @@
 #include "primitives/transaction.h"
 #include "serialize.h"
 #include "uint256.h"
+#include "consensus/consensus.h"
+#include "consensus/params.h"
+static const int SER_WITHOUT_SIGNATURE = 1 << 3;
 
 /** Nodes collect new transactions into a block, hash them into a hash tree,
  * and scan through nonce values to make the block's hash satisfy proof-of-work
@@ -27,7 +30,8 @@ public:
     uint32_t nTime;
     uint32_t nBits;
     uint32_t nNonce;
-
+    COutPoint prevoutStake;
+    std::vector<unsigned char> vchBlockSig;
     CBlockHeader()
     {
         SetNull();
@@ -43,6 +47,14 @@ public:
         READWRITE(nTime);
         READWRITE(nBits);
         READWRITE(nNonce);
+        if((this->nVersion & VERSION_BLOCK_SIG)) { 
+            READWRITE(prevoutStake);
+            if (!(s.GetType() & SER_WITHOUT_SIGNATURE))
+                READWRITE(vchBlockSig);
+        }else{
+            vchBlockSig.clear();
+            prevoutStake.SetNull();    
+        }
     }
 
     void SetNull()
@@ -53,6 +65,8 @@ public:
         nTime = 0;
         nBits = 0;
         nNonce = 0;
+        vchBlockSig.clear();
+        prevoutStake.SetNull();
     }
 
     bool IsNull() const
@@ -63,10 +77,46 @@ public:
     uint256 GetHash() const;
 
     uint256 GetPoWHash() const;
-
+    uint256 GetHashWithoutSign() const;
     int64_t GetBlockTime() const
     {
         return (int64_t)nTime;
+    }
+    virtual bool IsProofOfStake() const
+    {
+        return !prevoutStake.IsNull();
+    }
+    virtual bool IsProofOfOnline() const
+    {
+        return prevoutStake.IsNull()&&vchBlockSig.size()>0;
+    }
+    virtual bool IsProofOfWork() const
+    {
+        return !IsProofOfStake()&&!IsProofOfOnline();
+    }
+    virtual uint32_t StakeTime() const
+    {
+        uint32_t ret = 0;
+        if(IsProofOfStake())
+        {
+            ret = nTime;
+        }
+        return ret;
+    }
+     CBlockHeader& operator=(const CBlockHeader& other) //qtum
+    {
+        if (this != &other)
+        {
+            this->nVersion       = other.nVersion;
+            this->hashPrevBlock  = other.hashPrevBlock;
+            this->hashMerkleRoot = other.hashMerkleRoot;
+            this->nTime          = other.nTime;
+            this->nBits          = other.nBits;
+            this->nNonce         = other.nNonce;
+            this->vchBlockSig    = other.vchBlockSig;
+            this->prevoutStake   = other.prevoutStake;
+        }
+        return *this;
     }
 };
 
@@ -76,7 +126,6 @@ class CBlock : public CBlockHeader
 public:
     // network and disk
     std::vector<CTransactionRef> vtx;
-
     // memory only
     mutable bool fChecked;
 
@@ -97,8 +146,9 @@ public:
     inline void SerializationOp(Stream& s, Operation ser_action) {
         READWRITE(*(CBlockHeader*)this);
         READWRITE(vtx);
+        
     }
-
+    
     void SetNull()
     {
         CBlockHeader::SetNull();
@@ -115,9 +165,12 @@ public:
         block.nTime          = nTime;
         block.nBits          = nBits;
         block.nNonce         = nNonce;
+        block.vchBlockSig    = vchBlockSig;
+        block.prevoutStake   = prevoutStake;
         return block;
     }
-
+     
+    
     std::string ToString() const;
 };
 

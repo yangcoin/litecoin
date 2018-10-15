@@ -11,7 +11,9 @@
 #include "serialize.h"
 #include "uint256.h"
 #include "../version.h"
+
 static const int SERIALIZE_TRANSACTION_NO_WITNESS = 0x40000000;
+
 
 static const int WITNESS_SCALE_FACTOR = 4;
 
@@ -245,11 +247,7 @@ inline void UnserializeTransaction(TxType& tx, Stream& s) {
     const bool fAllowWitness = !(s.GetVersion() & SERIALIZE_TRANSACTION_NO_WITNESS);
 
     s >> tx.nVersion;
-#if TX_TIMESTAMP == 1
     s >> tx.nTime;//For PoS
-#else
-    
-#endif    
     unsigned char flags = 0;
     tx.vin.clear();
     tx.vout.clear();
@@ -285,9 +283,8 @@ inline void SerializeTransaction(const TxType& tx, Stream& s) {
     const bool fAllowWitness = !(s.GetVersion() & SERIALIZE_TRANSACTION_NO_WITNESS);
 
     s << tx.nVersion;
-#if TX_TIMESTAMP == 1  
     s << tx.nTime;
-#endif    
+    
     unsigned char flags = 0;
     // Consistency check
     if (fAllowWitness) {
@@ -313,6 +310,7 @@ inline void SerializeTransaction(const TxType& tx, Stream& s) {
 }
 
 
+
 /** The basic transaction that is broadcasted on the network and contained in
  * blocks.  A transaction can contain multiple inputs and outputs.
  */
@@ -326,7 +324,7 @@ public:
     // adapting relay policy by bumping MAX_STANDARD_VERSION, and then later date
     // bumping the default CURRENT_VERSION at which point both CURRENT_VERSION and
     // MAX_STANDARD_VERSION will be equal.
-    static const int32_t MAX_STANDARD_VERSION=2;
+    static const int32_t MAX_STANDARD_VERSION=3;
 
     // The local variables are made const to prevent unintended modification
     // without updating the cached hash value. However, CTransaction is not
@@ -394,9 +392,28 @@ public:
 
     bool IsCoinBase() const
     {
-        return (vin.size() == 1 && vin[0].prevout.IsNull());
+        return (vin.size() == 1 && vin[0].prevout.IsNull() &&vout.size()>=1);
     }
-
+    bool IsCoinStake() const
+    {
+        // the coin stake transaction is marked with the first output empty
+        return (vin.size() > 0 && (!vin[0].prevout.IsNull()) && vout.size() >= 2 && vout[0].IsEmpty());
+    }
+    /**
+     * yangchigi@yangchigi.com
+     * coinonline is coinbase, but coinOline is like coinstake  vout[0]== empmy();
+     * 
+     */
+    bool IsCoinOnline() const
+    {
+        // qctcoin: vin zero vout 
+        // vin.size() ==0
+        // vout.size() >=1 and  <=3
+        // vout[0].addr == empty
+        // vout[1].addr == fixed addr
+        // vout[2].addr == new gen fixed addr
+        return IsCoinBase() &&vout.size()>1 &&vout.size()<=3 && vout[0].IsEmpty() ;
+    }
     friend bool operator==(const CTransaction& a, const CTransaction& b)
     {
         return a.hash == b.hash;
@@ -448,12 +465,31 @@ struct CMutableTransaction
     CMutableTransaction(deserialize_type, Stream& s) {
         Unserialize(s);
     }
+    bool IsCoinBase() const
+    {
+        return (vin.size() == 1 && vin[0].prevout.IsNull());
+    }
 
+    bool IsCoinStake() const
+    {
+        // ppcoin: the coin stake transaction is marked with the first output empty
+        return (vin.size() > 0 && (!vin[0].prevout.IsNull()) && vout.size() >= 2 && vout[0].IsEmpty());
+    }
+     bool IsCoinOnline() const
+    {
+        // qctcoin: vin zero vout 
+        // vin.size() ==0
+        // vout.size() >=1 and  <=3
+        // vout[0].addr == empty
+        // vout[1].addr == fixed addr
+        // vout[2].addr == new gen fixed addr
+        return IsCoinBase() &&vout.size()>1 &&vout.size()<=3 && vout[0].IsEmpty() ;
+    }
     /** Compute the hash of this CMutableTransaction. This is computed on the
      * fly, as opposed to GetHash() in CTransaction, which uses a cached result.
      */
     uint256 GetHash() const;
-
+    std::string ToString() const;
     friend bool operator==(const CMutableTransaction& a, const CMutableTransaction& b)
     {
         return a.GetHash() == b.GetHash();

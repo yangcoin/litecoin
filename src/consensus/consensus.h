@@ -19,6 +19,11 @@ static const int64_t MAX_BLOCK_SIGOPS_COST = 80000;
 /** Coinbase transaction outputs can only be spent after this number of new blocks (network rule) */
 static const int COINBASE_MATURITY = 500;
 
+
+
+// static const uint8_t ONLINE_BLOCK_VERSION = 0xA0;
+static const int VERSION_BLOCK_SIG =  1024;
+static const int32_t TX_VERSION_STAKE=3;
 /** Flags for nSequence and nLockTime locks */
 enum {
     /* Interpret sequence numbers as relative lock-time constraints. */

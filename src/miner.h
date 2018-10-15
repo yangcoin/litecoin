@@ -14,6 +14,8 @@
 #include "boost/multi_index_container.hpp"
 #include "boost/multi_index/ordered_index.hpp"
 
+#include "wallet/wallet.h"
+
 class CBlockIndex;
 class CChainParams;
 class CReserveKey;
@@ -23,7 +25,11 @@ class CWallet;
 namespace Consensus { struct Params; };
 
 static const bool DEFAULT_PRINTPRIORITY = false;
-
+enum BlockTYPE: short {
+    BLOCK_TYPE_POW      =    0,
+    BLOCK_TYPE_POO       =    1,
+    BLOCK_TYPE_POS         =    2
+};
 struct CBlockTemplate
 {
     CBlock block;
@@ -165,7 +171,7 @@ private:
 public:
     BlockAssembler(const CChainParams& chainparams);
     /** Construct a new block template with coinbase to scriptPubKeyIn */
-    std::unique_ptr<CBlockTemplate> CreateNewBlock(const CScript& scriptPubKeyIn, bool fMineWitnessTx=true);
+    std::unique_ptr<CBlockTemplate> CreateNewBlock(const CScript& scriptPubKeyIn, bool fMineWitnessTx=true,BlockTYPE blockType = BlockTYPE::BLOCK_TYPE_POW ,int64_t* pFees=NULL);
 
 private:
     // utility functions
@@ -176,7 +182,7 @@ private:
 
     // Methods for how to add transactions to a block.
     /** Add transactions based on tx "priority" */
-    void addPriorityTxs();
+    void addPriorityTxs(bool fProofOfStake, int blockTime);
     /** Add transactions based on feerate including unconfirmed ancestors
       * Increments nPackagesSelected / nDescendantsUpdated with corresponding
       * statistics from the package selection (for logging statistics). */
@@ -212,5 +218,7 @@ private:
 /** Modify the extranonce in a block */
 void IncrementExtraNonce(CBlock* pblock, const CBlockIndex* pindexPrev, unsigned int& nExtraNonce);
 int64_t UpdateTime(CBlockHeader* pblock, const Consensus::Params& consensusParams, const CBlockIndex* pindexPrev);
-
+bool CheckOnline(CBlock* pblock, CWallet& wallet, const CChainParams& chainparams);
+void ThreadOnlineMiner(CWallet *pwallet, const CChainParams& chainparams);
+void ThreadStakeMiner(CWallet *pwallet, const CChainParams& chainparams);
 #endif // BITCOIN_MINER_H

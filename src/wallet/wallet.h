@@ -17,6 +17,7 @@
 #include "wallet/crypter.h"
 #include "wallet/walletdb.h"
 #include "wallet/rpcwallet.h"
+#include "util.h"
 
 #include <algorithm>
 #include <atomic>
@@ -40,7 +41,14 @@ extern CFeeRate payTxFee;
 extern unsigned int nTxConfirmTarget;
 extern bool bSpendZeroConfChange;
 extern bool fSendFreeTransactions;
+
 extern bool fWalletRbf;
+
+
+extern bool fWalletUnlockStakingOnly;
+
+extern CAmount nMinimumInputValue;
+
 
 static const unsigned int DEFAULT_KEYPOOL_SIZE = 100;
 //! -paytxfee default
@@ -244,6 +252,9 @@ public:
 
     const uint256& GetHash() const { return tx->GetHash(); }
     bool IsCoinBase() const { return tx->IsCoinBase(); }
+    bool IsCoinOnline() const { return tx->IsCoinOnline(); }
+    bool IsCoinStake() const { return tx->IsCoinStake(); }
+    CAmount GetValueOut() const {return tx->GetValueOut();}
 };
 
 /** 
@@ -280,6 +291,7 @@ public:
     mutable bool fImmatureWatchCreditCached;
     mutable bool fAvailableWatchCreditCached;
     mutable bool fChangeCached;
+    
     mutable CAmount nDebitCached;
     mutable CAmount nCreditCached;
     mutable CAmount nImmatureCreditCached;
@@ -290,6 +302,8 @@ public:
     mutable CAmount nAvailableWatchCreditCached;
     mutable CAmount nChangeCached;
 
+    mutable CAmount nImmatureStakeCreditCached;
+    mutable bool fImmatureStakeCreditCached;
     CWalletTx()
     {
         Init(NULL);
@@ -329,6 +343,8 @@ public:
         nImmatureWatchCreditCached = 0;
         nChangeCached = 0;
         nOrderPos = -1;
+        fImmatureStakeCreditCached = false;
+        nImmatureStakeCreditCached = 0;
     }
 
     ADD_SERIALIZE_METHODS;
@@ -399,6 +415,7 @@ public:
     CAmount GetDebit(const isminefilter& filter) const;
     CAmount GetCredit(const isminefilter& filter) const;
     CAmount GetImmatureCredit(bool fUseCache=true) const;
+    CAmount GetImmatureStakeCredit(bool fUseCache=true) const;
     CAmount GetAvailableCredit(bool fUseCache=true) const;
     CAmount GetImmatureWatchOnlyCredit(const bool& fUseCache=true) const;
     CAmount GetAvailableWatchOnlyCredit(const bool& fUseCache=true) const;
@@ -799,6 +816,8 @@ public:
     CAmount GetUnconfirmedWatchOnlyBalance() const;
     CAmount GetImmatureWatchOnlyBalance() const;
 
+    CAmount GetStake() const;
+    CAmount GetWatchOnlyStake() const;
     /**
      * Insert additional inputs into the transaction by
      * calling CreateTransaction();
@@ -889,7 +908,7 @@ public:
         {
             LOCK(cs_wallet);
             std::map<uint256, int>::iterator mi = mapRequestCount.find(hash);
-            if (mi != mapRequestCount.end())
+            if (mi != mapRequestCount.end()) 
                 (*mi).second++;
         }
     }
@@ -993,6 +1012,19 @@ public:
     
     /* Set the current HD master key (will reset the chain child index counters) */
     bool SetHDMasterKey(const CPubKey& key);
+
+    bool CreateCoinOnline(const CKeyStore& keystore, unsigned int nBits, int64_t nSearchInterval, CAmount& nFees, CMutableTransaction& tx, CKey& key);
+    bool HaveAvailableCoinsForOnline() const;
+    bool SignPoOBlock(CBlock& block, CWallet& wallet, int64_t& nFees);
+    bool SignPoSBlock(CBlock& block, CWallet& wallet, int64_t& nFees);
+    bool GetOnlineKey(CKeyID& keyId,CKey& vchSecret);
+
+    bool CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int64_t nSearchInterval, CAmount& nFees, CMutableTransaction& tx, CKey& key);
+    bool SelectCoinsForStaking(CAmount& nTargetValue, std::set<std::pair<const CWalletTx*,unsigned int> >& setCoinsRet, CAmount& nValueRet) const;
+    void AvailableCoinsForStaking(std::vector<COutput>& vCoins) const;
+    bool HaveAvailableCoinsForStaking() const;
+    uint64_t GetStakeWeight() const;
+    static const bool DEFAULT_STAKE_CACHE = true;
 };
 
 /** A key allocated from the key pool. */

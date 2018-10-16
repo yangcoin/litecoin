@@ -769,75 +769,7 @@ void ThreadOnlineMiner(CWallet *pwallet, const CChainParams& chainparams)
         }
     }
 }
-/**
- * block 서명이 pool 의 한명인가?
- * 블럭의 보상이 넘었는가?
- * 블럭의 
- */ 
 
-bool CheckOnline(CBlock* pblock, CWallet& wallet, const CChainParams& chainparams)
-{
-    uint256 hashBlock = pblock->GetHash();
-
-    if(!pblock->IsProofOfOnline()){ 
-        return error("CheckOnline() : %s is not a proof-of-online block", hashBlock.GetHex());
-    }
-
-    CValidationState state;
-    // verify hash target and signature of coinstake tx
-    // poo not need hash target and signature
-    // pos is vin to vout must check signature but poo tx is like coinbase
-    if (!CheckProofOfOnline(mapBlockIndex[pblock->hashPrevBlock], *pblock->vtx[0], pblock->nBits, state))
-        return error("CheckOnline() : proof-of-online checking failed");
-
-    // Found a solution
-    {
-        LOCK(cs_main);
-        if (pblock->hashPrevBlock != chainActive.Tip()->GetBlockHash())
-            return error("CheckOnline() : generated block is stale");
-        
-        std::shared_ptr<const CBlock> shared_pblock = std::make_shared<const CBlock>(*pblock);
-        if (!ProcessNewBlock(Params(), shared_pblock, true, NULL)){ 
-            return error("BitcoinMiner(poo): ProcessNewBlock, block not accepted");
-        }
-        
-    }
-
-    return true;
-}
-
-bool CheckStake(CBlock* pblock, CWallet& wallet, const CChainParams& chainparams)
-{
-    uint256 hashBlock = pblock->GetHash();
-
-    if(!pblock->IsProofOfStake())
-        return error("CheckStake() : %s is not a proof-of-stake block", hashBlock.GetHex());
-
-    CValidationState state;
-    // verify hash target and signature of coinstake tx
-    if (!CheckProofOfStake(mapBlockIndex[pblock->hashPrevBlock], *pblock->vtx[1], pblock->nBits, state))
-        return error("CheckStake() : proof-of-stake checking failed");
-
-    //// debug print
-    LogPrintf("%s\n", pblock->ToString());
-    LogPrintf("out %s\n", FormatMoney(pblock->vtx[1]->GetValueOut()));
-
-    // Found a solution
-    {
-        LOCK(cs_main);
-        if (pblock->hashPrevBlock != chainActive.Tip()->GetBlockHash())
-            return error("CheckStake() : generated block is stale");
-       
-        // Process this block the same as if we had received it from another node
-        // CValidationState state;
-        std::shared_ptr<const CBlock> shared_pblock = std::make_shared<const CBlock>(*pblock);
-        if (!ProcessNewBlock(Params(), shared_pblock, true, NULL)){ 
-            return error("BitcoinMiner(pos): ProcessNewBlock, block not accepted");
-        }
-    }
-
-    return true;
-}
 void ThreadStakeMiner(CWallet *pwallet, const CChainParams& chainparams)
 {
     LogPrintf("staking start....");

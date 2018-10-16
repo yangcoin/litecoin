@@ -16,6 +16,7 @@
 #include "script/sign.h"
 #include <stdint.h>
 
+#include "wallet/wallet.h"
 using namespace std;
 
 /** Compute the hash modifier for proof-of-stake */
@@ -45,4 +46,5 @@ bool GetCoinAge(const CTransaction& tx,  uint64_t& nCoinAge);
 bool TransactionGetCoinAge(CTransaction& transaction, uint64_t& nCoinAge);
 
 CAmount GetProofOfStakeReward(const CBlockIndex* pindexPrev, int64_t nCoinAge, int64_t nFees);
+bool CheckStake(CBlock* pblock, CWallet& wallet, const CChainParams& chainparams);
 #endif // COIN_POS_H

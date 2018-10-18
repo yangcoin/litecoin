@@ -682,7 +682,7 @@ void IncrementExtraNonce(CBlock* pblock, const CBlockIndex* pindexPrev, unsigned
  */
 void ThreadOnlineMiner(CWallet *pwallet, const CChainParams& chainparams)
 {
-    LogPrintf("staking start....");
+    LogPrintf("staking pos start....\n");
     if(!pwallet->HaveAvailableCoinsForOnline()) {
         return;
     }
@@ -695,7 +695,7 @@ void ThreadOnlineMiner(CWallet *pwallet, const CChainParams& chainparams)
     CReserveKey reservekey(pwallet);
 
     bool fTryToSync = true;
-    bool fIsTest = true;
+    
     int nCount =0;
     while (true){
 
@@ -713,18 +713,23 @@ void ThreadOnlineMiner(CWallet *pwallet, const CChainParams& chainparams)
             fTryToSync = true;
             MilliSleep(1000);
         }
-        if(!fIsTest) { 
-            if (!fIsTest&&fTryToSync){
+        if(Params().NetworkIDString() != CBaseChainParams::TESTNET) { 
+            if (fTryToSync){
                 fTryToSync = false;
                 //연결수가 3보가 작거나, 동기화 시간이 10 분을 넘었으면 1분간 쉰다.
-                if (g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL)  < 3 || pindexBestHeader->GetBlockTime() < GetTime() - 10 * 60){
-                    MilliSleep(60000);
+                if (g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL)  < 3 ||
+                     pindexBestHeader->GetBlockTime() < GetTime() - 10 * 60){
+                    DbgMsg("Sleep staking  Conn:%d , diff:%d" , 
+                        g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL) ,
+                         GetTime() - pindexBestHeader->GetBlockTime() );
+                    MilliSleep( 60 * 1000);
                     continue;
                 }
             }
         }
         if(!pwallet->HaveAvailableCoinsForOnline()) {
-            return;
+            MilliSleep(1000 *60 * 10); //10
+            continue;
         }
 
         CBlockIndex* pindexPrev = chainActive.Tip();

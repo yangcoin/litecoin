@@ -22,7 +22,7 @@ static const int COINBASE_MATURITY = 500;
 
 
 // static const uint8_t ONLINE_BLOCK_VERSION = 0xA0;
-static const int VERSION_BLOCK_SIG =  1024;
+static const int VERSION_BLOCK_SIG =  1024;// 0xA0
 static const int32_t TX_VERSION_STAKE=3;
 /** Flags for nSequence and nLockTime locks */
 enum {
